@@ -58,7 +58,7 @@
         <el-card
             shadow="hover"
             class="scenic-card"
-            @click="router.push('/scenicDetails/'+item.id)"
+            @click="router.push('/front/scenicDetails/'+item.id)"
         >
           <div class="card-cover">
             <el-image

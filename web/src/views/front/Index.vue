@@ -30,7 +30,7 @@
         <template #header>
           <div class="card-header">
             <span class="header-title">精选景点推荐</span>
-            <el-button type="primary" link @click="router.push('/scenic')">
+            <el-button type="primary" link @click="router.push('/front/scenic')">
               更多景点
               <el-icon>
                 <ArrowRight/>
@@ -94,7 +94,7 @@
             <template #header>
               <div class="card-header">
                 <span class="header-title">热门游记分享</span>
-                <el-button type="primary" link @click="router.push('/travelNote')">
+                <el-button type="primary" link @click="router.push('/front/travelNote')">
                   更多游记
                   <el-icon>
                     <ArrowRight/>
@@ -107,7 +107,7 @@
                 <div v-for="item in travelNotes"
                      :key="item.id"
                      class="note-item"
-                     @click="router.push('/travelDetails/'+item.id)">
+                     @click="router.push('/front/travelDetails/'+item.id)">
                   <el-image :src="item.cover" class="note-cover" fit="cover">
                     <template #error>
                       <div class="image-error">
@@ -151,7 +151,7 @@
             <template #header>
               <div class="card-header">
                 <span class="header-title">精品路线分享推荐</span>
-                <el-button type="primary" link @click="router.push('/route')">
+                <el-button type="primary" link @click="router.push('/front/route')">
                   更多路线分享
                   <el-icon><ArrowRight/></el-icon>
                 </el-button>
@@ -162,7 +162,7 @@
                 <div v-for="item in routeList"
                      :key="item.id"
                      class="note-item"
-                     @click="router.push('/routeDetails/'+item.id)">
+                     @click="router.push('/front/routeDetails/'+item.id)">
                   <!-- 封面图 -->
                   <el-image :src="item.cover" class="note-cover" fit="cover">
                     <template #error>

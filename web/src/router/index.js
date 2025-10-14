@@ -153,14 +153,23 @@ function getRoutes() {
                     name: 'front-scenicDetails',
                     component: () => import('../views/front/ScenicDetails.vue')
                 },
+                {
+                    path: 'travelDetails/:id',
+                    name: 'front-travelDetails',
+                    component: () => import('../views/front/TravelDetails.vue')
+                },
+                {
+                    path: 'routeDetails/:id',
+                    name: 'front-routeDetails',
+                    component: () => import('../views/front/RouteDetails.vue')
+                },
 
             ]
         },
         {
             path: "/",
             redirect: "/front/index"
-        },
-        {
+        }, {
             path: "/login",
             name: "login",
             component: () =>

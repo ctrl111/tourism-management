@@ -42,7 +42,7 @@
         <el-card
             shadow="hover"
             class="note-card"
-            @click="router.push('/travelDetails/'+item.id)"
+            @click="router.push('/front/travelDetails/'+item.id)"
         >
           <!-- 封面图 -->
           <div class="card-cover">

@@ -70,7 +70,7 @@
         <el-card
             shadow="hover"
             class="route-card"
-            @click="router.push('/routeDetails/'+item.id)"
+            @click="router.push('/front/routeDetails/'+item.id)"
         >
           <div class="card-cover">
             <el-image
