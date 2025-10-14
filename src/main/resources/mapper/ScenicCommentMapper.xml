@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.platform.mapper.ScenicCommentMapper">
+    <!-- 分页查询 -->
+    <select id="queryPage"  resultType="com.project.platform.entity.ScenicComment">
+        SELECT scenic_comment.*
+        FROM scenic_comment left join user on user.id = scenic_comment.user_id
+        left join scenic_info on scenic_info.id = scenic_comment.scenic_id
+        <include refid="queryConditions"/>
+        ORDER BY scenic_comment.id DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+    <!-- 查询总数 -->
+    <select id="queryCount"  resultType="int">
+        SELECT count(scenic_comment.id) FROM scenic_comment
+        left join user on user.id = scenic_comment.user_id
+        left join scenic_info on scenic_info.id = scenic_comment.scenic_id
+        <include refid="queryConditions"/>
+    </select>
+
+    <!-- 查询条件 -->
+    <sql id="queryConditions">
+        <where>
+            <if test="query.scenicId != null">
+                AND scenic_comment.scenic_id = #{query.scenicId}
+            </if>
+            <if test="query.scenicName != null and query.scenicName.trim() != ''">
+                AND scenic_info.name  LIKE CONCAT('%', #{query.scenicName}, '%')
+            </if>
+            <if test="query.username != null and query.username.trim() != ''">
+                AND user.username LIKE CONCAT('%', #{query.username}, '%')
+            </if>
+        </where>
+    </sql>
+
+    <!-- 插入 -->
+    <insert id="insert" parameterType="com.project.platform.entity.ScenicComment" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO scenic_comment
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">user_id,</if>
+            <if test="scenicId != null">scenic_id,</if>
+            <if test="content != null">content,</if>
+            <if test="score != null">score,</if>
+            <if test="createTime != null">create_time,</if>
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId},</if>
+            <if test="scenicId != null">#{scenicId},</if>
+            <if test="content != null">#{content},</if>
+            <if test="score != null">#{score},</if>
+            <if test="createTime != null">#{createTime},</if>
+        </trim>
+
+
+    </insert>
+
+    <!-- 更新 -->
+    <update id="updateById" parameterType="com.project.platform.entity.ScenicComment">
+        UPDATE scenic_comment
+        <set>
+            <if test="userId != null">
+                user_id = #{userId},
+            </if>
+            <if test="scenicId != null">
+                scenic_id = #{scenicId},
+            </if>
+            <if test="content != null">
+                content = #{content},
+            </if>
+            <if test="score != null">
+                score = #{score},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+
+    <!-- 根据ID列表删除 -->
+    <delete id="removeByIds">
+        DELETE FROM scenic_comment
+        WHERE id IN
+        <foreach item="id" collection="list" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

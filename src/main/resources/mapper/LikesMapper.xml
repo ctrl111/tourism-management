@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.platform.mapper.LikesMapper">
+    <!-- 分页查询 -->
+    <select id="queryPage"  resultType="com.project.platform.entity.Likes">
+        SELECT likes.*
+        FROM likes
+        <include refid="queryConditions"/>
+        ORDER BY likes.id DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+    <!-- 查询总数 -->
+    <select id="queryCount"  resultType="int">
+        SELECT count(likes.id) FROM likes
+        <include refid="queryConditions"/>
+    </select>
+
+    <!-- 查询条件 -->
+    <sql id="queryConditions">
+        <where>
+            <if test="query.type != null  and query.type.trim() != ''">
+                AND likes.type_code = #{query.type}
+            </if>
+            <if test="query.userId != null">
+                AND likes.user_id =  #{query.userId}
+            </if>
+        </where>
+    </sql>
+
+    <!-- 插入 -->
+    <insert id="insert" parameterType="com.project.platform.entity.Likes" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO likes
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">user_id,</if>
+            <if test="typeCode != null">type_code,</if>
+            <if test="associationId != null">association_id,</if>
+            <if test="createTime != null">create_time,</if>
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId},</if>
+            <if test="typeCode != null">#{typeCode},</if>
+            <if test="associationId != null">#{associationId},</if>
+            <if test="createTime != null">#{createTime},</if>
+        </trim>
+
+
+    </insert>
+    <delete id="deleteByUserId" parameterType="com.project.platform.entity.Likes">
+        DELETE FROM likes
+        WHERE user_id = #{userId}
+        <if test="typeCode!= null">
+            AND type_code = #{typeCode}
+        </if>
+        <if test="associationId!= null">
+            AND association_id = #{associationId}
+        </if>
+    </delete>
+
+    <!-- 更新 -->
+    <update id="updateById" parameterType="com.project.platform.entity.Likes">
+        UPDATE likes
+        <set>
+            <if test="userId != null">
+                user_id = #{userId},
+            </if>
+            <if test="typeCode != null">
+                type_code = #{typeCode},
+            </if>
+            <if test="associationId != null">
+                association_id = #{associationId},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+
+    <!-- 根据ID列表删除 -->
+    <delete id="removeByIds">
+        DELETE FROM likes
+        WHERE id IN
+        <foreach item="id" collection="list" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

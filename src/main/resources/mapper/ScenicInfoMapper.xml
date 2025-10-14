@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.platform.mapper.ScenicInfoMapper">
+    <!-- 分页查询 -->
+    <select id="queryPage"  resultType="com.project.platform.entity.ScenicInfo">
+        SELECT scenic_info.*
+        FROM scenic_info left join scenic_category on scenic_category.id = scenic_info.category_id
+        <include refid="queryConditions"/>
+        ORDER BY scenic_info.id DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+    <!-- 查询总数 -->
+    <select id="queryCount"  resultType="int">
+        SELECT count(scenic_info.id) FROM scenic_info left join scenic_category on scenic_category.id = scenic_info.category_id
+        <include refid="queryConditions"/>
+    </select>
+
+    <!-- 查询条件 -->
+    <sql id="queryConditions">
+        <where>
+            <if test="query.associationIds != null">
+                AND id IN
+                <foreach item="id" collection="associationIds" open="(" separator="," close=")">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="query.name != null and query.name.trim() != ''">
+                AND scenic_info.name  LIKE CONCAT('%', #{query.name}, '%')
+            </if>
+            <if test="query.categoryType != null and query.categoryType.trim() != ''">
+                AND scenic_category.name = #{query.categoryType}
+            </if>
+            <if test="query.status != null and query.status.trim() != ''">
+                AND scenic_info.status = #{query.status}
+            </if>
+        </where>
+    </sql>
+
+    <!-- 插入 -->
+    <insert id="insert" parameterType="com.project.platform.entity.ScenicInfo" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO scenic_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="categoryId != null">category_id,</if>
+            <if test="name != null">name,</if>
+            <if test="originalPrice != null">originalPrice,</if>
+            <if test="price != null">price,</if>
+            <if test="description != null">description,</if>
+            <if test="stock != null">stock,</if>
+            <if test="coverImage != null">cover_image,</if>
+            <if test="detailImages != null">detail_images,</if>
+            <if test="address != null">address,</if>
+            <if test="openingHours != null">opening_hours,</if>
+            <if test="status != null">status,</if>
+            <if test="createTime != null">create_time,</if>
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="categoryId != null">#{categoryId},</if>
+            <if test="name != null">#{name},</if>
+            <if test="originalPrice != null">#{originalPrice},</if>
+            <if test="price != null">#{price},</if>
+            <if test="description != null">#{description},</if>
+            <if test="stock != null">#{stock},</if>
+            <if test="coverImage != null">#{coverImage},</if>
+            <if test="detailImages != null">#{detailImages},</if>
+            <if test="address != null">#{address},</if>
+            <if test="openingHours != null">#{openingHours},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createTime != null">#{createTime},</if>
+        </trim>
+
+
+    </insert>
+
+    <!-- 更新 -->
+    <update id="updateById" parameterType="com.project.platform.entity.ScenicInfo">
+        UPDATE scenic_info
+        <set>
+            <if test="categoryId != null">
+                category_id = #{categoryId},
+            </if>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="originalPrice != null">
+                original_price = #{originalPrice},
+            </if>
+            <if test="price != null">
+                price = #{price},
+            </if>
+            <if test="description != null">
+                description = #{description},
+            </if>
+            <if test="stock != null">
+                stock = #{stock},
+            </if>
+            <if test="coverImage != null">
+                cover_image = #{coverImage},
+            </if>
+            <if test="detailImages != null">
+                detail_images = #{detailImages},
+            </if>
+            <if test="address != null">
+                address = #{address},
+            </if>
+            <if test="openingHours != null">
+                opening_hours = #{openingHours},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+
+    <!-- 根据ID列表删除 -->
+    <delete id="removeByIds">
+        DELETE FROM scenic_info
+        WHERE id IN
+        <foreach item="id" collection="list" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

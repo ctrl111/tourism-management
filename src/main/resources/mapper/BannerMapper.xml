@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.platform.mapper.BannerMapper">
+    <!-- 分页查询 -->
+    <select id="queryPage"  resultType="com.project.platform.entity.Banner">
+        SELECT banner.*
+        FROM banner
+        <include refid="queryConditions"/>
+        ORDER BY banner.id DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+    <!-- 查询总数 -->
+    <select id="queryCount"  resultType="int">
+        SELECT count(banner.id) FROM banner
+        <include refid="queryConditions"/>
+    </select>
+
+    <!-- 查询条件 -->
+    <sql id="queryConditions">
+        <where>
+            <if test="query.title != null and query.title.trim() != ''">
+                AND banner.title LIKE CONCAT('%', #{query.title}, '%')
+            </if>
+            <if test="query.status != null and query.status.trim() != ''">
+                AND banner.status = #{query.status}
+            </if>
+        </where>
+    </sql>
+
+    <!-- 插入 -->
+    <insert id="insert" parameterType="com.project.platform.entity.Banner" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO banner
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="imageUrl != null">image_url,</if>
+            <if test="linkId != null">link_id,</if>
+            <if test="title != null">title,</if>
+            <if test="sort != null">sort,</if>
+            <if test="status != null">status,</if>
+            <if test="createTime != null">create_time,</if>
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="imageUrl != null">#{imageUrl},</if>
+            <if test="linkId != null">#{linkId},</if>
+            <if test="title != null">#{title},</if>
+            <if test="sort != null">#{sort},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createTime != null">#{createTime},</if>
+        </trim>
+
+
+    </insert>
+
+    <!-- 更新 -->
+    <update id="updateById" parameterType="com.project.platform.entity.Banner">
+        UPDATE banner
+        <set>
+            <if test="imageUrl != null">
+                image_url = #{imageUrl},
+            </if>
+            <if test="linkId != null">
+                link_id = #{linkId},
+            </if>
+            <if test="title != null">
+                title = #{title},
+            </if>
+            <if test="sort != null">
+                sort = #{sort},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+
+    <!-- 根据ID列表删除 -->
+    <delete id="removeByIds">
+        DELETE FROM banner
+        WHERE id IN
+        <foreach item="id" collection="list" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

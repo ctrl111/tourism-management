@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.platform.mapper.TravelNoteMapper">
+    <!-- 分页查询 -->
+    <select id="queryPage"  resultType="com.project.platform.entity.TravelNote">
+        SELECT travel_note.*
+        FROM travel_note left join user u on travel_note.user_id = u.id
+        <include refid="queryConditions"/>
+        ORDER BY travel_note.id DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+    <!-- 查询总数 -->
+    <select id="queryCount"  resultType="int">
+        SELECT count(travel_note.id) FROM travel_note  left join user u on travel_note.user_id = u.id
+        <include refid="queryConditions"/>
+    </select>
+
+    <!-- 查询条件 -->
+    <sql id="queryConditions">
+        <where>
+            <if test="query.associationIds != null">
+                AND id IN
+                <foreach item="id" collection="associationIds" open="(" separator="," close=")">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="query.userName != null and query.userName.trim() != ''">
+                AND u.username LIKE CONCAT('%', #{query.userName}, '%')
+            </if>
+            <if test="query.title != null and query.title.trim() != ''">
+                AND travel_note.title LIKE CONCAT('%', #{query.title}, '%')
+            </if>
+            <if test="query.content != null and query.content.trim() != ''">
+                AND travel_note.content LIKE CONCAT('%', #{query.content}, '%')
+            </if>
+        </where>
+    </sql>
+
+    <!-- 插入 -->
+    <insert id="insert" parameterType="com.project.platform.entity.TravelNote" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO travel_note
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">user_id,</if>
+            <if test="title != null">title,</if>
+            <if test="content != null">content,</if>
+            <if test="cover != null">cover,</if>
+            <if test="travelTime != null">travel_time,</if>
+            <if test="days != null">days,</if>
+            <if test="createTime != null">create_time,</if>
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId},</if>
+            <if test="title != null">#{title},</if>
+            <if test="content != null">#{content},</if>
+            <if test="cover != null">#{cover},</if>
+            <if test="travelTime != null">#{travelTime},</if>
+            <if test="days != null">#{days},</if>
+            <if test="createTime != null">#{createTime},</if>
+        </trim>
+
+
+    </insert>
+
+    <!-- 更新 -->
+    <update id="updateById" parameterType="com.project.platform.entity.TravelNote">
+        UPDATE travel_note
+        <set>
+            <if test="userId != null">
+                user_id = #{userId},
+            </if>
+            <if test="title != null">
+                title = #{title},
+            </if>
+            <if test="content != null">
+                content = #{content},
+            </if>
+            <if test="cover != null">
+                cover = #{cover},
+            </if>
+            <if test="travelTime != null">
+                travel_time = #{travelTime},
+            </if>
+            <if test="days != null">
+                days = #{days},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+
+    <!-- 根据ID列表删除 -->
+    <delete id="removeByIds">
+        DELETE FROM travel_note
+        WHERE id IN
+        <foreach item="id" collection="list" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
