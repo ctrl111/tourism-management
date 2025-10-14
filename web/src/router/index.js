@@ -78,7 +78,7 @@ function getRoutes() {
                     path: 'favorite',
                     name: 'admin-favorite',
                     component: () =>
-                        import ('../views/front/personalCenter/Favorite.vue')
+                        import ('../views/admin/Favorite.vue')
                 },
                 {
                     path: 'notice',

@@ -20,7 +20,6 @@
 <script setup>
 import {ref} from "vue";
 import {useRoute} from "vue-router";
-import Favorite from "@/views/front/personalCenter/Favorite.vue";
 import ViewHistory from "@/views/front/personalCenter/ViewHistory.vue";
 /*
  * @TODO 订单管理
