@@ -148,8 +148,17 @@ function getRoutes() {
                     name: 'personalCenter',
                     component: () => import('../views/front/PersonalCenter.vue')
                 },
+                {
+                    path: 'scenicDetails/:id',
+                    name: 'front-scenicDetails',
+                    component: () => import('../views/front/ScenicDetails.vue')
+                },
 
             ]
+        },
+        {
+            path: "/",
+            redirect: "/front/index"
         },
         {
             path: "/login",

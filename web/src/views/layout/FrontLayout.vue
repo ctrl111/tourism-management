@@ -5,7 +5,7 @@
       <div class="header-container">
         <!-- 网站Logo和标题 -->
         <div class="logo">
-          <router-link to="/index">
+          <router-link to="/front/index">
             <span class="system-name">旅游推荐系统</span>
           </router-link>
         </div>
@@ -24,31 +24,27 @@
           <el-menu-item index="/front/route">路线攻略</el-menu-item>
           <el-menu-item index="/front/notice">系统通知</el-menu-item>
           <el-menu-item index="/front/feedback">意见反馈</el-menu-item>
-          <el-menu-item index="/front/personalCenter">个人中心</el-menu-item>
 
-          <!-- @TODO: 动态菜单内容，需要根据项目模块状态渲染 -->
-          <!--
+          <!-- 动态菜单内容（根据用户类型或系统配置动态渲染） -->
           <el-menu-item
-            v-for="item in $projectModule.menuContent"
+            v-for="item in menuStore.menuContent"
             :key="item.id"
             :index="item.path"
           >
             {{ item.name }}
           </el-menu-item>
-          -->
         </el-menu>
 
         <!-- 用户操作区 -->
         <div class="user-actions">
-          <!-- @TODO: 需要实现登录状态判断 -->
-          <template v-if="isLoggedIn">
+          <template v-if="userStore.getIsLoggedIn">
             <!-- 已登录状态 -->
             <el-dropdown @command="handleUserCommand">
               <span class="user-info">
-                <el-avatar :size="32" :src="userInfo.avatarUrl" class="user-avatar">
-                  {{ userInfo.nickname?.charAt(0) }}
+                <el-avatar :size="32" :src="userStore.userInfo?.avatarUrl" class="user-avatar">
+                  {{ userStore.userInfo?.username?.charAt(0) || 'U' }}
                 </el-avatar>
-                <span class="username">{{ userInfo.nickname }}</span>
+                <span class="username">{{ userStore.userInfo?.username || '用户' }}</span>
                 <el-icon><arrow-down /></el-icon>
               </span>
               <template #dropdown>
@@ -59,10 +55,10 @@
                   <el-dropdown-item command="orders">
                     <el-icon><Document /></el-icon>我的订单
                   </el-dropdown-item>
-                  <el-dropdown-item command="collects">
+                  <el-dropdown-item command="favorite">
                     <el-icon><Star /></el-icon>我的收藏
                   </el-dropdown-item>
-                  <el-dropdown-item command="history">
+                  <el-dropdown-item command="viewHistory">
                     <el-icon><Clock /></el-icon>浏览历史
                   </el-dropdown-item>
                   <el-dropdown-item divided command="logout">
@@ -98,7 +94,10 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, watch, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   ArrowDown,
   User,
@@ -107,152 +106,119 @@ import {
   Clock,
   SwitchButton
 } from '@element-plus/icons-vue'
+import { useUserStore } from '@/stores/user'
+import { useMenuStore } from '@/stores/menu'
 
-export default {
-  name: 'FrontLayout',
-  components: {
-    ArrowDown,
-    User,
-    Document,
-    Star,
-    Clock,
-    SwitchButton
-  },
-  data() {
-    return {
-      // @TODO: 需要从Vuex或API获取真实数据
-      activeMenu: '/index',
-      isLoggedIn: false, // @TODO: 需要实现登录状态管理
-      userInfo: {
-        nickname: '游客',
-        avatarUrl: ''
-      }
-    }
-  },
-  computed: {
-    // @TODO: 需要配置Vuex映射
-    // ...mapState('projectModule', ['menuContent'])
-  },
-  mounted() {
-    this.checkLoginStatus()
-    this.updateActiveMenu()
-  },
-  watch: {
-    '$route.path': {
-      handler(newPath) {
-        this.updateActiveMenu()
-      },
-      immediate: true
-    }
-  },
-  methods: {
-    /**
-     * @TODO: 检查用户登录状态
-     * 需要从localStorage或Vuex中获取登录状态
-     */
-    checkLoginStatus() {
-      // 模拟检查登录状态
-      const token = localStorage.getItem('userToken')
-      this.isLoggedIn = !!token
+const router = useRouter()
+const route = useRoute()
+const userStore = useUserStore()
+const menuStore = useMenuStore()
 
-      if (this.isLoggedIn) {
-        // @TODO: 调用API获取用户信息
-        this.fetchUserInfo()
-      }
-    },
+const activeMenu = ref('/front/index')
 
-    /**
-     * @TODO: 获取用户信息
-     */
-    async fetchUserInfo() {
-      try {
-        // const response = await this.$api.user.getUserInfo()
-        // this.userInfo = response.data
-        // 模拟数据
-        this.userInfo = {
-          nickname: '测试用户',
-          avatarUrl: ''
-        }
-      } catch (error) {
-        console.error('获取用户信息失败:', error)
-      }
-    },
+/**
+ * 初始化
+ */
+onMounted(async () => {
+  await initializeApp()
+  updateActiveMenu()
+})
 
-    /**
-     * 更新激活的菜单项
-     */
-    updateActiveMenu() {
-      const currentPath = this.$route.path
-      this.activeMenu = currentPath
-    },
-
-    /**
-     * 菜单选择处理
-     */
-    handleMenuSelect(index) {
-      console.log('菜单选择:', index)
-      this.activeMenu = index
-    },
-
-    /**
-     * 用户下拉菜单命令处理
-     */
-    handleUserCommand(command) {
-      switch (command) {
-        case 'personalCenter':
-          this.$router.push('/personalCenter')
-          break
-        case 'orders':
-          this.$router.push('/orderList')
-          break
-        case 'collects':
-          this.$router.push('/collectList')
-          break
-        case 'history':
-          this.$router.push('/viewHistory')
-          break
-        case 'logout':
-          this.handleLogout()
-          break
-      }
-    },
-
-    /**
-     * @TODO: 退出登录处理
-     */
-    handleLogout() {
-      this.$confirm('确定要退出登录吗?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        // 清除登录状态
-        localStorage.removeItem('userToken')
-        this.isLoggedIn = false
-        this.userInfo = { nickname: '游客', avatarUrl: '' }
-
-        // 跳转到首页
-        this.$router.push('/index')
-        this.$message.success('退出成功')
-      }).catch(() => {
-        // 用户取消操作
-      })
-    },
-
-    /**
-     * 跳转到登录页
-     */
-    goToLogin() {
-      this.$router.push('/login')
-    },
-
-    /**
-     * 跳转到注册页
-     */
-    goToRegister() {
-      this.$router.push('/register')
-    }
+/**
+ * 监听路由变化
+ */
+watch(
+  () => route.path,
+  () => {
+    updateActiveMenu()
   }
+)
+
+/**
+ * 初始化应用
+ */
+async function initializeApp() {
+  // 初始化用户状态
+  await userStore.initUserState()
+  
+  // 如果用户已登录，加载动态菜单
+  if (userStore.getIsLoggedIn) {
+    await menuStore.loadMenuByUserType(userStore.getUserType)
+  }
+}
+
+/**
+ * 更新激活的菜单项
+ */
+function updateActiveMenu() {
+  activeMenu.value = route.path
+}
+
+/**
+ * 菜单选择处理
+ */
+function handleMenuSelect(index) {
+  activeMenu.value = index
+}
+
+/**
+ * 用户下拉菜单命令处理
+ */
+function handleUserCommand(command) {
+  switch (command) {
+    case 'personalCenter':
+      router.push('/front/personalCenter')
+      break
+    case 'orders':
+      router.push('/front/orders')
+      break
+    case 'favorite':
+      router.push('/front/favorite')
+      break
+    case 'viewHistory':
+      router.push('/front/viewHistory')
+      break
+    case 'logout':
+      handleLogout()
+      break
+  }
+}
+
+/**
+ * 退出登录处理
+ */
+function handleLogout() {
+  ElMessageBox.confirm('确定要退出登录吗?', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  })
+    .then(() => {
+      // 清除登录状态
+      userStore.logout()
+      menuStore.setMenuContent([])
+
+      // 跳转到首页
+      router.push('/front/index')
+      ElMessage.success('退出成功')
+    })
+    .catch(() => {
+      // 用户取消操作
+    })
+}
+
+/**
+ * 跳转到登录页
+ */
+function goToLogin() {
+  router.push('/login')
+}
+
+/**
+ * 跳转到注册页
+ */
+function goToRegister() {
+  router.push('/register')
 }
 </script>
 

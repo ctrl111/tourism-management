@@ -11,7 +11,7 @@
       <el-carousel-item
           v-for="item in bannerList"
           :key="item.id"
-          @click="router.push('/scenicDetails/'+item.linkId)">
+          @click="router.push('/front/scenicDetails/'+item.linkId)">
         <el-image
             :src="item.imageUrl"
             class="carousel-image"
@@ -43,7 +43,7 @@
           <div v-for="item in scenicList"
                :key="item.id"
                class="scenic-card"
-               @click="router.push('/scenicDetails/'+item.id)">
+               @click="router.push('/front/scenicDetails/'+item.id)">
             <el-image :src="item.coverImage" class="scenic-cover" fit="cover">
               <template #error>
                 <div class="image-error">
