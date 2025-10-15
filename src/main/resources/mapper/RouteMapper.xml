@@ -52,15 +52,18 @@
 
 
     <select id="queryPage" resultType="com.project.platform.entity.Route">
-        SELECT *
+        SELECT route.*
         FROM route
+        LEFT JOIN user u ON route.user_id = u.id
         <include refid="queryConditions"/>
         ORDER BY route.id DESC
         LIMIT #{offset}, #{pageSize}
     </select>
 
     <select id="queryCount" resultType="int">
-        SELECT count(route.id) FROM route
+        SELECT count(route.id) 
+        FROM route
+        LEFT JOIN user u ON route.user_id = u.id
         <include refid="queryConditions"/>
     </select>
 
@@ -69,6 +72,9 @@
         <where>
             <if test="query.userId != null">
                 AND route.user_id = #{query.userId}
+            </if>
+            <if test="query.userName != null and query.userName.trim() != ''">
+                AND u.username LIKE CONCAT('%', #{query.userName}, '%')
             </if>
             <if test="query.title != null and query.title.trim() != ''">
                 AND route.title LIKE CONCAT('%', #{query.title}, '%')

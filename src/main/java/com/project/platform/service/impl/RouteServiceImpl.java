@@ -53,6 +53,25 @@ public class RouteServiceImpl implements RouteService {
     public PageVO<Route> page(Map<String, Object> query, Integer pageNum, Integer pageSize) {
         PageVO<Route> page = new PageVO();
         List<Route> list = routeMapper.queryPage((pageNum - 1) * pageSize, pageSize, query);
+        
+        // 填充用户信息和统计数据
+        list.forEach(route -> {
+            // 发布人信息
+            if (route.getUserId() != null) {
+                User user = userMapper.selectById(route.getUserId());
+                route.setUser(user);
+            }
+            // 评论数
+            Integer commentCount = commentInfoMapper.queryCommentsCount("路线分享", route.getId());
+            route.setCommentsCount(commentCount);
+            // 浏览数
+            Integer viewCount = viewHistoryMapper.queryViewCount("路线分享", route.getId());
+            route.setViewCount(viewCount);
+            // 点赞数
+            Integer likeCount = likesMapper.queryLikeCount("路线分享", route.getId());
+            route.setLikesCount(likeCount);
+        });
+        
         page.setList(list);
         page.setTotal(routeMapper.queryCount(query));
         return page;

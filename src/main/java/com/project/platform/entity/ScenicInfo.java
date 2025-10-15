@@ -24,7 +24,7 @@ public class ScenicInfo  {
      */
     private String name;
 
-    private float  originalPrice;
+    private BigDecimal originalPrice;
     /**
      * 收费价格
      */

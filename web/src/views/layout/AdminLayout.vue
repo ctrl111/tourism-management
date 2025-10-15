@@ -1,13 +1,14 @@
 <template>
   <el-container class="admin-wrapper" style="height: 100%;">
     <el-aside width="200px" class="my-aside">
-      <h3 class="title">管理系统</h3>
+      <h3 class="title">旅游推荐系统</h3>
       <el-menu
           style="width: 100%; overflow: hidden;"
           active-text-color="#409EFF"
           background-color="#000000"
           text-color="white"
           :default-active="useRoute().path"
+          :default-openeds="['user', 'scenic', 'content']"
           @select="handleMenuSelect"
           router>
         <el-menu-item index="/admin">
@@ -16,58 +17,78 @@
           </el-icon>
           <span>首页</span>
         </el-menu-item>
-        <el-menu-item index="/admin/admin">
-          <el-icon>
-            <User/>
-          </el-icon>
-          <span>管理员管理</span>
-        </el-menu-item>
-        <el-menu-item index="/admin/user">
-          <el-icon>
-            <User/>
-          </el-icon>
-          <span>游客管理</span>
-        </el-menu-item>
+
+        <!-- 用户管理 -->
+        <el-sub-menu index="user">
+          <template #title>
+            <el-icon><User /></el-icon>
+            <span>用户管理</span>
+          </template>
+          <el-menu-item index="/admin/admin">
+            <el-icon><Lock /></el-icon>
+            <span>管理员管理</span>
+          </el-menu-item>
+          <el-menu-item index="/admin/user">
+            <el-icon><UserFilled /></el-icon>
+            <span>游客管理</span>
+          </el-menu-item>
+        </el-sub-menu>
+
         <el-menu-item index="/admin/banner">
           <el-icon><PictureFilled /></el-icon>
           <span>轮播图管理</span>
         </el-menu-item>
-        <el-menu-item index="/admin/scenicCategory">
-          <el-icon><Grid /></el-icon>
-          <span>分类管理</span>
-        </el-menu-item>
-        <el-menu-item index="/admin/scenicInfo">
-          <el-icon><LocationFilled /></el-icon>
-          <span>景点管理</span>
-        </el-menu-item>
 
-        <el-menu-item index="/admin/scenicComment">
-          <el-icon><ChatDotSquare /></el-icon>
-          <span>评论管理</span>
-        </el-menu-item>
-        <el-menu-item index="/admin/order">
-          <el-icon><ShoppingCart /></el-icon>
-          <span>订单</span>
-        </el-menu-item>
+        <!-- 景点信息管理 -->
+        <el-sub-menu index="scenic">
+          <template #title>
+            <el-icon><Grid /></el-icon>
+            <span>景点信息管理</span>
+          </template>
+          <el-menu-item index="/admin/scenicCategory">
+            <el-icon><Menu /></el-icon>
+            <span>分类管理</span>
+          </el-menu-item>
+          <el-menu-item index="/admin/scenicInfo">
+            <el-icon><LocationFilled /></el-icon>
+            <span>景点管理</span>
+          </el-menu-item>
+          <el-menu-item index="/admin/scenicComment">
+            <el-icon><ChatDotSquare /></el-icon>
+            <span>评论管理</span>
+          </el-menu-item>
+          <el-menu-item index="/admin/order">
+            <el-icon><ShoppingCart /></el-icon>
+            <span>订单管理</span>
+          </el-menu-item>
+        </el-sub-menu>
+
+        <!-- 内容审核 -->
+        <el-sub-menu index="content">
+          <template #title>
+            <el-icon><Document /></el-icon>
+            <span>内容审核</span>
+          </template>
+          <el-menu-item index="/admin/travelNote">
+            <el-icon><Notebook /></el-icon>
+            <span>游记分享</span>
+          </el-menu-item>
+          <el-menu-item index="/admin/routePlan">
+            <el-icon><Guide /></el-icon>
+            <span>路线分享</span>
+          </el-menu-item>
+        </el-sub-menu>
+
         <el-menu-item index="/admin/viewHistory">
           <el-icon><View /></el-icon>
           <span>用户浏览历史管理</span>
         </el-menu-item>
+
         <el-menu-item index="/admin/notice">
           <el-icon><Message /></el-icon>
           <span>系统通知管理</span>
         </el-menu-item>
-        <el-menu-item index="/admin/travelNote">
-          <el-icon><Tickets /></el-icon>
-          <span>游记分享</span>
-        </el-menu-item>
-<!--        <el-menu-item index="/admin/route">-->
-<!--          <el-icon><Location /></el-icon>-->
 
-        <el-menu-item index="/admin/favorite">
-          <el-icon><Tickets /></el-icon>
-          <span>收藏</span>
-        </el-menu-item>
       </el-menu>
       </el-aside>
     <el-container>
@@ -123,7 +144,22 @@ import router from "@/router/index.js";
 import {ElMessage} from "element-plus";
 import {useRoute} from 'vue-router';
 import {HomeOutlined} from "@ant-design/icons-vue";
-import {User} from '@element-plus/icons-vue'
+import {
+  User,
+  UserFilled,
+  Lock,
+  Grid,
+  Menu,
+  LocationFilled,
+  ChatDotSquare,
+  ShoppingCart,
+  Document,
+  Notebook,
+  Guide,
+  View,
+  Message,
+  PictureFilled
+} from '@element-plus/icons-vue'
 import "@/styles/admin.css";
 
 const isUserLogin = ref(tools.isLogin())

@@ -77,12 +77,6 @@ function getRoutes() {
                         import ('../views/admin/TravelNoteManage.vue')
                 },
                 {
-                    path: 'favorite',
-                    name: 'admin-favorite',
-                    component: () =>
-                        import ('../views/admin/Favorite.vue')
-                },
-                {
                     path: 'notice',
                     name: 'admin-notice',
                     component: () =>
@@ -105,6 +99,12 @@ function getRoutes() {
                     name: 'admin-orderItem',
                     component: () =>
                         import ('../views/admin/OrderItemManage.vue')
+                },
+                {
+                    path: 'routePlan',
+                    name: 'admin-routePlan',
+                    component: () =>
+                        import ('../views/admin/RoutePlanManage.vue')
                 }
 
             ]
