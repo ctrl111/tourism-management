@@ -27,18 +27,31 @@ public class NoticeServiceImpl  implements NoticeService {
     public PageVO<Notice> page(Map<String, Object> query, Integer pageNum, Integer pageSize) {
         PageVO<Notice> page = new PageVO();
         CurrentUserDTO dto = CurrentUserThreadLocal.getCurrentUser();
-        if (dto.getType().equals("USER")){
-            query.put("userId",dto.getId());
-        }
-        if (query.get("typeCode") != null){
-            String typeCode = query.get("typeCode").toString();
-            if (typeCode.equals("全部")){
-                query.remove("typeCode");
+        
+        // 权限控制：
+        // 1. 普通用户（USER）：只能查看自己的通知（所有通知都是私有的）
+        // 2. 管理员（ADMIN）：可以查看所有通知（用于管理后台）
+        // 3. 游客（未登录）：无法查看任何通知（返回空列表）
+        
+        if (dto != null && dto.getType() != null) {
+            if (dto.getType().equals("USER")) {
+                // 普通用户：只查看自己的通知
+                query.put("userId", dto.getId());
+            } else if (dto.getType().equals("ADMIN")) {
+                // 管理员：可以查看所有通知
+                query.put("isAdmin", true);
             }
+        } else {
+            // 游客：返回空列表（userId = -1 用于标记游客，不返回任何数据）
+            query.put("userId", -1);
+            query.put("isGuest", true);
         }
+        
         List<Notice> list = noticeMapper.queryPage((pageNum - 1) * pageSize, pageSize, query);
         list.forEach(item->{
-            item.setUser(userMapper.selectById(item.getUserId()));
+            if (item.getUserId() != null) {
+                item.setUser(userMapper.selectById(item.getUserId()));
+            }
         });
         page.setList(list);
         page.setTotal(noticeMapper.queryCount(query));
@@ -48,6 +61,16 @@ public class NoticeServiceImpl  implements NoticeService {
     @Override
     public Notice selectById(Integer id) {
         Notice notice = noticeMapper.selectById(id);
+        
+        // 权限检查：普通用户只能查看自己的通知
+        CurrentUserDTO dto = CurrentUserThreadLocal.getCurrentUser();
+        if (dto != null && dto.getType() != null && dto.getType().equals("USER")) {
+            if (notice != null && !notice.getUserId().equals(dto.getId())) {
+                // 不是该用户的通知，返回 null 或抛出异常
+                throw new RuntimeException("无权查看该通知");
+            }
+        }
+        
         return notice;
     }
 
@@ -57,7 +80,8 @@ public class NoticeServiceImpl  implements NoticeService {
     }
     @Override
     public void insert(Notice entity) {
-        if (entity.getUserIds().size()>0){
+        // 如果指定了用户列表，则为每个用户创建私有通知
+        if (entity.getUserIds() != null && entity.getUserIds().size() > 0){
             entity.getUserIds().forEach(item->{
                 Notice notice = new Notice();
                 notice.setUserId(item);
@@ -67,22 +91,56 @@ public class NoticeServiceImpl  implements NoticeService {
                 notice.setIsRead("未读");
                 noticeMapper.insert(notice);
             });
-        }else {
+        } else {
+            // 如果没有指定用户列表，直接插入单条通知
+            // 注意：所有通知都必须有 userId，不允许 userId 为 null
             check(entity);
+            
+            if (entity.getIsRead() == null || entity.getIsRead().isEmpty()) {
+                entity.setIsRead("未读");
+            }
+            
+            // 确保 userId 不为空
+            if (entity.getUserId() == null) {
+                throw new RuntimeException("通知必须指定用户ID，不允许创建公共通知");
+            }
+            
             noticeMapper.insert(entity);
         }
     }
 
     @Override
     public void updateById(Notice entity) {
+        // 权限检查：普通用户只能修改自己的通知
+        CurrentUserDTO dto = CurrentUserThreadLocal.getCurrentUser();
+        if (dto != null && dto.getType() != null && dto.getType().equals("USER")) {
+            Notice existNotice = noticeMapper.selectById(entity.getId());
+            if (existNotice != null && !existNotice.getUserId().equals(dto.getId())) {
+                throw new RuntimeException("无权修改该通知");
+            }
+        }
+        
         check(entity);
         noticeMapper.updateById(entity);
     }
+    
     private void check(Notice entity) {
 
     }
+    
     @Override
     public void removeByIds(List<Integer> ids) {
+        // 权限检查：普通用户只能删除自己的通知
+        CurrentUserDTO dto = CurrentUserThreadLocal.getCurrentUser();
+        if (dto != null && dto.getType() != null && dto.getType().equals("USER")) {
+            for (Integer id : ids) {
+                Notice notice = noticeMapper.selectById(id);
+                if (notice != null && !notice.getUserId().equals(dto.getId())) {
+                    throw new RuntimeException("无权删除该通知");
+                }
+            }
+        }
+        
         noticeMapper.removeByIds(ids);
     }
 }

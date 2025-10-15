@@ -62,11 +62,17 @@ public class TravelNoteServiceImpl  implements TravelNoteService {
     @Override
     public PageVO<TravelNote> homePage(Map<String, Object> query, Integer pageNum, Integer pageSize) {
         CurrentUserDTO dto =  CurrentUserThreadLocal.getCurrentUser();
-        List<ViewHistory> views = viewHistoryMapper.queryViewList("游记",dto.getId());
-        List<Integer> intList = views.stream().map(ViewHistory::getAssociationId).distinct().collect(Collectors.toList());
-        if (intList.size() > pageSize) {
-            query.put("associationIds",intList);
+        
+        // 如果用户已登录，基于用户浏览历史推荐
+        if (dto != null && dto.getId() != null) {
+            List<ViewHistory> views = viewHistoryMapper.queryViewList("游记", dto.getId());
+            List<Integer> intList = views.stream().map(ViewHistory::getAssociationId).distinct().collect(Collectors.toList());
+            if (intList.size() > pageSize) {
+                query.put("associationIds", intList);
+            }
         }
+        // 如果用户未登录（dto为null），则返回普通列表数据
+        
         PageVO<TravelNote> page = new PageVO();
         List<TravelNote> list = travelNoteMapper.queryPage((pageNum - 1) * pageSize, pageSize, query);
         if (list.size() < pageSize) {
@@ -129,10 +135,12 @@ public class TravelNoteServiceImpl  implements TravelNoteService {
             //点赞数
             Integer likeCount = likesMapper.queryLikeCount("游记",travelNote.getId());
             travelNote.setLikesCount(likeCount);
-            int isLiked = likesMapper.queryIsLike("游记",travelNote.getId(),user.getId());
-            if (isLiked> 0) {
-                travelNote.setLiked(true);
-            }else {
+            
+            // 只有登录用户才检查是否点赞
+            if (dto != null && dto.getId() != null && user != null) {
+                int isLiked = likesMapper.queryIsLike("游记", travelNote.getId(), dto.getId());
+                travelNote.setLiked(isLiked > 0);
+            } else {
                 travelNote.setLiked(false);
             }
         }
@@ -143,7 +151,8 @@ public class TravelNoteServiceImpl  implements TravelNoteService {
         CurrentUserDTO dto =  CurrentUserThreadLocal.getCurrentUser();
         TravelNote note = travelNoteMapper.selectById(id);
         if (note != null) {
-            if (dto.getType().equals("USER")) {
+            // 只有已登录的普通用户才记录浏览历史
+            if (dto != null && dto.getId() != null && "USER".equals(dto.getType())) {
                 ViewHistory entity = new ViewHistory();
                 entity.setTypeCode("游记");
                 entity.setUserId(dto.getId());

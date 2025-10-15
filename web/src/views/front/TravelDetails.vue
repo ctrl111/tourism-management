@@ -25,15 +25,27 @@
               <span class="publish-time">{{ formatDate(info.createTime) }} 发布</span>
             </div>
           </div>
-          <div class="stats-bar">
-            <div class="stat-item">
-              <el-icon><View /></el-icon>
-              <span class="count">{{ info.viewCount | formatNumber }}</span>
+          <div class="right-actions">
+            <div class="stats-bar">
+              <div class="stat-item">
+                <el-icon><View /></el-icon>
+                <span class="count">{{ info.viewCount | formatNumber }}</span>
+              </div>
+              <div class="stat-item">
+                <el-icon><Star /></el-icon>
+                <span class="count">{{ info.likesCount | formatNumber }}</span>
+              </div>
             </div>
-            <div class="stat-item">
-              <el-icon><Star /></el-icon>
-              <span class="count">{{ info.likesCount | formatNumber }}</span>
-            </div>
+            <el-button
+                v-if="showDelete"
+                type="danger"
+                size="small"
+                :icon="Delete"
+                @click="handleDelete(info)"
+                plain
+            >
+              删除游记
+            </el-button>
           </div>
         </div>
       </div>
@@ -212,16 +224,6 @@
               class="like-button"
           />
         </el-tooltip>
-
-        <el-button
-            v-if="showDelete"
-            type="danger"
-            size="large"
-            :icon="Delete"
-            @click="handleDelete(info)"
-        >
-          删除游记
-        </el-button>
       </div>
     </div>
 
@@ -328,10 +330,18 @@ function handleDelete(info) {
     tableComponents.value.clearSelection();
   });
 }
-// 权限判断
+// 权限判断：只有作者本人或管理员才能删除
 const showDelete = computed(() => {
-  return currentUser.value.type === 'USER' &&
-      currentUser.value.id === info.value.userId
+  if (!currentUser.value || !info.value.userId) return false
+  
+  // 管理员可以删除任何游记
+  if (currentUser.value.type === 'ADMIN') {
+    return true
+  }
+  
+  // 作者可以删除自己的游记
+  return currentUser.value.type === 'USER' && 
+         currentUser.value.id === info.value.userId
 })
 function formatDate(value) {
   if (!value) return '--'
@@ -594,6 +604,12 @@ const handleChatToggle = () => {
         color: var(--text-secondary);
       }
     }
+  }
+
+  .right-actions {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
   }
 }
 

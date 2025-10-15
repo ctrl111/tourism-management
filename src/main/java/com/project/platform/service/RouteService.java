@@ -18,4 +18,14 @@ public interface RouteService{
      */
     PageVO<Route> homePage(Map<String, Object> query, Integer pageNum, Integer pageSize);
 
+    void putViewCount(Integer id);
+
+    List<Route> list();
+
+    void insert(Route entity);
+
+    void updateById(Route entity);
+
+    void removeByIds(List<Integer> ids);
+
 }

@@ -55,6 +55,12 @@
                   <el-dropdown-item command="orders">
                     <el-icon><Document /></el-icon>我的订单
                   </el-dropdown-item>
+                  <el-dropdown-item command="travelNoteManage">
+                    <el-icon><Notebook /></el-icon>我的游记
+                  </el-dropdown-item>
+                  <el-dropdown-item command="routeManage">
+                    <el-icon><Guide /></el-icon>我的路线
+                  </el-dropdown-item>
                   <el-dropdown-item command="favorite">
                     <el-icon><Star /></el-icon>我的收藏
                   </el-dropdown-item>
@@ -104,7 +110,9 @@ import {
   Document,
   Star,
   Clock,
-  SwitchButton
+  SwitchButton,
+  Notebook,
+  Guide
 } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
 import { useMenuStore } from '@/stores/menu'
@@ -138,12 +146,22 @@ watch(
  * 初始化应用
  */
 async function initializeApp() {
-  // 初始化用户状态
-  await userStore.initUserState()
-  
-  // 如果用户已登录，加载动态菜单
-  if (userStore.getIsLoggedIn) {
-    await menuStore.loadMenuByUserType(userStore.getUserType)
+  try {
+    // 初始化用户状态（不会抛出错误）
+    await userStore.initUserState()
+    
+    // 如果用户已登录，加载动态菜单
+    if (userStore.getIsLoggedIn) {
+      try {
+        await menuStore.loadMenuByUserType(userStore.getUserType)
+      } catch (error) {
+        console.error('加载动态菜单失败:', error)
+        // 失败也不影响页面显示
+      }
+    }
+  } catch (error) {
+    console.error('初始化应用失败:', error)
+    // 即使初始化失败，也允许用户继续访问页面
   }
 }
 
@@ -170,13 +188,24 @@ function handleUserCommand(command) {
       router.push('/front/personalCenter')
       break
     case 'orders':
-      router.push('/front/orders')
+      // 跳转到个人中心的订单管理标签页
+      router.push('/front/personalCenter?type=orderManage')
+      break
+    case 'travelNoteManage':
+      // 跳转到个人中心的游记管理标签页
+      router.push('/front/personalCenter?type=travelNoteManage')
+      break
+    case 'routeManage':
+      // 跳转到个人中心的路线管理标签页
+      router.push('/front/personalCenter?type=routeManage')
       break
     case 'favorite':
-      router.push('/front/favorite')
+      // 跳转到个人中心的收藏标签页
+      router.push('/front/personalCenter?type=favorite')
       break
     case 'viewHistory':
-      router.push('/front/viewHistory')
+      // 跳转到个人中心的浏览历史标签页
+      router.push('/front/personalCenter?type=viewHistory')
       break
     case 'logout':
       handleLogout()

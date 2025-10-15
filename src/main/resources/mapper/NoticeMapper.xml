@@ -18,15 +18,35 @@
     <!-- 查询条件 -->
     <sql id="queryConditions">
         <where>
-            <if test="query.userId != null">
-                AND notice.user_id =  #{query.userId}
+            <!-- 管理员权限：可以查看所有通知 -->
+            <if test="query.isAdmin == null or query.isAdmin == false">
+                <!-- 用户ID过滤：所有通知都是私有的，必须匹配用户ID -->
+                <if test="query.userId != null">
+                    <choose>
+                        <!-- 游客（userId = -1 或 isGuest = true）：不返回任何通知 -->
+                        <when test="query.userId == -1 or query.isGuest == true">
+                            AND 1 = 0
+                        </when>
+                        <!-- 普通用户：只查看自己的通知 -->
+                        <otherwise>
+                            AND notice.user_id = #{query.userId}
+                        </otherwise>
+                    </choose>
+                </if>
             </if>
+            <!-- 已读状态过滤 -->
+            <if test="query.isRead != null and query.isRead.trim() != ''">
+                AND notice.is_read = #{query.isRead}
+            </if>
+            <!-- 通知类型过滤 -->
             <if test="query.typeCode != null and query.typeCode.trim() != ''">
                 AND notice.type_code = #{query.typeCode}
             </if>
+            <!-- 标题搜索 -->
             <if test="query.title != null and query.title.trim() != ''">
                 AND notice.title LIKE CONCAT('%', #{query.title}, '%')
             </if>
+            <!-- 内容搜索 -->
             <if test="query.content != null and query.content.trim() != ''">
                 AND notice.content LIKE CONCAT('%', #{query.content}, '%')
             </if>
@@ -37,7 +57,7 @@
     <insert id="insert" parameterType="com.project.platform.entity.Notice" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO notice
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="userId != null">user_id,</if>
+            user_id,
             <if test="title != null">title,</if>
             <if test="content != null">content,</if>
             <if test="isRead != null">is_read,</if>
@@ -46,7 +66,7 @@
         </trim>
         VALUES
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="userId != null">#{userId},</if>
+            #{userId},
             <if test="title != null">#{title},</if>
             <if test="content != null">#{content},</if>
             <if test="isRead != null">#{isRead},</if>

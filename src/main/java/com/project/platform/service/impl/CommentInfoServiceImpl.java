@@ -27,7 +27,10 @@ public class CommentInfoServiceImpl implements CommentInfoService {
     @Override
     public PageVO<CommentInfo> page(Map<String, Object> query, Integer pageNum, Integer pageSize) {
         PageVO<CommentInfo> page = new PageVO();
-        if (CurrentUserThreadLocal.getCurrentUser().getType().equals("USER")) {
+        // 只有已登录的普通用户才过滤个人评论，游客和管理员查看所有评论
+        if (CurrentUserThreadLocal.getCurrentUser() != null 
+            && CurrentUserThreadLocal.getCurrentUser().getType() != null
+            && CurrentUserThreadLocal.getCurrentUser().getType().equals("USER")) {
             query.put("userId", CurrentUserThreadLocal.getCurrentUser().getId());
         }
         Boolean isParent;

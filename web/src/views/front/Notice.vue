@@ -123,7 +123,22 @@ getPageList()
  */
 function getPageList() {
   let data = Object.assign(toRaw(searchForm.value), toRaw(pageInfo.value))
-  data.typeCode = activeName.value
+  
+  // 根据标签页类型设置不同的过滤参数
+  if (activeName.value === '全部') {
+    // 查询所有通知（不设置typeCode和isRead）
+    delete data.typeCode
+    delete data.isRead
+  } else if (activeName.value === '未读') {
+    // 查询未读通知
+    delete data.typeCode
+    data.isRead = '未读'
+  } else {
+    // 查询特定类型的通知（订单、系统通知等）
+    data.typeCode = activeName.value
+    delete data.isRead
+  }
+  
   request.get("/notice/page", {
     params: data
   }).then(res => {

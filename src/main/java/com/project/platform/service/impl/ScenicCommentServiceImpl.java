@@ -44,7 +44,10 @@ public class ScenicCommentServiceImpl  implements ScenicCommentService {
     }
     @Override
     public void insert(ScenicComment entity) {
-        if(CurrentUserThreadLocal.getCurrentUser().getType().equals("USER")){
+        // 只有已登录的普通用户才能添加评论
+        if(CurrentUserThreadLocal.getCurrentUser() != null 
+            && CurrentUserThreadLocal.getCurrentUser().getType() != null
+            && CurrentUserThreadLocal.getCurrentUser().getType().equals("USER")){
             entity.setUserId(CurrentUserThreadLocal.getCurrentUser().getId());
         }
         check(entity);

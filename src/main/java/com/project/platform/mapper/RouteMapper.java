@@ -19,4 +19,10 @@ public interface RouteMapper{
 
     @Select("SELECT * FROM route ORDER BY id DESC")
     List<Route> list();
+
+    int insert(Route entity);
+
+    int updateById(Route entity);
+
+    boolean removeByIds(List<Integer> ids);
 }

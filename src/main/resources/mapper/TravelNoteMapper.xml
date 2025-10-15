@@ -18,6 +18,9 @@
     <!-- 查询条件 -->
     <sql id="queryConditions">
         <where>
+            <if test="query.userId != null">
+                AND travel_note.user_id = #{query.userId}
+            </if>
             <if test="query.associationIds != null">
                 AND id IN
                 <foreach item="id" collection="associationIds" open="(" separator="," close=")">

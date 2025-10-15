@@ -61,11 +61,17 @@ public class ScenicInfoServiceImpl  implements ScenicInfoService {
     @Override
     public PageVO<ScenicInfo> homePage(Map<String, Object> query, Integer pageNum, Integer pageSize) {
         CurrentUserDTO dto =  CurrentUserThreadLocal.getCurrentUser();
-        List<ViewHistory> views = viewHistoryMapper.queryViewList("景点",dto.getId());
-        List<Integer> intList = views.stream().map(ViewHistory::getAssociationId).distinct().collect(Collectors.toList());
-        if (intList.size() > pageSize) {
-            query.put("associationIds",intList);
+        
+        // 如果用户已登录，基于用户浏览历史推荐
+        if (dto != null && dto.getId() != null) {
+            List<ViewHistory> views = viewHistoryMapper.queryViewList("景点", dto.getId());
+            List<Integer> intList = views.stream().map(ViewHistory::getAssociationId).distinct().collect(Collectors.toList());
+            if (intList.size() > pageSize) {
+                query.put("associationIds", intList);
+            }
         }
+        // 如果用户未登录（dto为null），则返回普通列表数据
+        
         query.put("pageNum",pageNum);
         PageVO<ScenicInfo> page = new PageVO();
         List<ScenicInfo> list = scenicInfoMapper.queryPage((pageNum - 1) * pageSize, pageSize, query);
@@ -126,7 +132,8 @@ public class ScenicInfoServiceImpl  implements ScenicInfoService {
         CurrentUserDTO dto =  CurrentUserThreadLocal.getCurrentUser();
         ScenicInfo scenicInfo = scenicInfoMapper.selectById(id);
         if (scenicInfo != null) {
-            if (dto.getType().equals("USER")) {
+            // 只有已登录的普通用户才记录浏览历史
+            if (dto != null && dto.getId() != null && "USER".equals(dto.getType())) {
                 ViewHistory entity = new ViewHistory();
                 entity.setTypeCode("景点");
                 entity.setUserId(dto.getId());

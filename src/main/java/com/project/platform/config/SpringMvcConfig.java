@@ -23,6 +23,9 @@ public class SpringMvcConfig implements WebMvcConfigurer {
                 .addPathPatterns("/**")
                 //允许直接访问的接口
                 .excludePathPatterns(
+                        // 系统端点
+                        "/error",
+                        
                         // Swagger 文档
                         "/v3/api-docs",
                         "/api-docs/swagger-config",
@@ -48,7 +51,6 @@ public class SpringMvcConfig implements WebMvcConfigurer {
                         "/scenicInfo/page",
                         "/travelNote/page",
                         "/route/page",
-                        "/notice/page",
                         
                         // 分类和筛选API
                         "/scenicCategory/list",
@@ -60,6 +62,9 @@ public class SpringMvcConfig implements WebMvcConfigurer {
                         "/scenicInfo/selectById/**",
                         "/travelNote/selectById/**",
                         "/route/selectById/**",
+                        "/scenicInfo/putViewCount/**",
+                        "/travelNote/putViewCount/**",
+                        "/route/putViewCount/**",
                         
                         // 评论相关公开API
                         "/commentsInfo/page",

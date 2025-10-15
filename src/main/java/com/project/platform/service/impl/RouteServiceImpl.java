@@ -32,6 +32,20 @@ public class RouteServiceImpl implements RouteService {
     @Override
     public Route selectById(Integer id) {
         Route route = routeMapper.selectById(id);
+        if (route != null) {
+            // 发布人信息
+            User user = userMapper.selectById(route.getUserId());
+            route.setUser(user);
+            // 评论数
+            Integer commentCount = commentInfoMapper.queryCommentsCount("路线分享", route.getId());
+            route.setCommentsCount(commentCount);
+            // 浏览数
+            Integer viewCount = viewHistoryMapper.queryViewCount("路线分享", route.getId());
+            route.setViewCount(viewCount);
+            // 点赞数
+            Integer likeCount = likesMapper.queryLikeCount("路线分享", route.getId());
+            route.setLikesCount(likeCount);
+        }
         return route;
     }
 
@@ -50,11 +64,17 @@ public class RouteServiceImpl implements RouteService {
     @Override
     public PageVO<Route> homePage(Map<String, Object> query, Integer pageNum, Integer pageSize) {
         CurrentUserDTO dto = CurrentUserThreadLocal.getCurrentUser();
-        List<ViewHistory> views = viewHistoryMapper.queryViewList("路线分享", dto.getId());
-        List<Integer> intList = views.stream().map(ViewHistory::getAssociationId).distinct().collect(Collectors.toList());
-        if (intList.size() > pageSize) {
-            query.put("associationIds", intList);
+        
+        // 如果用户已登录，基于用户浏览历史推荐
+        if (dto != null && dto.getId() != null) {
+            List<ViewHistory> views = viewHistoryMapper.queryViewList("路线分享", dto.getId());
+            List<Integer> intList = views.stream().map(ViewHistory::getAssociationId).distinct().collect(Collectors.toList());
+            if (intList.size() > pageSize) {
+                query.put("associationIds", intList);
+            }
         }
+        // 如果用户未登录（dto为null），则返回普通列表数据
+        
         query.put("pageNum", pageNum);
         PageVO<Route> page = new PageVO();
         List<Route> list = routeMapper.queryPage((pageNum - 1) * pageSize, pageSize, query);
@@ -102,5 +122,65 @@ public class RouteServiceImpl implements RouteService {
         page.setList(list);
         page.setTotal(routeMapper.queryCount(query));
         return page;
+    }
+
+    @Override
+    public void putViewCount(Integer id) {
+        CurrentUserDTO dto = CurrentUserThreadLocal.getCurrentUser();
+        Route route = routeMapper.selectById(id);
+        if (route != null) {
+            // 只有已登录的普通用户才记录浏览历史
+            if (dto != null && dto.getId() != null && "USER".equals(dto.getType())) {
+                ViewHistory entity = new ViewHistory();
+                entity.setTypeCode("路线分享");
+                entity.setUserId(dto.getId());
+                entity.setAssociationId(id);
+                viewHistoryMapper.insert(entity);
+            }
+        }
+    }
+
+    @Override
+    public List<Route> list() {
+        return routeMapper.list();
+    }
+
+    @Override
+    public void insert(Route entity) {
+        CurrentUserDTO userDTO = CurrentUserThreadLocal.getCurrentUser();
+        if (userDTO != null) {
+            entity.setUserId(userDTO.getId());
+        }
+        routeMapper.insert(entity);
+    }
+
+    @Override
+    public void updateById(Route entity) {
+        routeMapper.updateById(entity);
+    }
+
+    @Override
+    public void removeByIds(List<Integer> ids) {
+        for (Integer id : ids) {
+            // 删除评论
+            List<CommentInfo> commentInfos = commentInfoMapper.queryCommentsList("路线分享", id);
+            List<Integer> commentIds = commentInfos.stream().map(CommentInfo::getId).collect(Collectors.toList());
+            if (commentIds != null && commentIds.size() > 0) {
+                commentInfoMapper.removeByIds(commentIds);
+            }
+            // 删除点赞
+            List<Likes> likesList = likesMapper.queryLikeList("路线分享", id);
+            List<Integer> likesIds = likesList.stream().map(Likes::getId).collect(Collectors.toList());
+            if (likesIds != null && likesIds.size() > 0) {
+                likesMapper.removeByIds(likesIds);
+            }
+            // 删除浏览历史
+            List<ViewHistory> viewList = viewHistoryMapper.queryViewList("路线分享", id);
+            List<Integer> viewIds = viewList.stream().map(ViewHistory::getId).collect(Collectors.toList());
+            if (viewIds != null && viewIds.size() > 0) {
+                viewHistoryMapper.removeByIds(viewIds);
+            }
+        }
+        routeMapper.removeByIds(ids);
     }
 }

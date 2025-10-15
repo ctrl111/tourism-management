@@ -29,7 +29,7 @@ http.interceptors.response.use(response => {
         case 401:
             localStorage.removeItem("token");
             ElMessage({message: "请先登录", type: "error"});
-            router.push("/login");
+            // router.push("/login");
             break;
         case 409:
             ElMessage({message: error.response.data.data, type: "error"});

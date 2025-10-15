@@ -164,7 +164,7 @@ function getRoutes() {
                     path: 'routeDetails/:id',
                     name: 'front-routeDetails',
                     component: () => import('../views/front/RouteDetails.vue')
-                },
+                }
 
             ]
         },
@@ -200,14 +200,70 @@ function getRoutes() {
 }
 
 /**
- * 白名单：不需要登录就能访问的路由
+ * 完全公开的路由（无需登录）
  */
-const whiteList = ['/login', '/register', '/retrievePassword', '/front/index']
+const publicRoutes = [
+    '/login',
+    '/register', 
+    '/retrievePassword',
+    '/',
+    '/front/index',
+    '/front/scenic',
+    '/front/travelNote',
+    '/front/route',
+    '/front/feedback'
+]
 
 /**
- * 需要登录的前端路由（部分页面）
+ * 需要登录的前端路由
  */
-const requireAuthFrontRoutes = ['/front/personalCenter', '/front/orders', '/front/favorite', '/front/viewHistory']
+const requireAuthFrontRoutes = [
+    '/front/personalCenter',
+    '/front/notice'
+]
+
+/**
+ * 检查路径是否需要认证
+ */
+function requiresAuth(path) {
+    // 管理员路由都需要登录
+    if (path.startsWith('/admin')) {
+        return true
+    }
+    
+    // 检查是否在需要登录的前端路由列表中
+    return requireAuthFrontRoutes.some(route => path.startsWith(route))
+}
+
+/**
+ * 检查路径是否公开访问
+ */
+function isPublicRoute(path) {
+    console.log('📋 检查公开路由:', path)
+    
+    // 精确匹配公开路由
+    if (publicRoutes.includes(path)) {
+        console.log('  ✓ 在公开路由列表中')
+        return true
+    }
+    
+    // 检查详情页路由（允许未登录访问，支持任意ID格式）
+    if (path.match(/^\/front\/scenicDetails\/.+$/) ||
+        path.match(/^\/front\/travelDetails\/.+$/) ||
+        path.match(/^\/front\/routeDetails\/.+$/)) {
+        console.log('  ✓ 是详情页路由')
+        return true
+    }
+    
+    // 其他前端路由默认允许访问（除了需要认证的）
+    if (path.startsWith('/front') && !requiresAuth(path)) {
+        console.log('  ✓ 前端路由且不需要认证')
+        return true
+    }
+    
+    console.log('  ✗ 不是公开路由')
+    return false
+}
 
 /**
  * 路由守卫
@@ -217,6 +273,14 @@ router.beforeEach(async (to, from, next) => {
     
     // 获取token
     const token = userStore.token || localStorage.getItem('token')
+    
+    // 调试信息
+    console.log('🔍 路由守卫:', {
+        path: to.path,
+        hasToken: !!token,
+        isPublic: isPublicRoute(to.path),
+        requiresAuth: requiresAuth(to.path)
+    })
     
     // 如果已登录
     if (token) {
@@ -228,52 +292,70 @@ router.beforeEach(async (to, from, next) => {
             } else {
                 next('/front/index')
             }
-        } else {
-            // 确保用户信息已加载
-            if (!userStore.userInfo) {
-                try {
-                    await userStore.fetchUserInfo()
-                    next()
-                } catch (error) {
-                    // 获取用户信息失败，清除登录状态
-                    userStore.logout()
+            return
+        }
+        
+        // 确保用户信息已加载
+        if (!userStore.userInfo) {
+            try {
+                await userStore.fetchUserInfo()
+            } catch (error) {
+                // 获取用户信息失败，清除登录状态
+                console.error('获取用户信息失败:', error)
+                userStore.logout()
+                
+                // 如果访问的不是公开路由，提示重新登录
+                if (!isPublicRoute(to.path)) {
                     ElMessage.error('登录已过期，请重新登录')
                     next(`/login?redirect=${to.path}`)
+                    return
                 }
-            } else {
-                // 检查权限：管理员路由只能管理员访问
-                if (to.path.startsWith('/admin')) {
-                    if (userStore.getUserType === 'ADMIN') {
-                        next()
-                    } else {
-                        ElMessage.warning('您没有权限访问该页面')
-                        next('/front/index')
-                    }
-                } else {
-                    next()
-                }
+                // 如果是公开路由，允许访问
+                next()
+                return
             }
         }
-    } else {
-        // 未登录
-        if (whiteList.includes(to.path)) {
-            // 在白名单中，直接放行
-            next()
-        } else if (to.path.startsWith('/admin')) {
-            // 管理员路由需要登录
-            ElMessage.warning('请先登录')
-            next(`/login?redirect=${to.path}`)
-        } else if (requireAuthFrontRoutes.some(route => to.path.startsWith(route))) {
-            // 部分前端路由需要登录
-            ElMessage.warning('请先登录')
-            next(`/login?redirect=${to.path}`)
-        } else if (to.path.startsWith('/front')) {
-            // 其他前端路由可以访问
-            next()
-        } else {
-            // 其他路由，重定向到登录页
-            next(`/login?redirect=${to.path}`)
+        
+        // 检查权限：管理员路由只能管理员访问
+        if (to.path.startsWith('/admin')) {
+            if (userStore.getUserType === 'ADMIN') {
+                next()
+            } else {
+                ElMessage.warning('您没有权限访问该页面')
+                next('/front/index')
+            }
+            return
         }
+        
+        // 其他路由正常访问
+        next()
+        return
+    }
+    
+    // 未登录用户
+    // 检查是否为公开路由
+    if (isPublicRoute(to.path)) {
+        console.log('✅ 公开路由，允许访问')
+        next()
+        return
+    }
+    
+    // 需要登录的路由 - 只弹窗提示，不跳转
+    if (requiresAuth(to.path)) {
+        console.log('⚠️ 需要登录，阻止访问')
+        ElMessage.warning('请先登录')
+        next(false) // 阻止导航，停留在当前页面
+        return
+    }
+    
+    // 其他路由：404或未匹配的路由
+    console.log('❓ 未知路由，路径:', to.path)
+    if (to.path === '/404' || to.matched.length === 0) {
+        next()
+    } else {
+        // 理论上不应该到这里，因为前端路由都应该被 isPublicRoute 捕获
+        console.warn('⚠️ 未识别的路由，允许访问:', to.path)
+        next()
     }
 })
 
