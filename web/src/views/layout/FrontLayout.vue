@@ -23,7 +23,6 @@
           <el-menu-item index="/front/travelNote">游记故事</el-menu-item>
           <el-menu-item index="/front/route">路线攻略</el-menu-item>
           <el-menu-item index="/front/notice">系统通知</el-menu-item>
-          <el-menu-item index="/front/feedback">意见反馈</el-menu-item>
 
           <!-- 动态菜单内容（根据用户类型或系统配置动态渲染） -->
           <el-menu-item

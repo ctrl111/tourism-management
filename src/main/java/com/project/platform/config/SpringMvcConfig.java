@@ -68,10 +68,7 @@ public class SpringMvcConfig implements WebMvcConfigurer {
                         
                         // 评论相关公开API
                         "/commentsInfo/page",
-                        "/scenicComment/page",
-                        
-                        // 其他公开API
-                        "/feedback/add"
+                        "/scenicComment/page"
                 );
     }
 

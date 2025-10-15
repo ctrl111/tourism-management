@@ -141,11 +141,6 @@ function getRoutes() {
                     component: () => import('../views/front/Notice.vue')
                 },
                 {
-                    path: 'feedback',
-                    name: 'feedback',
-                    component: () => import('../views/front/Feedback.vue')
-                },
-                {
                     path: 'personalCenter',
                     name: 'personalCenter',
                     component: () => import('../views/front/PersonalCenter.vue')
@@ -210,8 +205,7 @@ const publicRoutes = [
     '/front/index',
     '/front/scenic',
     '/front/travelNote',
-    '/front/route',
-    '/front/feedback'
+    '/front/route'
 ]
 
 /**
