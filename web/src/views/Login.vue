@@ -136,7 +136,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { User, Lock, Avatar, View } from '@element-plus/icons-vue'
@@ -265,26 +265,68 @@ async function handleLogin() {
 }
 
 /**
- * 初始化
+ * 根据选择的用户类型加载保存的用户名
  */
-onMounted(() => {
-  // 如果已经登录，直接跳转
-  if (userStore.checkLoginStatus()) {
-    const userType = userStore.getUserType
-    if (userType === 'ADMIN') {
-      router.push('/admin')
-    } else {
-      router.push('/front/index')
-    }
-    return
-  }
-
-  // 加载保存的用户名
-  const savedUsername = localStorage.getItem('savedUsername')
+function loadSavedUsername() {
+  const usernameKey = formData.type === 'ADMIN' ? 'admin_savedUsername' : 'user_savedUsername'
+  const savedUsername = localStorage.getItem(usernameKey)
   if (savedUsername) {
     formData.username = savedUsername
     formData.rememberMe = true
+  } else {
+    // 兼容旧版本
+    const oldSavedUsername = localStorage.getItem('savedUsername')
+    if (oldSavedUsername) {
+      formData.username = oldSavedUsername
+      formData.rememberMe = true
+    } else {
+      // 清空表单
+      formData.username = ''
+      formData.rememberMe = false
+    }
   }
+}
+
+// 监听用户类型变化，加载对应的保存用户名
+watch(() => formData.type, () => {
+  loadSavedUsername()
+})
+
+/**
+ * 初始化
+ */
+onMounted(async () => {
+  // 检查是否是从退出登录跳转过来的
+  const fromLogout = route.query.fromLogout
+  
+  if (fromLogout) {
+    // 如果是从退出登录跳转过来的，不自动登录，只设置用户类型
+    if (fromLogout === 'admin') {
+      formData.type = 'ADMIN'
+    } else if (fromLogout === 'user') {
+      formData.type = 'USER'
+    }
+    // 清除 URL 参数
+    router.replace('/login')
+  } else {
+    // 根据当前选择的用户类型检查对应的登录状态
+    // 这样可以避免前台登录页被后台登录状态影响
+    await userStore.initUserState(formData.type)
+    
+    // 如果已经登录，直接跳转
+    if (userStore.getIsLoggedIn) {
+      const userType = userStore.getUserType
+      if (userType === 'ADMIN') {
+        router.push('/admin')
+      } else {
+        router.push('/front/index')
+      }
+      return
+    }
+  }
+
+  // 加载保存的用户名
+  loadSavedUsername()
 })
 </script>
 

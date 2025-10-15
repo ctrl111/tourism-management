@@ -147,8 +147,8 @@ watch(
  */
 async function initializeApp() {
   try {
-    // 初始化用户状态（不会抛出错误）
-    await userStore.initUserState()
+    // 优先尝试加载普通用户会话，如果没有则尝试其他类型
+    await userStore.initUserState('USER')
     
     // 如果用户已登录，加载动态菜单
     if (userStore.getIsLoggedIn) {
@@ -226,10 +226,14 @@ function handleLogout() {
       // 清除登录状态
       userStore.logout()
       menuStore.setMenuContent([])
+      
+      ElMessage.success('退出成功，正在跳转到登录页')
 
-      // 跳转到首页
-      router.push('/front/index')
-      ElMessage.success('退出成功')
+      // 使用 window.location.href 强制跳转到登录页并刷新页面
+      // 添加 fromLogout 参数，告诉登录页不要自动登录
+      setTimeout(() => {
+        window.location.href = '/login?fromLogout=user'
+      }, 500)
     })
     .catch(() => {
       // 用户取消操作

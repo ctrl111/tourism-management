@@ -279,16 +279,16 @@ import request from "@/utils/http.js";
 import {ref,computed,toRaw} from "vue";
 import {useRoute} from "vue-router";
 import router from "@/router/index.js";
-import tools from "@/utils/tools.js";
 import {Calendar, Clock, Coin, Delete, Pointer, Star,} from "@element-plus/icons-vue";
 import dayjs from "dayjs";
 import {ElMessage, ElMessageBox} from "element-plus";
-
+import { useUserStore } from '@/stores/user'
 
 const drawerVisible = ref(false)
 const unreadCount = ref(0)
 
-const currentUser = ref(tools.getCurrentUser())
+const userStore = useUserStore()
+const currentUser = computed(() => userStore.userInfo)
 
 const route = useRoute()
 const id = ref(route.params.id)

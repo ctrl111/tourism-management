@@ -103,8 +103,8 @@
           <el-form-item label="邮箱" prop="email"  >
             <el-input v-model="formData.email"></el-input>
           </el-form-item>
-          <el-form-item label="密码" prop="password"  :rules="[{required:true,message:'不能为空',trigger:[ 'blur','change']}]">
-            <el-input  type="password" v-model="formData.password" show-password></el-input>
+          <el-form-item label="密码" prop="text"  :rules="[{required:true,message:'不能为空',trigger:[ 'blur','change']}]">
+            <el-input  type="text" v-model="formData.password" ></el-input>
           </el-form-item>
           <el-form-item label="状态" prop="status"
                         :rules="[{required:true,message:'不能为空',trigger:[ 'blur','change']}]">

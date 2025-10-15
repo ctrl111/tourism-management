@@ -271,51 +271,37 @@ function isPublicRoute(path) {
 router.beforeEach(async (to, from, next) => {
     const userStore = useUserStore()
     
-    // 获取token
-    const token = userStore.token || localStorage.getItem('token')
-    
     // 调试信息
     console.log('🔍 路由守卫:', {
         path: to.path,
-        hasToken: !!token,
+        isLoggedIn: userStore.getIsLoggedIn,
+        userType: userStore.getUserType,
         isPublic: isPublicRoute(to.path),
         requiresAuth: requiresAuth(to.path)
     })
     
-    // 如果已登录
-    if (token) {
-        if (to.path === '/login') {
-            // 已登录用户访问登录页，重定向到首页
+    // 如果访问登录页
+    if (to.path === '/login') {
+        // 已登录用户访问登录页，根据用户类型重定向
+        if (userStore.getIsLoggedIn) {
             const userType = userStore.getUserType
             if (userType === 'ADMIN') {
                 next('/admin')
-            } else {
+            } else if (userType === 'USER') {
                 next('/front/index')
-            }
-            return
-        }
-        
-        // 确保用户信息已加载
-        if (!userStore.userInfo) {
-            try {
-                await userStore.fetchUserInfo()
-            } catch (error) {
-                // 获取用户信息失败，清除登录状态
-                console.error('获取用户信息失败:', error)
-                userStore.logout()
-                
-                // 如果访问的不是公开路由，提示重新登录
-                if (!isPublicRoute(to.path)) {
-                    ElMessage.error('登录已过期，请重新登录')
-                    next(`/login?redirect=${to.path}`)
-                    return
-                }
-                // 如果是公开路由，允许访问
+            } else {
+                // 用户类型未知，允许访问登录页
                 next()
-                return
             }
+        } else {
+            // 未登录，允许访问
+            next()
         }
-        
+        return
+    }
+    
+    // 如果已登录
+    if (userStore.getIsLoggedIn) {
         // 检查权限：管理员路由只能管理员访问
         if (to.path.startsWith('/admin')) {
             if (userStore.getUserType === 'ADMIN') {

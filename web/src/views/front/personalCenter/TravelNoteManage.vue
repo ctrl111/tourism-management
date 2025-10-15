@@ -97,17 +97,18 @@
 </template>
 
 <script setup>
-import { ref, onMounted, toRaw } from 'vue'
+import { ref, onMounted, toRaw, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import request from '@/utils/http.js'
-import tools from '@/utils/tools.js'
+import { useUserStore } from '@/stores/user'
 import MyUpload from '@/components/MyUpload.vue'
 import MyEditor from '@/components/MyEditor.vue'
 
 const router = useRouter()
-const currentUser = ref(tools.getCurrentUser())
+const userStore = useUserStore()
+const currentUser = computed(() => userStore.userInfo)
 
 const loading = ref(false)
 const listData = ref([])

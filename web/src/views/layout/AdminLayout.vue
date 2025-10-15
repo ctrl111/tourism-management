@@ -138,8 +138,7 @@
 </template>
 
 <script setup>
-import tools from "@/utils/tools.js";
-import {ref} from "vue";
+import {ref, computed, onMounted} from "vue";
 import router from "@/router/index.js";
 import {ElMessage} from "element-plus";
 import {useRoute} from 'vue-router';
@@ -161,30 +160,52 @@ import {
   PictureFilled
 } from '@element-plus/icons-vue'
 import "@/styles/admin.css";
+import { useUserStore } from '@/stores/user'
 
-const isUserLogin = ref(tools.isLogin())
-const currentUser = ref(tools.getCurrentUser())
+// 使用 Pinia Store 统一管理登录状态
+const userStore = useUserStore()
 const activeIndex = ref(useRoute().path)
 
-if (currentUser.value === null) {
-  window.location.href = "/login"
-}
-if (currentUser.value && currentUser.value.type === 'USER') {
-  router.push({path: "/"})
-}
+// 从 store 获取登录状态和用户信息
+const isUserLogin = computed(() => userStore.getIsLoggedIn)
+const currentUser = computed(() => userStore.userInfo)
+
+// 初始化用户状态
+onMounted(async () => {
+  // 只加载管理员会话
+  const hasAdminSession = await userStore.initUserState('ADMIN')
+  
+  // 检查登录状态和权限
+  if (!hasAdminSession || !userStore.getIsLoggedIn) {
+    ElMessage.warning('请先登录管理员账号')
+    window.location.href = "/login"
+    return
+  }
+  
+  if (userStore.getUserType !== 'ADMIN') {
+    ElMessage.warning('您没有权限访问后台管理系统')
+    window.location.href = "/login"
+  }
+})
 
 function handleMenuSelect(key, keyPath) {
   activeIndex.value = key
 }
-
 
 function logout() {
   ElMessage({
     message: '退出登录成功，正在跳转',
     type: 'success'
   });
-  localStorage.clear()
-  router.push({path: "/login"})
+  
+  // 使用 store 的 logout 方法统一清除状态
+  userStore.logout()
+  
+  // 使用 window.location.href 强制跳转到登录页并刷新页面
+  // 添加 fromLogout 参数，告诉登录页不要自动登录
+  setTimeout(() => {
+    window.location.href = "/login?fromLogout=admin"
+  }, 500)
 }
 
 function editCurrentUser() {
@@ -194,7 +215,6 @@ function editCurrentUser() {
 function editPassword() {
   router.push({path: "/admin/editPassword"})
 }
-
 
 const isCollapse = ref(true)
 
