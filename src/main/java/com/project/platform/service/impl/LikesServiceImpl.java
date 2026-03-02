@@ -23,8 +23,6 @@ public class LikesServiceImpl implements LikesService {
     private LikesMapper likesMapper;
     @Resource
     private TravelNoteMapper travelNoteMapper;
-    @Resource
-    private RouteMapper routeMapper;
 
     @Override
     public PageVO<Likes> page(Map<String, Object> query, Integer pageNum, Integer pageSize) {
@@ -38,9 +36,6 @@ public class LikesServiceImpl implements LikesService {
             String type = item.getTypeCode();
             if (type.equals("游记")){
                 item.setAssociationObject(travelNoteMapper.selectById(item.getAssociationId()));
-            }
-            if (type.equals("路线分享")){
-                item.setAssociationObject(routeMapper.selectById(item.getAssociationId()));
             }
         });
         page.setList(list);

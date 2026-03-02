@@ -59,11 +59,12 @@ function getRoutes() {
                         import ('../views/admin/ScenicInfoManage.vue')
                 },
                 {
-                    path: 'scenicComment',
-                    name: 'admin-scenicComment',
+                    path: 'commentsInfo',
+                    name: 'admin-commentsInfo',
                     component: () =>
-                        import ('../views/admin/ScenicCommentManage.vue')
+                        import ('../views/admin/CommentInfoManage.vue')
                 },
+
                 {
                     path: 'viewHistory',
                     name: 'admin-viewHistory',
@@ -83,29 +84,12 @@ function getRoutes() {
                         import ('../views/admin/NoticeManage.vue')
                 },
                 {
-                    path: 'banner',
-                    name: 'admin-banner',
-                    component: () =>
-                        import ('../views/admin/BannerManage.vue')
-                },
-                {
                     path: 'order',
                     name: 'admin-order',
                     component: () =>
                         import ('../views/admin/OrderInfoManage.vue')
                 },
-                {
-                    path: 'orderItem',
-                    name: 'admin-orderItem',
-                    component: () =>
-                        import ('../views/admin/OrderItemManage.vue')
-                },
-                {
-                    path: 'routePlan',
-                    name: 'admin-routePlan',
-                    component: () =>
-                        import ('../views/admin/RoutePlanManage.vue')
-                }
+
 
             ]
         },
@@ -130,11 +114,7 @@ function getRoutes() {
                     name: 'travelNote',
                     component: () => import('../views/front/TravelNote.vue')
                 },
-                {
-                    path: 'route',
-                    name: 'route',
-                    component: () => import('../views/front/Route.vue')
-                },
+
                 {
                     path: 'notice',
                     name: 'notice',
@@ -155,11 +135,7 @@ function getRoutes() {
                     name: 'front-travelDetails',
                     component: () => import('../views/front/TravelDetails.vue')
                 },
-                {
-                    path: 'routeDetails/:id',
-                    name: 'front-routeDetails',
-                    component: () => import('../views/front/RouteDetails.vue')
-                }
+
 
             ]
         },
@@ -204,8 +180,7 @@ const publicRoutes = [
     '/',
     '/front/index',
     '/front/scenic',
-    '/front/travelNote',
-    '/front/route'
+    '/front/travelNote'
 ]
 
 /**
@@ -243,8 +218,7 @@ function isPublicRoute(path) {
     
     // 检查详情页路由（允许未登录访问，支持任意ID格式）
     if (path.match(/^\/front\/scenicDetails\/.+$/) ||
-        path.match(/^\/front\/travelDetails\/.+$/) ||
-        path.match(/^\/front\/routeDetails\/.+$/)) {
+        path.match(/^\/front\/travelDetails\/.+$/)) {
         console.log('  ✓ 是详情页路由')
         return true
     }

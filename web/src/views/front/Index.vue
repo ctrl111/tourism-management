@@ -1,28 +1,5 @@
 <template>
   <div class="home-container">
-    <!-- 顶部轮播图 -->
-    <el-carousel
-        class="banner-carousel"
-        :interval="5000"
-        height="400px"
-        arrow="always"
-        trigger="hover"
-        autoplay>
-      <el-carousel-item
-          v-for="item in bannerList"
-          :key="item.id"
-          @click="router.push('/front/scenicDetails/'+item.linkId)">
-        <el-image
-            :src="item.imageUrl"
-            class="carousel-image"
-            fit="cover">
-          <template #error>
-            <div class="image-error">Banner加载失败</div>
-          </template>
-        </el-image>
-      </el-carousel-item>
-    </el-carousel>
-
     <!-- 主体内容区域 -->
     <div class="main-content">
       <!-- 景点推荐板块 -->
@@ -87,9 +64,9 @@
         </div>
       </el-card>
 
-      <!-- 游记和线路双栏布局 -->
+      <!-- 游记板块 -->
       <el-row :gutter="24" class="double-section">
-        <el-col :span="12">
+        <el-col :span="24">
           <el-card shadow="hover" class="section-card">
             <template #header>
               <div class="card-header">
@@ -145,71 +122,6 @@
             </el-scrollbar>
           </el-card>
         </el-col>
-        <!-- 精品路线分享推荐 -->
-        <el-col :span="12">
-          <el-card shadow="hover" class="section-card">
-            <template #header>
-              <div class="card-header">
-                <span class="header-title">精品路线分享推荐</span>
-                <el-button type="primary" link @click="router.push('/front/route')">
-                  更多路线分享
-                  <el-icon><ArrowRight/></el-icon>
-                </el-button>
-              </div>
-            </template>
-            <el-scrollbar height="520px">
-              <div class="travel-notes-list">
-                <div v-for="item in routeList"
-                     :key="item.id"
-                     class="note-item"
-                     @click="router.push('/front/routeDetails/'+item.id)">
-                  <!-- 封面图 -->
-                  <el-image :src="item.cover" class="note-cover" fit="cover">
-                    <template #error>
-                      <div class="image-error">
-                        <el-icon><Picture/></el-icon>
-                        <span>图片加载失败</span>
-                      </div>
-                    </template>
-                  </el-image>
-
-                  <div class="note-content">
-                    <!-- 标题和天数 -->
-                    <h5 class="note-title">{{ item.title }}</h5>
-
-                    <!-- 用户信息 -->
-                    <div class="note-meta">
-                      <el-avatar :size="24" :src="item.user?.avatarUrl"/>
-                      <span class="author">{{ item.user?.username }}</span>
-                      <el-tag type="warning" effect="plain" size="small">
-                        {{ item.days }}日游
-                      </el-tag>
-                    </div>
-
-                    <!-- 统计信息 -->
-                    <div class="route-stats">
-                      <div class="stat-item">
-                        <el-icon><View /></el-icon>
-                        {{ item.viewCount || 0 }}
-                      </div>
-                      <div class="stat-item">
-                        <el-icon><Star /></el-icon>
-                        {{ item.likesCount || 0 }}
-                      </div>
-                      <div class="stat-item">
-                        <el-icon><ChatDotRound /></el-icon>
-                        {{ item.commentsCount || 0 }}
-                      </div>
-                      <el-tag type="danger" size="small">
-                        预估 ￥{{ item.totalCost }}
-                      </el-tag>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </el-scrollbar>
-          </el-card>
-        </el-col>
       </el-row>
     </div>
     <el-dialog
@@ -254,8 +166,7 @@
             type="primary"
             @click="confirmBooking"
         >
-          <!--            :loading="submitting"-->
-          立即支付
+          确认预定
         </el-button>
       </template>
     </el-dialog>
@@ -286,35 +197,19 @@ const buyTicketForm = ref({
   totalPrice: 0,
 })
 
-// 轮播图数据
-const bannerList = ref([])
-
 // 景点数据
 const scenicList = ref([])
 
 // 游记数据
 const travelNotes = ref([])
 
-// 线路数据
-const routeList = ref([])
-
 // 数据获取方法
 const fetchData = () => {
   try {
-    let bannParams = {
-      pageNum: 1,
-      pageSize: 5
-    }
     let paramsForm = {
       pageNum: 1,
       pageSize: 6
     }
-    // 获取banner轮播i图数据
-    const bannerData = request.get('/banner/page', {
-      params: bannParams
-    }).then(res => {
-      bannerList.value = res.data.list
-    })
     // 获取景点数据
     const scenicData = request.get('/scenicInfo/homelist', {
       params: paramsForm
@@ -326,12 +221,6 @@ const fetchData = () => {
       params: paramsForm
     }).then(res => {
       travelNotes.value = res.data.list
-    })
-    // 获取线路数据
-    const travelRouteRes = request.get('/route/homelist', {
-      params: paramsForm
-    }).then(res => {
-      routeList.value = res.data.list
     })
   } catch (error) {
     console.error('数据加载失败:', error)

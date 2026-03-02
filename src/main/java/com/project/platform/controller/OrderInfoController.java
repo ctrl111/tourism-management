@@ -1,6 +1,6 @@
 package com.project.platform.controller;
 
-//import com.project.platform.dto.BuyTicketDTO;
+import com.project.platform.dto.BuyTicketDTO;
 import com.project.platform.entity.OrderInfo;
 import com.project.platform.service.OrderInfoService;
 import com.project.platform.vo.PageVO;
@@ -98,11 +98,12 @@ public class OrderInfoController {
     /**
      * 确认预定
      *
-     * @TODO: BuyTicketDTO
+     * @param dto 购票信息
+     * @return 订单号
      */
-//    @PostMapping("confirmBooking")
-//    public ResponseVO confirmBooking(@RequestBody BuyTicketDTO dto) {
-//        orderService.buyTickets(dto);
-//        return ResponseVO.ok();
-//    }
+    @PostMapping("confirmBooking")
+    public ResponseVO<String> confirmBooking(@RequestBody BuyTicketDTO dto) {
+        String orderNo = orderService.buyTickets(dto);
+        return ResponseVO.ok(orderNo);
+    }
 }

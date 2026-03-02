@@ -5,10 +5,9 @@ import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.List;
 
 /**
- * 订单信息
+ * 订单信息（简化版）
  */
 @Data
 public class OrderInfo {
@@ -20,14 +19,28 @@ public class OrderInfo {
      * 订单号
      */
     private String orderNo;
-
-    private List<OrderItem> orderItemList;
     /**
      * 用户id
      */
     private Integer userId;
 
     private User user;
+    /**
+     * 景点ID
+     */
+    private Integer scenicId;
+    /**
+     * 景点名称
+     */
+    private String scenicName;
+    /**
+     * 票数
+     */
+    private Integer quantity;
+    /**
+     * 单价
+     */
+    private BigDecimal unitPrice;
     /**
      * 订单总金额
      */
@@ -36,12 +49,10 @@ public class OrderInfo {
      * 支付状态
      */
     private String status;
-
+    /**
+     * 游玩日期
+     */
     private Date visitDate;
-
-    private String scenicName;
-
-    private Integer quantity;
     /**
      * 创建时间
      */

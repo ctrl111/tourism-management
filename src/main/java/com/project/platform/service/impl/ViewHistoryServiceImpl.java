@@ -24,8 +24,6 @@ public class ViewHistoryServiceImpl  implements ViewHistoryService {
     @Resource
     private TravelNoteMapper travelNoteMapper;
     @Resource
-    private RouteMapper routeMapper;
-    @Resource
     private UserMapper userMapper;
 
     @Override
@@ -44,9 +42,6 @@ public class ViewHistoryServiceImpl  implements ViewHistoryService {
             }
             if (type.equals("游记")){
                 item.setAssociationObject(travelNoteMapper.selectById(item.getAssociationId()));
-            }
-            if (type.equals("路线分享")){
-                item.setAssociationObject(routeMapper.selectById(item.getAssociationId()));
             }
         });
         page.setList(list);

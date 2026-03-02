@@ -43,14 +43,11 @@ public class SpringMvcConfig implements WebMvcConfigurer {
                         
                         // 首页公开API
                         "/scenicInfo/homelist",
-                        "/route/homelist",
-                        "/banner/page",
                         "/travelNote/homelist",
                         
                         // 列表页公开API
                         "/scenicInfo/page",
                         "/travelNote/page",
-                        "/route/page",
                         
                         // 分类和筛选API
                         "/scenicCategory/list",
@@ -58,17 +55,13 @@ public class SpringMvcConfig implements WebMvcConfigurer {
                         // 详情页公开API
                         "/scenicInfo/detail/**",
                         "/travelNote/detail/**",
-                        "/route/detail/**",
                         "/scenicInfo/selectById/**",
                         "/travelNote/selectById/**",
-                        "/route/selectById/**",
                         "/scenicInfo/putViewCount/**",
                         "/travelNote/putViewCount/**",
-                        "/route/putViewCount/**",
                         
                         // 评论相关公开API
-                        "/commentsInfo/page",
-                        "/scenicComment/page"
+                        "/commentsInfo/page"
                 );
     }
 

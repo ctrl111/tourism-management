@@ -6,8 +6,8 @@
           <el-form-item label="用户名" prop="username">
             <el-input v-model="searchForm.username" clearable></el-input>
           </el-form-item>
-          <el-form-item label="手机号" prop="tel">
-            <el-input v-model="searchForm.tel" clearable></el-input>
+          <el-form-item label="手机号" prop="phone">
+            <el-input v-model="searchForm.phone" clearable></el-input>
           </el-form-item>
           <el-form-item label="状态" prop="status">
             <el-select v-model="searchForm.status" placeholder="请选择" clearable style="width: 150px">
@@ -45,7 +45,7 @@
                         :preview-teleported="true"></el-image>
             </template>
           </el-table-column>
-          <el-table-column prop="tel" label="电话"></el-table-column>
+          <el-table-column prop="phone" label="电话"></el-table-column>
           <el-table-column prop="email" label="邮箱" width="150"></el-table-column>
           <el-table-column prop="status" label="状态">
             <template #default="scope">
@@ -98,9 +98,9 @@
                       :rules="[{required:true,message:'不能为空',trigger:[ 'blur','change']}]">
           <el-input v-model="formData.nickname" placeholder="昵称"></el-input>
         </el-form-item>
-        <el-form-item label="电话" prop="tel"
+        <el-form-item label="电话" prop="phone"
                       :rules="[{required:true,message:'不能为空',trigger:[ 'blur','change']}]">
-          <el-input v-model="formData.tel" placeholder="电话"></el-input>
+          <el-input v-model="formData.phone" placeholder="电话"></el-input>
         </el-form-item>
         <el-form-item label="邮箱" prop="email"
                       :rules="[{required:true,message:'不能为空',trigger:[ 'blur','change']}]">

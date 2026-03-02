@@ -28,13 +28,13 @@ public class StatisticsController {
      */
     @GetMapping("/scenicSalesTop10")
     public ResponseVO<List<Map<String, Object>>> getScenicSalesTop10() {
+        // 使用简化后的order_info表（直接包含scenic_id和quantity）
         String sql = "SELECT " +
                 "s.name AS scenicName, " +
                 "s.id AS scenicId, " +
-                "COALESCE(COUNT(oi.id), 0) AS salesCount " +
+                "COALESCE(SUM(o.quantity), 0) AS salesCount " +
                 "FROM scenic_info s " +
-                "LEFT JOIN order_item oi ON s.id = oi.attraction_id " +
-                "LEFT JOIN order_info o ON oi.order_id = o.id AND o.status != '已取消' " +
+                "LEFT JOIN order_info o ON s.id = o.scenic_id AND o.status != '已取消' " +
                 "GROUP BY s.id, s.name " +
                 "ORDER BY salesCount DESC " +
                 "LIMIT 10";
@@ -48,14 +48,14 @@ public class StatisticsController {
      */
     @GetMapping("/categoryStatistics")
     public ResponseVO<List<Map<String, Object>>> getCategoryStatistics() {
+        // 使用简化后的order_info表
         String sql = "SELECT " +
                 "c.name AS categoryName, " +
                 "COUNT(DISTINCT s.id) AS scenicCount, " +
-                "COALESCE(COUNT(CASE WHEN o.status != '已取消' THEN oi.id END), 0) AS orderCount " +
+                "COALESCE(COUNT(CASE WHEN o.status != '已取消' THEN o.id END), 0) AS orderCount " +
                 "FROM scenic_category c " +
                 "LEFT JOIN scenic_info s ON c.id = s.category_id " +
-                "LEFT JOIN order_item oi ON s.id = oi.attraction_id " +
-                "LEFT JOIN order_info o ON oi.order_id = o.id " +
+                "LEFT JOIN order_info o ON s.id = o.scenic_id " +
                 "GROUP BY c.id, c.name " +
                 "ORDER BY orderCount DESC";
 
@@ -89,11 +89,6 @@ public class StatisticsController {
         String travelNoteCountSql = "SELECT COUNT(*) FROM travel_note";
         Integer travelNoteCount = jdbcTemplate.queryForObject(travelNoteCountSql, Integer.class);
         result.put("travelNoteCount", travelNoteCount);
-
-        // 路线总数
-        String routeCountSql = "SELECT COUNT(*) FROM route";
-        Integer routeCount = jdbcTemplate.queryForObject(routeCountSql, Integer.class);
-        result.put("routeCount", routeCount);
 
         // 总销售额（按实际订单金额计算）
         String totalRevenueSql = "SELECT COALESCE(SUM(total_amount), 0) FROM order_info WHERE status != '已取消'";

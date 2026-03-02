@@ -8,9 +8,6 @@
         <el-tab-pane label="我的游记" name="travelNoteManage">
           <TravelNoteManage v-if="activeName==='travelNoteManage'"></TravelNoteManage>
         </el-tab-pane>
-        <el-tab-pane label="我的路线" name="routeManage">
-          <RouteManage v-if="activeName==='routeManage'"></RouteManage>
-        </el-tab-pane>
         <el-tab-pane label="点赞记录" name="favorite">
           <Favorite v-if="activeName==='favorite'"></Favorite>
         </el-tab-pane>
@@ -30,7 +27,6 @@ import ViewHistory from "@/views/front/personalCenter/ViewHistory.vue"
 import OrderManage from "@/views/front/personalCenter/OrderManage.vue"
 import Favorite from "@/views/front/personalCenter/Favorite.vue"
 import TravelNoteManage from "@/views/front/personalCenter/TravelNoteManage.vue"
-import RouteManage from "@/views/front/personalCenter/RouteManage.vue"
 
 const drawerVisible = ref(false)
 const unreadCount = ref(0)

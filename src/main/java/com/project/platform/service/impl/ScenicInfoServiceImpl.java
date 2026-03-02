@@ -2,11 +2,10 @@ package com.project.platform.service.impl;
 
 import com.project.platform.dto.CurrentUserDTO;
 import com.project.platform.entity.*;
-import com.project.platform.mapper.ScenicCommentMapper;
+import com.project.platform.mapper.CommentInfoMapper;
 import com.project.platform.mapper.ScenicInfoMapper;
 import com.project.platform.mapper.UserMapper;
 import com.project.platform.mapper.ViewHistoryMapper;
-import com.project.platform.service.ScenicCommentService;
 import com.project.platform.service.ScenicInfoService;
 import com.project.platform.utils.CurrentUserThreadLocal;
 import jakarta.annotation.Resource;
@@ -30,7 +29,7 @@ public class ScenicInfoServiceImpl  implements ScenicInfoService {
     @Resource
     private ViewHistoryMapper viewHistoryMapper;
     @Autowired
-    private ScenicCommentMapper scenicCommentMapper;
+    private CommentInfoMapper commentInfoMapper;
 
 
     @Override
@@ -38,13 +37,13 @@ public class ScenicInfoServiceImpl  implements ScenicInfoService {
         PageVO<ScenicInfo> page = new PageVO();
         List<ScenicInfo> list = scenicInfoMapper.queryPage((pageNum - 1) * pageSize, pageSize, query);
         list.forEach(scenicInfo -> {
-            //总评论数量
-            int countComm = scenicCommentMapper.selectByScenicId(scenicInfo.getId());
+            // 使用CommentInfo统一评论表
+            // 总评论数量（typeCode='景点', associationId=景点ID）
+            int countComm = commentInfoMapper.queryCommentsCount("景点", scenicInfo.getId());
             scenicInfo.setCountComment(countComm);
-            //计算总评分
-            List<Double> ratings = scenicCommentMapper.queryRatingsByScenicId(scenicInfo.getId());
-            Double rating = calculateAverageRating(ratings);
-            scenicInfo.setScore(rating);
+            // 计算平均评分（如果CommentInfo有rating字段）
+            // 注：CommentInfo表没有rating字段，暂时设置为0或根据点赞数计算
+            scenicInfo.setScore(0.0);
         });
         page.setList(list);
         page.setTotal(scenicInfoMapper.queryCount(query));
@@ -98,13 +97,10 @@ public class ScenicInfoServiceImpl  implements ScenicInfoService {
             list.addAll(supplement);
         }
         list.forEach(scenicInfo -> {
-            //总评论数量
-            int countComm = scenicCommentMapper.selectByScenicId(scenicInfo.getId());
+            // 使用CommentInfo统一评论表
+            int countComm = commentInfoMapper.queryCommentsCount("景点", scenicInfo.getId());
             scenicInfo.setCountComment(countComm);
-            //计算总评分
-            List<Double> ratings = scenicCommentMapper.queryRatingsByScenicId(scenicInfo.getId());
-            Double rating = calculateAverageRating(ratings);
-            scenicInfo.setScore(rating);
+            scenicInfo.setScore(0.0);
         });
         page.setList(list);
         page.setTotal(scenicInfoMapper.queryCount(query));
@@ -116,13 +112,10 @@ public class ScenicInfoServiceImpl  implements ScenicInfoService {
         CurrentUserDTO dto =  CurrentUserThreadLocal.getCurrentUser();
         ScenicInfo scenicInfo = scenicInfoMapper.selectById(id);
         if (scenicInfo != null) {
-            //总评论数量
-            int countComm = scenicCommentMapper.selectByScenicId(scenicInfo.getId());
+            // 使用CommentInfo统一评论表
+            int countComm = commentInfoMapper.queryCommentsCount("景点", scenicInfo.getId());
             scenicInfo.setCountComment(countComm);
-            //计算总评分
-            List<Double> ratings = scenicCommentMapper.queryRatingsByScenicId(scenicInfo.getId());
-            Double rating = calculateAverageRating(ratings);
-            scenicInfo.setScore(rating);
+            scenicInfo.setScore(0.0);
         }
         return scenicInfo;
     }
@@ -163,16 +156,21 @@ public class ScenicInfoServiceImpl  implements ScenicInfoService {
     @Override
     public void removeByIds(List<Integer> ids) {
         for (Integer id : ids) {
-            //删除评论点赞信息
-            List<ScenicComment> commentInfos = scenicCommentMapper.selectByScenicsId(id);
-            List<Integer> commentIds = commentInfos.stream().map(ScenicComment::getId).collect(Collectors.toList());
-            if (commentIds != null && commentIds.size() > 0) {
-                scenicCommentMapper.removeByIds(commentIds);
+            // 删除评论信息（使用CommentInfo统一表）
+            List<CommentInfo> commentInfos = commentInfoMapper.queryCommentsList("景点", id);
+            if (commentInfos != null && !commentInfos.isEmpty()) {
+                List<Integer> commentIds = commentInfos.stream()
+                        .map(CommentInfo::getId)
+                        .collect(Collectors.toList());
+                commentInfoMapper.removeByIds(commentIds);
             }
-            //浏览数
-            List<ViewHistory> viewList = viewHistoryMapper.queryViewList("景点",id);
-            List<Integer> viewIds = viewList.stream().map(ViewHistory::getId).collect(Collectors.toList());
-            if (viewIds != null && viewIds.size() > 0) {
+            
+            // 删除浏览历史
+            List<ViewHistory> viewList = viewHistoryMapper.queryViewList("景点", id);
+            if (viewList != null && !viewList.isEmpty()) {
+                List<Integer> viewIds = viewList.stream()
+                        .map(ViewHistory::getId)
+                        .collect(Collectors.toList());
                 viewHistoryMapper.removeByIds(viewIds);
             }
         }

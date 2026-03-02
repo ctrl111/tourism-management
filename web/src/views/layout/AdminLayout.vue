@@ -34,11 +34,6 @@
           </el-menu-item>
         </el-sub-menu>
 
-        <el-menu-item index="/admin/banner">
-          <el-icon><PictureFilled /></el-icon>
-          <span>轮播图管理</span>
-        </el-menu-item>
-
         <!-- 景点信息管理 -->
         <el-sub-menu index="scenic">
           <template #title>
@@ -53,7 +48,7 @@
             <el-icon><LocationFilled /></el-icon>
             <span>景点管理</span>
           </el-menu-item>
-          <el-menu-item index="/admin/scenicComment">
+          <el-menu-item index="/admin/commentsInfo">
             <el-icon><ChatDotSquare /></el-icon>
             <span>评论管理</span>
           </el-menu-item>
@@ -72,10 +67,6 @@
           <el-menu-item index="/admin/travelNote">
             <el-icon><Notebook /></el-icon>
             <span>游记分享</span>
-          </el-menu-item>
-          <el-menu-item index="/admin/routePlan">
-            <el-icon><Guide /></el-icon>
-            <span>路线分享</span>
           </el-menu-item>
         </el-sub-menu>
 

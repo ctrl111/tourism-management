@@ -5,7 +5,7 @@ import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 /**
- * 用户信息
+ * 用户信息（包含管理员）
  */
 @Data
 public class User  {
@@ -38,11 +38,17 @@ public class User  {
      */
     private String avatarUrl;
     /**
+     * 余额
+     */
+    private BigDecimal balance;
+    /**
      * 状态
      */
     private String status;
-
-    private BigDecimal  balance;
+    /**
+     * 角色: USER/ADMIN
+     */
+    private String role;
     /**
      * 创建时间
      */

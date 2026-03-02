@@ -21,7 +21,6 @@
           <el-menu-item index="/front/index">首页</el-menu-item>
           <el-menu-item index="/front/scenic">景点导航</el-menu-item>
           <el-menu-item index="/front/travelNote">游记故事</el-menu-item>
-          <el-menu-item index="/front/route">路线攻略</el-menu-item>
           <el-menu-item index="/front/notice">系统通知</el-menu-item>
 
           <!-- 动态菜单内容（根据用户类型或系统配置动态渲染） -->
@@ -56,9 +55,6 @@
                   </el-dropdown-item>
                   <el-dropdown-item command="travelNoteManage">
                     <el-icon><Notebook /></el-icon>我的游记
-                  </el-dropdown-item>
-                  <el-dropdown-item command="routeManage">
-                    <el-icon><Guide /></el-icon>我的路线
                   </el-dropdown-item>
                   <el-dropdown-item command="favorite">
                     <el-icon><Star /></el-icon>我的收藏
@@ -110,8 +106,7 @@ import {
   Star,
   Clock,
   SwitchButton,
-  Notebook,
-  Guide
+  Notebook
 } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
 import { useMenuStore } from '@/stores/menu'
@@ -193,10 +188,6 @@ function handleUserCommand(command) {
     case 'travelNoteManage':
       // 跳转到个人中心的游记管理标签页
       router.push('/front/personalCenter?type=travelNoteManage')
-      break
-    case 'routeManage':
-      // 跳转到个人中心的路线管理标签页
-      router.push('/front/personalCenter?type=routeManage')
       break
     case 'favorite':
       // 跳转到个人中心的收藏标签页

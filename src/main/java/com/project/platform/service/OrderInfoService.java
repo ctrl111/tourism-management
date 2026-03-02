@@ -1,6 +1,6 @@
 package com.project.platform.service;
 
-//import com.project.platform.dto.BuyTicketDTO;
+import com.project.platform.dto.BuyTicketDTO;
 import com.project.platform.entity.OrderInfo;
 import com.project.platform.vo.PageVO;
 
@@ -24,5 +24,5 @@ public interface OrderInfoService {
 
     void removeByIds(List<Integer> id);
 
-//    String buyTickets(BuyTicketDTO dto);
+    String buyTickets(BuyTicketDTO dto);
 }

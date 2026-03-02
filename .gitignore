@@ -1,4 +1,28 @@
+# IDE
 .idea/
+.vscode/
+
+# Build
 target/
 
+# Frontend
 web/node_modules/
+
+# Uploads
+uploads/
+
+# Documentation and notes (Chinese)
+*.txt
+学期任务原文及翻译.md
+实习例子.txt
+实习例子中文版.txt
+实习报告正文引用来源.txt
+Раздел_1_Бизнес_анализ.md
+course_project.md
+README_KURSOVOY.md
+
+# SQL backups
+sql/*backup*.sql
+
+# Diagrams
+diagrams/

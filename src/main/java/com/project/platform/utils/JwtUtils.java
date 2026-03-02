@@ -3,8 +3,8 @@ package com.project.platform.utils;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import com.project.platform.dto.CurrentUserDTO;
-import com.project.platform.entity.Admin;
-import com.project.platform.service.AdminService;
+import com.project.platform.entity.User;
+import com.project.platform.service.UserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
@@ -29,7 +29,7 @@ import java.util.Map;
 public class JwtUtils {
 
     @Resource
-    private static AdminService userService;
+    private static UserService userService;
 
     /**
      * token 过期时间, 单位: 秒. 这个值表示 30 天

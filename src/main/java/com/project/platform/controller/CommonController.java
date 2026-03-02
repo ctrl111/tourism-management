@@ -6,7 +6,6 @@ import com.project.platform.dto.LoginDTO;
 import com.project.platform.dto.RetrievePasswordDTO;
 import com.project.platform.dto.UpdatePasswordDTO;
 import com.project.platform.exception.CustomException;
-import com.project.platform.service.AdminService;
 import com.project.platform.service.CommonService;
 import com.project.platform.service.UserService;
 import com.project.platform.utils.CurrentUserThreadLocal;
@@ -22,9 +21,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/common")
 public class CommonController {
-
-    @Resource
-    private AdminService adminService;
 
     @Resource
     private UserService userService;
@@ -128,6 +124,7 @@ public class CommonController {
 
     /**
      * 根据类型获取对应service
+     * 注：Admin和User已合并到user表，统一使用UserService
      *
      * @param type
      * @return
@@ -136,7 +133,6 @@ public class CommonController {
     private CommonService getCommonService(String type) {
         switch (type) {
             case "ADMIN":
-                return adminService;
             case "USER":
                 return userService;
             default:

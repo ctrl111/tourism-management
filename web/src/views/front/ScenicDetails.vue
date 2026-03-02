@@ -231,8 +231,7 @@
             type="primary"
             @click="confirmBooking"
         >
-          <!--            :loading="submitting"-->
-          立即支付
+          确认预定
         </el-button>
       </template>
     </el-dialog>
@@ -366,9 +365,10 @@ function disabledDate(time) {
 }
 // 加载评论
 function loadComments() {
-  searchForm.value.scenicId = id.value
+  searchForm.value.typeCode = '景点'
+  searchForm.value.associationId = id.value
   let data = Object.assign(toRaw(searchForm.value), toRaw(pageInfo.value))
-  request.get("/scenicComment/page", {
+  request.get("/commentsInfo/page", {
     params: data}
   ).then(res => {
     commentList.value = res.data.list
@@ -381,11 +381,11 @@ function submitComment (info) {
   try {
     submitting.value = true
     let formData = {
-      scenicId: id.value,
-      score: newRating.value,
+      typeCode: '景点',
+      associationId: id.value,
       content: newComment.value,
     }
-    request.post("/scenicComment/add", formData).then(res => {
+    request.post("/commentsInfo/add", formData).then(res => {
       if (!res) {
         return
       }

@@ -48,7 +48,7 @@
     </el-card>
 
     <!-- 景点列表 -->
-    <el-row :gutter="20" class="scenic-list">
+    <el-row :gutter="24" class="scenic-list">
       <el-col
           v-for="item in listData"
           :key="item.id"
@@ -56,7 +56,7 @@
           class="scenic-item"
       >
         <el-card
-            shadow="hover"
+            shadow="never"
             class="scenic-card"
             @click="router.push('/front/scenicDetails/'+item.id)"
         >
@@ -65,48 +65,58 @@
                 :src="item.coverImage"
                 fit="cover"
                 class="cover-image"
+                lazy
             >
+              <template #placeholder>
+                <div class="image-placeholder">
+                  <el-icon class="placeholder-icon"><Picture /></el-icon>
+                  <span class="placeholder-text">加载中...</span>
+                </div>
+              </template>
               <template #error>
-                <div class="image-error">
-                  <el-icon>
-                    <Picture/>
-                  </el-icon>
-                  <span>图片加载失败</span>
+                <div class="image-placeholder">
+                  <el-icon class="placeholder-icon"><Picture /></el-icon>
+                  <span class="placeholder-text">暂无图片</span>
                 </div>
               </template>
             </el-image>
+            <div class="price-badge">
+              <span class="price-symbol">¥</span>
+              <span class="price-value">{{ item.price }}</span>
+            </div>
           </div>
 
           <div class="card-content">
             <h4 class="scenic-title">{{ item.name }}</h4>
 
             <div class="scenic-tags">
-              <el-tag type="info" size="small">{{ item.categoryType }}</el-tag>
-              <el-tag type="warning" size="small">{{ item.score }}分</el-tag>
-              <el-tag type="warning" size="small">{{ item.countComment }}条点评</el-tag>
+              <el-tag class="category-tag" size="small">{{ item.categoryType }}</el-tag>
+              <div class="rating-tag">
+                <el-icon class="star-icon"><Star /></el-icon>
+                <span>{{ item.score }}</span>
+              </div>
             </div>
 
             <div class="scenic-info">
               <div class="info-item">
-                <el-icon>
-                  <Location/>
-                </el-icon>
-                <span class="address">{{ item.address }}</span>
-              </div>
-              <div class="info-item">
-                <el-icon>
-                  <Clock/>
-                </el-icon>
-                <span>{{ item.openingHours || '08:00-18:00' }}</span>
+                <el-icon class="info-icon"><Location /></el-icon>
+                <span class="address">{{ item.address || '暂无地址' }}</span>
               </div>
             </div>
 
             <div class="scenic-footer">
-              <div class="price">
-                <span class="current-price">￥{{ item.price }}</span>
-                <span class="original-price">¥{{ item.originalPrice }}</span>
+              <div class="comment-count">
+                <el-icon><ChatDotRound /></el-icon>
+                <span>{{ item.countComment }}条评论</span>
               </div>
-              <el-button type="primary" size="small" @click.stop="openBookingDialog(item)">立即预定</el-button>
+              <el-button 
+                type="primary" 
+                size="small" 
+                class="book-btn"
+                @click.stop="openBookingDialog(item)"
+              >
+                立即预定
+              </el-button>
             </div>
           </div>
         </el-card>
@@ -168,8 +178,7 @@
             type="primary"
             @click="confirmBooking"
         >
-          <!--            :loading="submitting"-->
-          立即支付
+          确认预定
         </el-button>
       </template>
     </el-dialog>
@@ -179,7 +188,7 @@
 
 <script setup>
 import request from "@/utils/http.js";
-import {Search} from '@element-plus/icons-vue'
+import {Search, Star, ChatDotRound} from '@element-plus/icons-vue'
 import {ref, toRaw,computed} from "vue";
 import router from "@/router/index.js";
 import {ElMessage, ElMessageBox} from "element-plus";
@@ -452,34 +461,41 @@ const handleChatToggle = () => {
 
 <style scoped>
 .scenic-container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 24px 32px;
 }
+
 .search-card {
   margin-bottom: 24px;
-  border-radius: 8px;
-
-  .search-wrapper {
-    display: flex;
-    gap: 16px;
-    padding: 8px;
-  }
-}
-.search-filter-card {
-  margin-bottom: 20px;
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 }
 
 .search-header {
+  display: flex;
+  gap: 12px;
   margin-bottom: 20px;
 }
 
 .search-input {
-  max-width: 90%;
-  margin: 0 auto;
-  border-radius: 20px 0 0 20px; /* 左圆角右直角 */
-  width: 90%;
-  height: 50px;
+  flex: 1;
+  border-radius: 8px;
+}
+
+.search-button {
+  min-width: 100px;
+  height: 40px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  border: none;
+  font-weight: 600;
+}
+
+.search-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.4);
 }
 
 .filter-area {
@@ -491,113 +507,223 @@ const handleChatToggle = () => {
 .filter-item {
   display: flex;
   align-items: center;
+  gap: 12px;
 }
 
 .filter-label {
   font-size: 14px;
-  color: #666;
+  font-weight: 600;
+  color: #262626;
   white-space: nowrap;
 }
 
 .scenic-list {
-  margin-top: 20px;
+  margin-top: 24px;
 }
 
 .scenic-item {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .scenic-card {
   cursor: pointer;
-  transition: transform 0.2s;
+  border-radius: 12px;
+  border: 1px solid #f0f0f0;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  height: 100%;
 }
 
 .scenic-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+  border-color: #1890ff;
 }
 
 .card-cover {
   position: relative;
-  height: 180px;
+  height: 200px;
   overflow: hidden;
-  border-radius: 4px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8f4f8 100%);
 }
 
 .cover-image {
   width: 100%;
   height: 100%;
+  transition: transform 0.3s;
 }
 
-.image-error {
+.scenic-card:hover .cover-image {
+  transform: scale(1.1);
+}
+
+.image-placeholder {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   height: 100%;
-  background: #f5f7fa;
-  color: #909399;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8f4f8 100%);
+  color: #bfbfbf;
+}
+
+.placeholder-icon {
+  font-size: 48px;
+  margin-bottom: 8px;
+  opacity: 0.5;
+}
+
+.placeholder-text {
+  font-size: 14px;
+  color: #8c8c8c;
+}
+
+.price-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: linear-gradient(135deg, #ff9f00 0%, #ff6b00 100%);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+}
+
+.price-symbol {
+  font-size: 12px;
+}
+
+.price-value {
+  font-size: 18px;
 }
 
 .card-content {
-  padding: 15px 0;
+  padding: 16px;
 }
 
 .scenic-title {
   margin: 0 0 12px;
-  font-size: 16px;
-  color: #333;
+  font-size: 18px;
+  font-weight: 700;
+  color: #262626;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  line-height: 1.4;
 }
 
 .scenic-tags {
-  margin-bottom: 12px;
   display: flex;
+  align-items: center;
   gap: 8px;
+  margin-bottom: 12px;
+}
+
+.category-tag {
+  background: #e6f7ff;
+  color: #1890ff;
+  border: none;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 4px;
+}
+
+.rating-tag {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #faad14;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.star-icon {
+  font-size: 16px;
 }
 
 .scenic-info {
   margin: 12px 0;
-  font-size: 12px;
-  color: #666;
+  font-size: 13px;
+  color: #8c8c8c;
 }
 
 .info-item {
   display: flex;
   align-items: center;
-  gap: 5px;
-  margin-bottom: 8px;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.info-icon {
+  font-size: 14px;
+  color: #1890ff;
+}
+
+.address {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
 }
 
 .scenic-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 15px;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
 }
 
-.current-price {
-  color: #ff6b6b;
-  font-size: 18px;
+.comment-count {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: #8c8c8c;
+}
+
+.book-btn {
+  background: linear-gradient(135deg, #ff9f00 0%, #ff6b00 100%);
+  border: none;
+  border-radius: 20px;
+  padding: 8px 20px;
   font-weight: 600;
+  transition: all 0.3s;
 }
 
-.original-price {
-  color: #999;
-  font-size: 12px;
-  text-decoration: line-through;
-  margin-left: 8px;
+.book-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(255, 107, 0, 0.4);
 }
 
 .pagination-wrapper {
-  margin-top: 30px;
+  margin-top: 40px;
   text-align: center;
 }
-.search-button {
-  min-width: 88px; /* 与按钮图标尺寸匹配 */
-  height: 50px; /* 与输入框高度一致 */
-  border-radius: 0 4px 4px 0; /* 右圆角左直角 */
-  margin-left: 0px; /* 按钮与输入框间距 */
+
+:deep(.el-pagination) {
+  justify-content: center;
+}
+
+:deep(.el-pagination.is-background .el-pager li:not(.is-disabled).is-active) {
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+}
+
+:deep(.el-radio-button__inner) {
+  border-radius: 6px;
+  margin: 0 4px;
+  border: 1px solid #d9d9d9;
+  transition: all 0.3s;
+}
+
+:deep(.el-radio-button__original-radio:checked + .el-radio-button__inner) {
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  border-color: #1890ff;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
 }
 </style>

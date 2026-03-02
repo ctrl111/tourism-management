@@ -27,6 +27,6 @@ public class Favorite {
     /**
      * 收藏时间
      */
-    private LocalDateTime collectTime;
+    private LocalDateTime createTime;
 
 }

@@ -1,6 +1,6 @@
 package com.project.platform.service.impl;
 
-//import com.project.platform.dto.BuyTicketDTO;
+import com.project.platform.dto.BuyTicketDTO;
 import com.project.platform.dto.CurrentUserDTO;
 import com.project.platform.entity.*;
 import com.project.platform.exception.CustomException;
@@ -25,7 +25,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
- * 订单信息
+ * 订单信息（简化版）
  */
 @Service
 public class OrderInfoServiceImpl implements OrderInfoService {
@@ -40,10 +40,7 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 
     @Resource
     private UserMapper userMapper;
-    @Autowired
-    private OrderItemMapper orderItemMapper;
-    @Autowired
-    private ScenicInfoMapper scenicMapper;
+
     @Autowired
     private NoticeMapper noticeMapper;
 
@@ -55,25 +52,12 @@ public class OrderInfoServiceImpl implements OrderInfoService {
         }
         PageVO<OrderInfo> page = new PageVO();
         List<OrderInfo> list = orderMapper.queryPage((pageNum - 1) * pageSize, pageSize, query);
+        
+        // 填充用户信息
         for (OrderInfo orderInfo : list) {
-            List<OrderItem> items = orderItemMapper.selectByOrderId(orderInfo.getId());
-            orderInfo.setOrderItemList(items);
-            String scenicName = "";
-            int quantity=0;
-            for (OrderItem item : items) {
-                quantity += item.getQuantity();
-                ScenicInfo scenicInfo = scenicMapper.selectById(item.getAttractionId());
-                if (scenicName.equals("")){
-                    scenicName = scenicInfo.getName();
-                    continue;
-                }else {
-                    scenicName =  scenicName+","+scenicInfo.getName();
-                }
-            }
-            orderInfo.setScenicName(scenicName);
-            orderInfo.setQuantity(quantity);
             orderInfo.setUser(userMapper.selectById(orderInfo.getUserId()));
         }
+        
         page.setList(list);
         page.setTotal(orderMapper.queryCount(query));
         return page;
@@ -82,6 +66,9 @@ public class OrderInfoServiceImpl implements OrderInfoService {
     @Override
     public OrderInfo selectById(Integer id) {
         OrderInfo order = orderMapper.selectById(id);
+        if (order != null) {
+            order.setUser(userMapper.selectById(order.getUserId()));
+        }
         return order;
     }
 
@@ -103,7 +90,7 @@ public class OrderInfoServiceImpl implements OrderInfoService {
     }
 
     private void check(OrderInfo entity) {
-
+        // 验证逻辑
     }
 
     @Override
@@ -111,77 +98,123 @@ public class OrderInfoServiceImpl implements OrderInfoService {
         orderMapper.removeByIds(ids);
     }
 
-//    @Transactional(rollbackFor = Exception.class)
-//    @Override
-//    public String buyTickets(BuyTicketDTO dto) {
-//        // 获取当前用户
-//        CurrentUserDTO currentUser = CurrentUserThreadLocal.getCurrentUser();
-//        // 验证景点有效性
-//        ScenicInfo scenic = scenicInfoMapper.selectById(dto.getId());
-//        if (scenic == null) {
-//            throw new CustomException("景点不存在");
-//
-//        }
-//        // 创建订单基础信息
-//        OrderInfo order = buildBaseOrder(currentUser, dto, scenic);
-//        // 处理支付逻辑
-//        processPayment(currentUser.getId(), order.getTotalAmount());
-//
-//        // 保存订单相关记录
-//        saveOrderRecords(order, dto, scenic);
-//        return "订单创建成功";
-//    }
-//
-//    private OrderInfo buildBaseOrder(CurrentUserDTO user, BuyTicketDTO dto, ScenicInfo scenic) {
-//        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-//        OrderInfo order = new OrderInfo();
-//        order.setUserId(user.getId());
-//        order.setOrderNo(UUID.randomUUID().toString().replace("-",""));
-//        order.setStatus("未支付");
-//        try {
-//            order.setVisitDate(formatter.parse(dto.getVisitDate()));
-//        } catch (ParseException e) {
-//            throw new RuntimeException(e);
-//        }
-//        order.setTotalAmount(calculateTotal(scenic.getPrice(), dto.getNumber()));
-//        Notice notice = new Notice();
-//        notice.setTypeCode("订单");
-//        notice.setUserId(user.getId());
-//        notice.setContent("您的订单已创建，订单号为：" + order.getOrderNo());
-//        notice.setIsRead("未读");
-//        notice.setTitle("创建订单");
-//        noticeMapper.insert(notice);
-//        return order;
-//    }
-//
-//    private BigDecimal calculateTotal(BigDecimal price, Integer quantity) {
-//        return price.multiply(BigDecimal.valueOf(quantity));
-//    }
-//
-//    private void processPayment(Integer userId, BigDecimal amount) {
-//        User user = userMapper.selectById(userId);
-//        BigDecimal userBalance = user.getBalance();
-//        if (userBalance.compareTo(amount) < 0) {
-//            throw new CustomException("余额不足，支付失败");
-//        }
-//        userService.consumption(userId, amount);
-//    }
-//
-//    private void saveOrderRecords(OrderInfo order, BuyTicketDTO dto, ScenicInfo scenic) {
-//        order.setStatus("已支付");
-//        orderMapper.insert(order);
-//        OrderItem orderItem = new OrderItem();
-//        orderItem.setOrderId(order.getId());
-//        orderItem.setAttractionId(dto.getId());
-//        orderItem.setQuantity(dto.getNumber());
-//        orderItem.setPrice(scenic.getPrice());
-//        Notice notice = new Notice();
-//        notice.setTypeCode("订单");
-//        notice.setUserId(order.getUserId());
-//        notice.setContent("您的订单已支付，订单号为：" + order.getOrderNo());
-//        notice.setIsRead("未读");
-//        notice.setTitle("订单支付");
-//        noticeMapper.insert(notice);
-//        orderItemMapper.insert(orderItem);
-//    }
+    /**
+     * 购买门票（简化版）- 真实支付流程（保留备用）
+     * @param scenicId 景点ID
+     * @param quantity 数量
+     * @param visitDate 游玩日期
+     * @return 订单号
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public String buyTicketWithPayment(Integer scenicId, Integer quantity, String visitDate) {
+        // 获取当前用户
+        CurrentUserDTO currentUser = CurrentUserThreadLocal.getCurrentUser();
+        
+        // 验证景点有效性
+        ScenicInfo scenic = scenicInfoMapper.selectById(scenicId);
+        if (scenic == null) {
+            throw new CustomException("景点不存在");
+        }
+        
+        // 计算总金额
+        BigDecimal unitPrice = scenic.getPrice();
+        BigDecimal totalAmount = unitPrice.multiply(BigDecimal.valueOf(quantity));
+        
+        // 验证余额
+        User user = userMapper.selectById(currentUser.getId());
+        if (user.getBalance().compareTo(totalAmount) < 0) {
+            throw new CustomException("余额不足，支付失败");
+        }
+        
+        // 创建订单
+        OrderInfo order = new OrderInfo();
+        order.setUserId(currentUser.getId());
+        order.setOrderNo(UUID.randomUUID().toString().replace("-", ""));
+        order.setScenicId(scenicId);
+        order.setScenicName(scenic.getName());
+        order.setQuantity(quantity);
+        order.setUnitPrice(unitPrice);
+        order.setTotalAmount(totalAmount);
+        order.setStatus("已支付");
+        
+        // 解析游玩日期
+        try {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+            order.setVisitDate(formatter.parse(visitDate));
+        } catch (ParseException e) {
+            throw new CustomException("日期格式错误");
+        }
+        
+        // 扣除余额
+        userService.consumption(currentUser.getId(), totalAmount);
+        
+        // 保存订单
+        orderMapper.insert(order);
+        
+        // 发送通知
+        Notice notice = new Notice();
+        notice.setTypeCode("订单");
+        notice.setUserId(currentUser.getId());
+        notice.setContent("您的订单已支付成功，订单号为：" + order.getOrderNo());
+        notice.setIsRead("未读");
+        notice.setTitle("订单支付成功");
+        noticeMapper.insert(notice);
+        
+        return order.getOrderNo();
+    }
+
+    /**
+     * 购买门票（使用DTO）- 模拟支付流程
+     * @param dto 购票信息
+     * @return 订单号
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public String buyTickets(BuyTicketDTO dto) {
+        // 获取当前用户
+        CurrentUserDTO currentUser = CurrentUserThreadLocal.getCurrentUser();
+        
+        // 验证景点有效性
+        ScenicInfo scenic = scenicInfoMapper.selectById(dto.getId());
+        if (scenic == null) {
+            throw new CustomException("景点不存在");
+        }
+        
+        // 计算总金额
+        BigDecimal unitPrice = scenic.getPrice();
+        BigDecimal totalAmount = unitPrice.multiply(BigDecimal.valueOf(dto.getNumber()));
+        
+        // 创建订单（模拟支付，不扣除余额）
+        OrderInfo order = new OrderInfo();
+        order.setUserId(currentUser.getId());
+        order.setOrderNo(UUID.randomUUID().toString().replace("-", ""));
+        order.setScenicId(dto.getId());
+        order.setScenicName(scenic.getName());
+        order.setQuantity(dto.getNumber());
+        order.setUnitPrice(unitPrice);
+        order.setTotalAmount(totalAmount);
+        order.setStatus("待支付"); // 模拟支付流程，订单状态为"待支付"
+        
+        // 解析游玩日期
+        try {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+            order.setVisitDate(formatter.parse(dto.getVisitDate()));
+        } catch (ParseException e) {
+            throw new CustomException("日期格式错误");
+        }
+        
+        // 保存订单（不扣除余额，只创建订单记录）
+        orderMapper.insert(order);
+        
+        // 发送通知
+        Notice notice = new Notice();
+        notice.setTypeCode("订单");
+        notice.setUserId(currentUser.getId());
+        notice.setContent("您的订单已创建成功，订单号为：" + order.getOrderNo() + "，请尽快支付");
+        notice.setIsRead("未读");
+        notice.setTitle("订单创建成功");
+        noticeMapper.insert(notice);
+        
+        return order.getOrderNo();
+    }
 }
