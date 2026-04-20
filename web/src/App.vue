@@ -10,7 +10,7 @@
 import { computed, ref } from 'vue'
 import ru from 'element-plus/dist/locale/ru.mjs'
 import '@/assets/styles/theme.css'
-import '@/styles/russian-ui-fixes.css'
+import '@/styles/ru-ui.css'
 import '@/styles/front.css'
 import '@/styles/admin.css'
 
