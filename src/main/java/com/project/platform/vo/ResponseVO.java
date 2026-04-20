@@ -12,15 +12,15 @@ public class ResponseVO<T> {
     }
 
     public static ResponseVO ok() {
-        return new ResponseVO(200, "操作成功", null);
+        return new ResponseVO(200, "Операция выполнена успешно", null);
     }
 
     public static ResponseVO ok(Object data) {
-        return new ResponseVO(200, "操作成功", data);
+        return new ResponseVO(200, "Операция выполнена успешно", data);
     }
 
     public static ResponseVO fail(int code, Object data) {
-        return new ResponseVO(code, "操作失败", data);
+        return new ResponseVO(code, "Операция не выполнена", data);
     }
 
 

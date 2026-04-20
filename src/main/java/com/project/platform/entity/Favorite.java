@@ -29,4 +29,14 @@ public class Favorite {
      */
     private LocalDateTime createTime;
 
+    /**
+     * 景点信息（当typeCode为SCENIC时）
+     */
+    private ScenicInfo scenicInfo;
+
+    /**
+     * 游记信息（当typeCode为TRAVEL_NOTE时）
+     */
+    private TravelNote travelNote;
+
 }

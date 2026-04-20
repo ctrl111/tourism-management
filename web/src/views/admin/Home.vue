@@ -10,7 +10,7 @@
             </div>
             <div class="stat-info">
               <div class="stat-value">{{ overview.userCount || 0 }}</div>
-              <div class="stat-label">用户总数</div>
+              <div class="stat-label">{{ $t('dashboard.userCount') }}</div>
             </div>
           </div>
         </el-card>
@@ -23,7 +23,7 @@
             </div>
             <div class="stat-info">
               <div class="stat-value">{{ overview.scenicCount || 0 }}</div>
-              <div class="stat-label">景点总数</div>
+              <div class="stat-label">{{ $t('dashboard.scenicCount') }}</div>
             </div>
           </div>
         </el-card>
@@ -36,7 +36,7 @@
             </div>
             <div class="stat-info">
               <div class="stat-value">{{ overview.orderCount || 0 }}</div>
-              <div class="stat-label">订单总数</div>
+              <div class="stat-label">{{ $t('dashboard.orderCount') }}</div>
             </div>
           </div>
         </el-card>
@@ -49,7 +49,7 @@
             </div>
             <div class="stat-info">
               <div class="stat-value">{{ overview.travelNoteCount || 0 }}</div>
-              <div class="stat-label">游记总数</div>
+              <div class="stat-label">{{ $t('dashboard.travelNoteCount') }}</div>
             </div>
           </div>
         </el-card>
@@ -62,7 +62,7 @@
             </div>
             <div class="stat-info">
               <div class="stat-value">{{ overview.routeCount || 0 }}</div>
-              <div class="stat-label">路线总数</div>
+              <div class="stat-label">{{ $t('dashboard.routeCount') }}</div>
             </div>
           </div>
         </el-card>
@@ -75,7 +75,7 @@
             </div>
             <div class="stat-info">
               <div class="stat-value">￥{{ (overview.totalRevenue || 0).toFixed(2) }}</div>
-              <div class="stat-label">总销售额</div>
+              <div class="stat-label">{{ $t('dashboard.totalRevenue') }}</div>
             </div>
           </div>
         </el-card>
@@ -89,7 +89,7 @@
         <el-card>
           <template #header>
             <div class="card-header">
-              <span class="card-title">景点销售TOP10</span>
+              <span class="card-title">{{ $t('dashboard.scenicSalesTop10') }}</span>
             </div>
           </template>
           <div ref="salesChartRef" style="width: 100%; height: 400px;"></div>
@@ -101,7 +101,7 @@
         <el-card>
           <template #header>
             <div class="card-header">
-              <span class="card-title">分类统计</span>
+              <span class="card-title">{{ $t('dashboard.categoryStatistics') }}</span>
             </div>
           </template>
           <div ref="categoryChartRef" style="width: 100%; height: 400px;"></div>
@@ -113,10 +113,12 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { useI18n } from 'vue-i18n'
 import * as echarts from 'echarts'
 import request from '@/utils/http.js'
 import { User, LocationFilled, ShoppingCart, Notebook, Guide, Money } from '@element-plus/icons-vue'
 
+const { t } = useI18n()
 const salesChartRef = ref(null)
 const categoryChartRef = ref(null)
 let salesChart = null
@@ -151,7 +153,7 @@ function initSalesChart(data) {
   
   const option = {
     title: {
-      text: '销量',
+      text: t('dashboard.salesVolume'),
       left: 0,
       textStyle: {
         fontSize: 14,
@@ -186,7 +188,7 @@ function initSalesChart(data) {
     },
     series: [
       {
-        name: '销量',
+        name: t('dashboard.salesVolume'),
         type: 'bar',
         data: salesCounts,
         itemStyle: {
@@ -228,7 +230,7 @@ function initCategoryChart(data) {
     },
     series: [
       {
-        name: '订单数',
+        name: t('dashboard.orderNumber'),
         type: 'pie',
         radius: ['35%', '60%'],
         center: ['35%', '50%'],

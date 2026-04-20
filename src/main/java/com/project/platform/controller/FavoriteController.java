@@ -71,6 +71,30 @@ public class FavoriteController {
     }
 
     /**
+     * 取消收藏
+     *
+     * @param entity
+     * @return
+     */
+    @PostMapping("del")
+    public ResponseVO del(@RequestBody Favorite entity) {
+        favoriteService.deleteFavorite(entity);
+        return ResponseVO.ok();
+    }
+
+    /**
+     * 根据ID删除
+     *
+     * @param id
+     * @return
+     */
+    @DeleteMapping("{id}")
+    public ResponseVO deleteById(@PathVariable("id") Integer id) {
+        favoriteService.removeByIds(List.of(id));
+        return ResponseVO.ok();
+    }
+
+    /**
      * 更新
      *
      * @param entity

@@ -3,6 +3,9 @@ import { ElMessage } from 'element-plus'
 import AdminLayout from "@/views/layout/AdminLayout.vue";
 import FrontLayout from "@/views/layout/FrontLayout.vue";
 import { useUserStore } from '@/stores/user'
+import i18n from '@/i18n'
+
+const { t } = i18n.global
 
 const router = createRouter({
     history: createWebHistory(),
@@ -66,12 +69,6 @@ function getRoutes() {
                 },
 
                 {
-                    path: 'viewHistory',
-                    name: 'admin-viewHistory',
-                    component: () =>
-                        import ('../views/front/personalCenter/ViewHistory.vue')
-                },
-                {
                     path: 'travelNote',
                     name: 'admin-travelNote',
                     component: () =>
@@ -89,6 +86,7 @@ function getRoutes() {
                     component: () =>
                         import ('../views/admin/OrderInfoManage.vue')
                 },
+
 
 
             ]
@@ -239,9 +237,19 @@ function isPublicRoute(path) {
 router.beforeEach(async (to, from, next) => {
     const userStore = useUserStore()
     
+    // 根据目标路径判断需要的用户类型
+    const targetUserType = to.path.startsWith('/admin') ? 'ADMIN' : 'USER'
+    
+    // 如果目标路径的用户类型与当前不同，需要切换会话
+    if (userStore.getUserType !== targetUserType) {
+        console.log('🔄 切换用户类型:', userStore.getUserType, '->', targetUserType)
+        await userStore.initUserState(targetUserType)
+    }
+    
     // 调试信息
     console.log('🔍 路由守卫:', {
         path: to.path,
+        targetUserType,
         isLoggedIn: userStore.getIsLoggedIn,
         userType: userStore.getUserType,
         isPublic: isPublicRoute(to.path),
@@ -275,7 +283,7 @@ router.beforeEach(async (to, from, next) => {
             if (userStore.getUserType === 'ADMIN') {
                 next()
             } else {
-                ElMessage.warning('您没有权限访问该页面')
+                ElMessage.warning(t('router.noPermission'))
                 next('/front/index')
             }
             return
@@ -297,7 +305,7 @@ router.beforeEach(async (to, from, next) => {
     // 需要登录的路由 - 只弹窗提示，不跳转
     if (requiresAuth(to.path)) {
         console.log('⚠️ 需要登录，阻止访问')
-        ElMessage.warning('请先登录')
+        ElMessage.warning(t('router.pleaseLogin'))
         next(false) // 阻止导航，停留在当前页面
         return
     }
@@ -318,7 +326,7 @@ router.beforeEach(async (to, from, next) => {
  */
 router.onError((error) => {
     console.error('路由错误:', error)
-    ElMessage.error('页面加载失败，请刷新重试')
+    ElMessage.error(t('router.pageLoadError'))
 })
 
 export default router

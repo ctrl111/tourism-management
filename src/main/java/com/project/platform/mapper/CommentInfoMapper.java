@@ -35,4 +35,9 @@ public interface CommentInfoMapper {
     @Select("SELECT * FROM comment_info WHERE association_id = #{id} and parent_id = #{parentId} order by create_time desc")
     List<CommentInfo> queryCommentsListByChild(String typeCode,Integer id, Integer parentId);
 
+    @Select("SELECT * FROM comment_info WHERE parent_id = #{parentId}")
+    List<CommentInfo> queryCommentsByParentId(Integer parentId);
+
+    Map<String, Object> getStatistics();
+
 }

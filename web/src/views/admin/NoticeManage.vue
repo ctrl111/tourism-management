@@ -3,13 +3,13 @@
     <el-space direction="vertical" alignment="left" style="width: 100%">
       <el-card>
         <el-form ref="searchFormComponents" :model="searchForm" inline>
-          <el-form-item label="标题" prop="title">
+          <el-form-item :label="$t('noticeManage.title')" prop="title">
             <el-input v-model="searchForm.title" clearable></el-input>
           </el-form-item>
-          <el-form-item label="用户" prop="userId" class="form-item-wide">
+          <el-form-item :label="$t('noticeManage.user')" prop="userId" class="form-item-wide">
             <el-select
                 v-model="searchForm.userId"
-                placeholder="请选择用户"
+                :placeholder="$t('noticeManage.pleaseSelectUser')"
                 style="width: 200px"
             >
               <el-option
@@ -21,14 +21,14 @@
             </el-select>
           </el-form-item>
           <el-form-item label="">
-            <el-button type="primary" :icon="Search" @click="search">搜索</el-button>
-            <el-button :icon="Refresh" @click="resetSearch">重置</el-button>
+            <el-button type="primary" :icon="Search" @click="search">{{ $t('noticeManage.search') }}</el-button>
+            <el-button :icon="Refresh" @click="resetSearch">{{ $t('noticeManage.reset') }}</el-button>
           </el-form-item>
         </el-form>
         <el-space>
-          <el-button type="primary" @click="addPublish" :icon="Plus">发布通知</el-button>
+          <el-button type="primary" @click="addPublish" :icon="Plus">{{ $t('noticeManage.publishNotice') }}</el-button>
           <el-button type="danger" :icon="Delete" @click="batchDelete(null)" :disabled="selectionRows.length<=0">
-            批量删除
+            {{ $t('noticeManage.batchDelete') }}
           </el-button>
         </el-space>
       </el-card>
@@ -40,26 +40,29 @@
                   @selection-change="selectionChange"
                   border>
           <el-table-column type="selection" width="55"></el-table-column>
-          <el-table-column prop="id" label="ID" width="50"></el-table-column>
-          <el-table-column prop="typeCode" label="通知类型"></el-table-column>
-          <el-table-column label="用户" key="user">
+          <el-table-column prop="typeCode" :label="$t('noticeManage.noticeType')"></el-table-column>
+          <el-table-column :label="$t('noticeManage.user')" key="user">
             <template #default="{row}">
               {{ row.user?.username }}
             </template>
           </el-table-column>
-          <el-table-column prop="title" label="标题"></el-table-column>
-          <el-table-column prop="content" label="内容" width="300"></el-table-column>
-          <el-table-column prop="createTime" label="时间" width="180"></el-table-column>
-          <el-table-column label="状态" width="100">
+          <el-table-column prop="title" :label="$t('noticeManage.title')" min-width="150" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="content" :label="$t('noticeManage.contentLabel')" min-width="250" show-overflow-tooltip>
             <template #default="scope">
-              <el-tag v-if="scope.row.isRead==='未读'" type="warning">{{ scope.row.isRead }}</el-tag>
-              <el-tag v-else-if="scope.row.isRead==='已读'" type="success">{{ scope.row.isRead }}</el-tag>
+              <div class="content-cell">{{ scope.row.content }}</div>
             </template>
           </el-table-column>
-          <el-table-column fixed="right" label="操作" width="260">
+          <el-table-column prop="createTime" :label="$t('noticeManage.time')" width="180"></el-table-column>
+          <el-table-column :label="$t('noticeManage.status')" width="100">
             <template #default="scope">
-              <el-button :icon="Edit" @click="edit(scope.$index, scope.row)">编辑/查看</el-button>
-              <el-button :icon="Delete" type="danger" @click="deleteOne(scope.$index, scope.row)">删除</el-button>
+              <el-tag v-if="scope.row.isRead==='未读'" type="warning">{{ $t('noticeManage.unread') }}</el-tag>
+              <el-tag v-else-if="scope.row.isRead==='已读'" type="success">{{ $t('noticeManage.read') }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column fixed="right" :label="$t('noticeManage.operation')" width="260">
+            <template #default="scope">
+              <el-button :icon="Edit" @click="edit(scope.$index, scope.row)">{{ $t('noticeManage.editView') }}</el-button>
+              <el-button :icon="Delete" type="danger" @click="deleteOne(scope.$index, scope.row)">{{ $t('noticeManage.delete') }}</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -79,70 +82,70 @@
     <el-dialog
         v-model="dialogOpen"
         v-if="dialogOpen"
-        :title="formData.id?'编辑':'新增'"
+        :title="formData.id ? $t('noticeManage.editTitle') : $t('noticeManage.addTitle')"
         width="500"
     >
       <el-form ref="formRef" :model="formData" label-width="100px">
         <slot name="content">
-          <el-form-item label="通知类型" prop="typeCode"
-                        :rules="[{required:true,message:'不能为空',trigger:[ 'blur','change']}]">
+          <el-form-item :label="$t('noticeManage.noticeTypeLabel')" prop="typeCode"
+                        :rules="[{required:true,message: $t('noticeManage.cannotBeEmpty'),trigger:[ 'blur','change']}]">
             <el-input v-model="formData.typeCode" disabled></el-input>
           </el-form-item>
-          <el-form-item label="标题" prop="title"
-                        :rules="[{required:true,message:'不能为空',trigger:[ 'blur','change']}]">
+          <el-form-item :label="$t('noticeManage.titleLabel')" prop="title"
+                        :rules="[{required:true,message: $t('noticeManage.cannotBeEmpty'),trigger:[ 'blur','change']}]">
             <el-input v-model="formData.title"></el-input>
           </el-form-item>
-          <el-form-item label="内容" prop="content"
-                        :rules="[{required:true,message:'不能为空',trigger:[ 'blur','change']}]">
+          <el-form-item :label="$t('noticeManage.contentLabel')" prop="content"
+                        :rules="[{required:true,message: $t('noticeManage.cannotBeEmpty'),trigger:[ 'blur','change']}]">
             <el-input type="textarea" v-model="formData.content"></el-input>
           </el-form-item>
-          <el-form-item label="状态" prop="isRead" width="100">
+          <el-form-item :label="$t('noticeManage.statusLabel')" prop="isRead" width="100">
             <template #default="scope">
-              <el-tag v-if="formData.isRead==='未读'" type="warning">{{ formData.isRead }}</el-tag>
-              <el-tag v-else-if="formData.isRead==='已读'" type="success">{{ formData.isRead }}</el-tag>
+              <el-tag v-if="formData.isRead==='未读'" type="warning">{{ $t('noticeManage.unread') }}</el-tag>
+              <el-tag v-else-if="formData.isRead==='已读'" type="success">{{ $t('noticeManage.read') }}</el-tag>
             </template>
           </el-form-item>
-          <el-form-item label="发布时间" prop="createTime"
-                        :rules="[{required:true,message:'不能为空',trigger:[ 'blur','change']}]">
+          <el-form-item :label="$t('noticeManage.publishTime')" prop="createTime"
+                        :rules="[{required:true,message: $t('noticeManage.cannotBeEmpty'),trigger:[ 'blur','change']}]">
             <el-input v-model="formData.createTime" disabled></el-input>
           </el-form-item>
         </slot>
       </el-form>
       <template #footer>
         <div class="dialog-footer">
-          <el-button type="primary" @click="submit" :icon="Check">提交</el-button>
-          <el-button @click="closeDialog" :icon="Close">取消</el-button>
+          <el-button type="primary" @click="submit" :icon="Check">{{ $t('noticeManage.submit') }}</el-button>
+          <el-button @click="closeDialog" :icon="Close">{{ $t('noticeManage.cancel') }}</el-button>
         </div>
       </template>
     </el-dialog>
     <el-dialog
         v-model="dialogOpenPublish"
         v-if="dialogOpenPublish"
-        title="发布通知"
+        :title="$t('noticeManage.publishNoticeTitle')"
         width="500"
     >
       <el-form ref="publishFormRef" :model="formData" label-width="100px">
         <slot name="content">
           <el-form-item
-              label="用户"
+              :label="$t('noticeManage.userLabel')"
               prop="userIds"
-              :rules="[{ required:true, message:'请至少选择一个用户', trigger: ['change', 'blur'] }]"
+              :rules="[{ required:true, message: $t('noticeManage.pleaseSelectAtLeastOneUser'), trigger: ['change', 'blur'] }]"
           >
             <el-select
                 v-model="formData.userIds"
                 multiple
                 filterable
-                placeholder="请选择用户（支持搜索）"
+                :placeholder="$t('noticeManage.pleaseSelectUser')"
                 style="width: 100%;"
                 @change="handleUserSelectChange"
             >
               <el-option
-                  label="全部用户"
+                  :label="$t('noticeManage.allUsers')"
                   value="all"
                   @click="toggleSelectAll"
               >
               <span style="color: #409EFF; font-weight: bold;">
-                {{ isSelectAll ? '✓ 已选全部' : '全选所有用户' }}
+                {{ isSelectAll ? $t('noticeManage.allSelected') : $t('noticeManage.selectAllUsers') }}
               </span>
               </el-option>
               <el-option
@@ -153,27 +156,27 @@
               />
             </el-select>
           </el-form-item>
-          <el-form-item label="通知类型" prop="typeCode"
-                        :rules="[{required:true,message:'不能为空',trigger:[ 'blur','change']}]">
+          <el-form-item :label="$t('noticeManage.noticeTypeLabel')" prop="typeCode"
+                        :rules="[{required:true,message: $t('noticeManage.cannotBeEmpty'),trigger:[ 'blur','change']}]">
             <el-radio-group v-model="formData.typeCode">
-              <el-radio label="系统通知"></el-radio>
-              <el-radio label="订单"></el-radio>
+              <el-radio :label="$t('noticeManage.systemNotice')"></el-radio>
+              <el-radio :label="$t('noticeManage.order')"></el-radio>
             </el-radio-group>
           </el-form-item>
-          <el-form-item label="标题" prop="title"
-                        :rules="[{required:true,message:'不能为空',trigger:[ 'blur','change']}]">
+          <el-form-item :label="$t('noticeManage.titleLabel')" prop="title"
+                        :rules="[{required:true,message: $t('noticeManage.cannotBeEmpty'),trigger:[ 'blur','change']}]">
             <el-input v-model="formData.title"></el-input>
           </el-form-item>
-          <el-form-item label="内容" prop="content"
-                        :rules="[{required:true,message:'不能为空',trigger:[ 'blur','change']}]">
+          <el-form-item :label="$t('noticeManage.contentLabel')" prop="content"
+                        :rules="[{required:true,message: $t('noticeManage.cannotBeEmpty'),trigger:[ 'blur','change']}]">
             <el-input type="textarea" v-model="formData.content"></el-input>
           </el-form-item>
         </slot>
       </el-form>
       <template #footer>
         <div class="dialog-footer">
-          <el-button type="primary" @click="submitPublishForm" :icon="Check">发布</el-button>
-          <el-button @click="closeDialog" :icon="Close">取消</el-button>
+          <el-button type="primary" @click="submitPublishForm" :icon="Check">{{ $t('noticeManage.publish') }}</el-button>
+          <el-button @click="closeDialog" :icon="Close">{{ $t('noticeManage.cancel') }}</el-button>
         </div>
       </template>
     </el-dialog>
@@ -338,7 +341,7 @@ function submit() {
   formRef.value.validate((valid) => {
     if (!valid) {
       ElMessage({
-        message: "验证失败，请检查表单!",
+        message: "Проверка не пройдена, проверьте форму!",
         type: 'warning'
       });
       return
@@ -351,7 +354,7 @@ function submit() {
         }
         dialogOpen.value = false
         ElMessage({
-          message: "操作成功",
+          message: "Операция выполнена успешно",
           type: 'success'
         });
         getPageList()
@@ -364,7 +367,7 @@ function submit() {
         }
         dialogOpen.value = false
         ElMessage({
-          message: "操作成功",
+          message: "Операция выполнена успешно",
           type: 'success'
         });
         getPageList()
@@ -377,7 +380,7 @@ function submitPublishForm() {
   publishFormRef.value.validate((valid) => {
     if (!valid) {
       ElMessage({
-        message: "验证失败，请检查表单!",
+        message: "Проверка не пройдена, проверьте форму!",
         type: 'warning'
       });
       return
@@ -390,7 +393,7 @@ function submitPublishForm() {
         }
         dialogOpen.value = false
         ElMessage({
-          message: "操作成功",
+          message: "Операция выполнена успешно",
           type: 'success'
         });
         getPageList()
@@ -403,7 +406,7 @@ function submitPublishForm() {
         }
         dialogOpen.value = false
         ElMessage({
-          message: "操作成功",
+          message: "Операция выполнена успешно",
           type: 'success'
         });
         getPageList()
@@ -441,9 +444,9 @@ function batchDelete(rows) {
     rows = selectionRows.value;
   }
   let ids = rows.map(item => item.id);
-  ElMessageBox.confirm(`此操作将永久删除ID为[${ids}]的数据, 是否继续?`, '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
+  ElMessageBox.confirm(`Это действие навсегда удалит данные с ID [${ids}]. Продолжить?`, 'Подсказка', {
+    confirmButtonText: 'Подтвердить',
+    cancelButtonText: 'Отмена',
     type: 'warning',
     center: true
   }).then(() => {
@@ -452,7 +455,7 @@ function batchDelete(rows) {
         return
       }
       ElMessage({
-        message: "操作成功",
+        message: "Операция выполнена успешно",
         type: 'success'
       });
       getPageList()
@@ -460,7 +463,7 @@ function batchDelete(rows) {
   }).catch(() => {
     ElMessage({
       type: 'info',
-      message: '已取消删除'
+      message: 'Удаление отменено'
     });
     tableComponents.value.clearSelection();
   });
@@ -470,5 +473,13 @@ function batchDelete(rows) {
 <style scoped>
 .form-item-wide .el-form-item__content {
   width: 200px;
+}
+
+.content-cell {
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.5;
 }
 </style>

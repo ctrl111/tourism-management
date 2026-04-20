@@ -3,20 +3,20 @@
     <el-space direction="vertical" alignment="left" style="width: 100%">
       <el-card>
         <el-form ref="searchFormComponents" :model="searchForm" inline>
-          <el-form-item label="标题" prop="title">
+          <el-form-item :label="$t('travelNoteManageAdmin.searchTitle')" prop="title">
             <el-input v-model="searchForm.title" clearable></el-input>
           </el-form-item>
-          <el-form-item label="用户" prop="content">
+          <el-form-item :label="$t('travelNoteManageAdmin.searchUser')" prop="content">
             <el-input v-model="searchForm.userName" clearable></el-input>
           </el-form-item>
           <el-form-item label="">
-            <el-button type="primary" :icon="Search" @click="search">搜索</el-button>
-            <el-button :icon="Refresh" @click="resetSearch">重置</el-button>
+            <el-button type="primary" :icon="Search" @click="search">{{ $t('travelNoteManageAdmin.search') }}</el-button>
+            <el-button :icon="Refresh" @click="resetSearch">{{ $t('travelNoteManageAdmin.reset') }}</el-button>
           </el-form-item>
         </el-form>
         <el-space>
           <!--          <el-button type="primary" @click="add" :icon="Plus">新增</el-button>-->
-          <el-button type="danger" :icon="Delete" @click="batchDelete(null)" :disabled="selectionRows.length<=0">批量删除</el-button>
+          <el-button type="danger" :icon="Delete" @click="batchDelete(null)" :disabled="selectionRows.length<=0">{{ $t('travelNoteManageAdmin.batchDelete') }}</el-button>
         </el-space>
       </el-card>
       <el-card>
@@ -27,29 +27,35 @@
                   @selection-change="selectionChange"
                   border>
           <el-table-column type="selection" width="55"></el-table-column>
-          <el-table-column prop="id" label="ID" width="50"></el-table-column>
-          <el-table-column prop="userName" label="用户" width="120">
+          <el-table-column prop="userName" :label="$t('travelNoteManageAdmin.user')" width="120">
             <template #default="{row}">
               {{ row.user?.username }}
             </template>
           </el-table-column>
-          <el-table-column prop="title" label="标题"></el-table-column>
-          <el-table-column show-overflow-tooltip label="封面">
+          <el-table-column prop="title" :label="$t('travelNoteManageAdmin.noteTitle')"></el-table-column>
+          <el-table-column show-overflow-tooltip :label="$t('travelNoteManageAdmin.cover')">
             <template #default="scope">
               <el-image style="width: 50px; height: 50px" :src="scope.row.cover"
                         :preview-src-list="[scope.row.cover]"
                         :preview-teleported="true"></el-image>
             </template>
           </el-table-column>
-          <el-table-column prop="travelTime" label="行程时间"></el-table-column>
-          <el-table-column prop="days" label="行程天数"></el-table-column>
-          <el-table-column prop="viewCount" label="浏览数"></el-table-column>
-          <el-table-column prop="likesCount" label="点赞数"></el-table-column>
-          <el-table-column prop="createTime" label="创建时间"></el-table-column>
-          <el-table-column fixed="right" label="操作" width="200">
+          <el-table-column prop="travelTime" :label="$t('travelNoteManageAdmin.travelTime')"></el-table-column>
+          <el-table-column prop="commentsCount" :label="$t('travelNoteManageAdmin.commentsCount')">
+            <template #default="{row}">
+              {{ row.commentsCount || 0 }}
+            </template>
+          </el-table-column>
+          <el-table-column prop="favoriteCount" :label="$t('travelNoteManageAdmin.favoriteCount')">
+            <template #default="{row}">
+              {{ row.favoriteCount || 0 }}
+            </template>
+          </el-table-column>
+          <el-table-column prop="createTime" :label="$t('travelNoteManageAdmin.createTime')"></el-table-column>
+          <el-table-column fixed="right" :label="$t('travelNoteManageAdmin.operation')" width="200">
             <template #default="scope">
-              <el-button :icon="Edit" @click="edit(scope.$index, scope.row)">查看</el-button>
-              <el-button :icon="Delete" type="danger" @click="deleteOne(scope.$index, scope.row)">删除</el-button>
+              <el-button :icon="Edit" @click="edit(scope.$index, scope.row)">{{ $t('travelNoteManageAdmin.view') }}</el-button>
+              <el-button :icon="Delete" type="danger" @click="deleteOne(scope.$index, scope.row)">{{ $t('travelNoteManageAdmin.delete') }}</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -69,24 +75,21 @@
     <el-dialog
         v-model="dialogOpen"
         v-if="dialogOpen"
-        :title="formData.id?'查看':'新增'"
+        :title="formData.id ? $t('travelNoteManageAdmin.viewTitle') : $t('travelNoteManageAdmin.addTitle')"
         width="800"
     >
-      <el-form ref="formRef" :model="formData" label-width="100px">
+      <el-form ref="formRef" :model="formData" label-width="120px">
         <slot name="content">
-          <el-form-item label="标题" prop="title"  :rules="[{required:true,message:'不能为空',trigger:[ 'blur','change']}]">
+          <el-form-item :label="$t('travelNoteManageAdmin.titleLabel')" prop="title"  :rules="[{required:true,message:$t('travelNoteManageAdmin.cannotBeEmpty'),trigger:[ 'blur','change']}]">
             <el-input v-model="formData.title" disabled></el-input>
           </el-form-item>
-          <el-form-item label="封面" >
+          <el-form-item :label="$t('travelNoteManageAdmin.coverLabel')" >
             <MyUpLoad type="imageCard" :limit="1" :files="formData.cover" @setFiles="formData.cover =$event" v-if="dialogOpen"></MyUpLoad>
           </el-form-item>
-          <el-form-item label="行程时间" prop="travelTime"  :rules="[{required:true,message:'不能为空',trigger:[ 'blur','change']}]">
+          <el-form-item :label="$t('travelNoteManageAdmin.travelTimeLabel')" prop="travelTime"  :rules="[{required:true,message:$t('travelNoteManageAdmin.cannotBeEmpty'),trigger:[ 'blur','change']}]">
             <el-input v-model="formData.travelTime" disabled></el-input>
           </el-form-item>
-          <el-form-item label="行程天数" prop="days"  :rules="[{required:true,message:'不能为空',trigger:[ 'blur','change']}]">
-            <el-input v-model="formData.days" disabled></el-input>
-          </el-form-item>
-          <el-form-item label="内容" prop="content"  >
+          <el-form-item :label="$t('travelNoteManageAdmin.contentLabel')" prop="content"  >
             <MyEditor disabled :content="formData.content" @content-change="formData.basicInfo =$event" v-if="dialogOpen"></MyEditor>
           </el-form-item>
         </slot>
@@ -94,7 +97,7 @@
       <template #footer>
         <div class="dialog-footer">
           <!--          <el-button type="primary" @click="submit" :icon="Check">提交</el-button>-->
-          <el-button @click="closeDialog" :icon="Close">取消</el-button>
+          <el-button @click="closeDialog" :icon="Close">{{ $t('travelNoteManageAdmin.cancel') }}</el-button>
         </div>
       </template>
     </el-dialog>
@@ -212,7 +215,7 @@ function submit() {
   formRef.value.validate((valid) => {
     if (!valid){
       ElMessage({
-        message: "验证失败，请检查表单!",
+        message: this.$t('travelNoteManageAdmin.validationFailed'),
         type: 'warning'
       });
       return
@@ -225,7 +228,7 @@ function submit() {
         }
         dialogOpen.value = false
         ElMessage({
-          message: "操作成功",
+          message: this.$t('travelNoteManageAdmin.operationSuccess'),
           type: 'success'
         });
         getPageList()
@@ -238,7 +241,7 @@ function submit() {
         }
         dialogOpen.value = false
         ElMessage({
-          message: "操作成功",
+          message: this.$t('travelNoteManageAdmin.operationSuccess'),
           type: 'success'
         });
         getPageList()
@@ -274,9 +277,9 @@ function batchDelete(rows) {
     rows = selectionRows.value;
   }
   let ids = rows.map(item => item.id);
-  ElMessageBox.confirm(`此操作将永久删除ID为[${ids}]的数据, 是否继续?`, '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
+  ElMessageBox.confirm(this.$t('travelNoteManageAdmin.confirmDelete', { ids: ids.join(', ') }), this.$t('travelNoteManageAdmin.hint'), {
+    confirmButtonText: this.$t('travelNoteManageAdmin.confirm'),
+    cancelButtonText: this.$t('travelNoteManageAdmin.cancel'),
     type: 'warning',
     center: true
   }).then(() => {
@@ -285,7 +288,7 @@ function batchDelete(rows) {
         return
       }
       ElMessage({
-        message: "操作成功",
+        message: this.$t('travelNoteManageAdmin.operationSuccess'),
         type: 'success'
       });
       getPageList()
@@ -293,7 +296,7 @@ function batchDelete(rows) {
   }).catch(() => {
     ElMessage({
       type: 'info',
-      message: '已取消删除'
+      message: this.$t('travelNoteManageAdmin.deleteCancelled')
     });
     tableComponents.value.clearSelection();
   });

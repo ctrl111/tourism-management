@@ -33,22 +33,28 @@ public class CommentInfoServiceImpl implements CommentInfoService {
             && CurrentUserThreadLocal.getCurrentUser().getType().equals("USER")) {
             query.put("userId", CurrentUserThreadLocal.getCurrentUser().getId());
         }
-        Boolean isParent;
-        if (query.get("parentStatus") != null) {
-            isParent = true;
-        } else {
-            isParent = false;
-        }
-        String typeCode = query.get("typeCode").toString();
-        String associationId = query.get("associationId").toString();
+        
+        Boolean isParent = query.get("parentStatus") != null;
+        
+        // 安全获取参数，避免 NullPointerException
+        String typeCode = query.get("typeCode") != null ? query.get("typeCode").toString() : null;
+        String associationId = query.get("associationId") != null ? query.get("associationId").toString() : null;
+        
         List<CommentInfo> list = commentInfoMapper.queryPage((pageNum - 1) * pageSize, pageSize, query);
+        
         //简单嵌套循环查询层级数据
         list.forEach(commentInfo -> {
             //发布人信息
             User user = userService.selectById(commentInfo.getUserId());
             commentInfo.setUser(user);
-            if (isParent) {
-                List<CommentInfo> commentsChildList = commentInfoMapper.queryCommentsListByChild(typeCode, Integer.valueOf(associationId), commentInfo.getId());
+            
+            // 只有在有 typeCode 和 associationId 且需要查询父评论时才查询子评论
+            if (isParent && typeCode != null && associationId != null) {
+                List<CommentInfo> commentsChildList = commentInfoMapper.queryCommentsListByChild(
+                    typeCode, 
+                    Integer.valueOf(associationId), 
+                    commentInfo.getId()
+                );
                 if (commentsChildList.size() > 0) {
                     for (CommentInfo commentsChild : commentsChildList) {
                         User userChild = userService.selectById(commentsChild.getUserId());
@@ -57,8 +63,8 @@ public class CommentInfoServiceImpl implements CommentInfoService {
                     commentInfo.setChildList(commentsChildList);
                 }
             }
-
         });
+        
         page.setList(list);
         page.setTotal(commentInfoMapper.queryCount(query));
         return page;
@@ -78,7 +84,7 @@ public class CommentInfoServiceImpl implements CommentInfoService {
     @Override
     public void insert(CommentInfo entity) {
         if (!CurrentUserThreadLocal.getCurrentUser().getType().equals("USER")) {
-            throw new CustomException("普通用户才允许添加");
+            throw new CustomException("Только пользователи могут добавлять комментарии");
         }
         entity.setUserId(CurrentUserThreadLocal.getCurrentUser().getId());
         check(entity);
@@ -97,6 +103,24 @@ public class CommentInfoServiceImpl implements CommentInfoService {
 
     @Override
     public void removeByIds(List<Integer> ids) {
+        // 对每个要删除的评论ID，先删除其所有子评论
+        for (Integer id : ids) {
+            // 查找所有以该评论为父评论的子评论
+            List<CommentInfo> childComments = commentInfoMapper.queryCommentsByParentId(id);
+            if (childComments != null && !childComments.isEmpty()) {
+                List<Integer> childIds = childComments.stream()
+                        .map(CommentInfo::getId)
+                        .collect(java.util.stream.Collectors.toList());
+                // 递归删除子评论（如果子评论还有子评论）
+                removeByIds(childIds);
+            }
+        }
+        // 删除主评论
         commentInfoMapper.removeByIds(ids);
+    }
+
+    @Override
+    public Map<String, Object> getStatistics() {
+        return commentInfoMapper.getStatistics();
     }
 }

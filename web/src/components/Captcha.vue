@@ -6,9 +6,9 @@
       :height="height"
       @click="refreshCaptcha"
       class="captcha-canvas"
-      title="点击刷新验证码"
+      :title="$t('captcha.clickToRefresh')"
     ></canvas>
-    <el-icon class="refresh-icon" @click="refreshCaptcha" title="刷新验证码">
+    <el-icon class="refresh-icon" @click="refreshCaptcha" :title="$t('captcha.refresh')">
       <Refresh />
     </el-icon>
   </div>

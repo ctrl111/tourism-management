@@ -19,11 +19,18 @@
   </div>
 </template>
 <script setup>
-import {ref, defineProps, onMounted, onBeforeUnmount} from 'vue';
+import {ref, defineProps, onMounted, onBeforeUnmount, watch} from 'vue';
 import {Editor, Toolbar} from "@wangeditor/editor-for-vue";
 import utils from "@/utils/tools.js";
+import {useI18n} from 'vue-i18n';
+
+const {t: $t} = useI18n();
 
 const props = defineProps({
+  modelValue: {
+    type: String,
+    default: "",
+  },
   content: {
     type: String,
     default: "",
@@ -31,14 +38,29 @@ const props = defineProps({
 });
 
 const myEditor = ref(null);
-const html = ref(props.content);
+const html = ref(props.modelValue || props.content);
+
+// 监听 content prop 变化
+watch(() => props.content, (newVal) => {
+  if (newVal !== html.value) {
+    html.value = newVal || ''
+  }
+}, { immediate: false })
+
+// 监听 modelValue 变化
+watch(() => props.modelValue, (newVal) => {
+  if (newVal !== html.value) {
+    html.value = newVal || ''
+  }
+}, { immediate: false })
+
 const toolbarConfig = ref({
   // toolbarKeys: [ /* 显示哪些菜单，如何排序、分组 */ ],
   // excludeKeys: [ /* 隐藏哪些菜单 */ ],
 });
 
 const editorConfig = ref({
-  placeholder: "请输入内容...",
+  placeholder: $t('form.enterContent'),
   // autoFocus: false,
   MENU_CONF: {
     uploadImage: {
@@ -69,11 +91,12 @@ function onCreated(editor) {
   myEditor.value = Object.seal(editor);
 }
 
-const emit = defineEmits(['content-change']);
+const emit = defineEmits(['update:modelValue', 'content-change']);
 
 function onChange(editor) {
   html.value = editor.getHtml();
   // 由于我们使用的是Vue 3的Composition API，所以不需要使用this.$emit
+  emit("update:modelValue", html.value);
   emit("content-change", html.value);
 }
 

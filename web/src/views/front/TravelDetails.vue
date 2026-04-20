@@ -8,11 +8,7 @@
           <div class="time-meta">
             <div class="meta-item">
               <el-icon><Calendar /></el-icon>
-              <span>出行时间：{{ formatDate(info.travelTime) }}</span>
-            </div>
-            <div class="meta-item">
-              <el-icon><Clock /></el-icon>
-              <span>行程天数：{{ info.days }} 天</span>
+              <span>{{ $t('travelNote.travelTime') }} {{ formatDate(info.travelTime) }}</span>
             </div>
           </div>
         </div>
@@ -22,18 +18,18 @@
             <el-avatar :size="48" :src="info.user?.avatarUrl" />
             <div class="author-meta">
               <span class="author-name">{{ info.user?.username }}</span>
-              <span class="publish-time">{{ formatDate(info.createTime) }} 发布</span>
+              <span class="publish-time">{{ formatDate(info.createTime) }} {{ $t('travelNote.published') }}</span>
             </div>
           </div>
           <div class="right-actions">
             <div class="stats-bar">
               <div class="stat-item">
-                <el-icon><View /></el-icon>
-                <span class="count">{{ info.viewCount | formatNumber }}</span>
+                <el-icon><ChatDotRound /></el-icon>
+                <span class="count">{{ info.commentsCount || 0 }}</span>
               </div>
               <div class="stat-item">
                 <el-icon><Star /></el-icon>
-                <span class="count">{{ info.likesCount | formatNumber }}</span>
+                <span class="count">{{ info.favoriteCount || 0 }}</span>
               </div>
             </div>
             <el-button
@@ -44,7 +40,7 @@
                 @click="handleDelete(info)"
                 plain
             >
-              删除游记
+              {{ $t('travelNote.deleteNote') }}
             </el-button>
           </div>
         </div>
@@ -64,7 +60,7 @@
           <template #error>
             <div class="cover-error">
               <el-icon><Picture /></el-icon>
-              <span>封面加载失败</span>
+              <span>{{ $t('travelNote.coverLoadFailed') }}</span>
             </div>
           </template>
         </el-image>
@@ -80,8 +76,8 @@
         <div class="comments-header">
           <!-- 左侧：评分信息 -->
           <div class="rating-summary">
-            <h3 class="section-title">用户评论</h3>
-            <div class="review-count">{{ info.commentsCount }} 条评论</div>
+            <h3 class="section-title">{{ $t('travelNote.userComments') }}</h3>
+            <div class="review-count">{{ $t('travelNote.commentsCount', { count: info.commentsCount }) }}</div>
           </div>
           <!-- 右侧：写评论按钮 -->
           <el-button
@@ -91,7 +87,7 @@
               @click="handleWriteComment(info)"
           >
             <el-icon name="EditPen" class="icon-edit" />
-            写评论
+            {{ $t('travelNote.writeComment') }}
           </el-button>
         </div>
         <!-- 新增评论表单 -->
@@ -100,17 +96,17 @@
               v-model="newComment"
               type="textarea"
               :rows="3"
-              placeholder="写下你的评论..."
+              :placeholder="$t('travelNote.writeYourComment')"
               class="comment-textarea"
           />
           <div class="form-actions">
-            <el-button @click="cancelComment">取消</el-button>
+            <el-button @click="cancelComment">{{ $t('common.cancel') }}</el-button>
             <el-button
                 type="primary"
                 @click="submitComment"
                 :disabled=" !newComment"
             >
-              提交评价
+              {{ $t('travelNote.submitComment') }}
             </el-button>
           </div>
         </div>
@@ -139,7 +135,7 @@
                     @click="toggleReplyForm(comment.id)"
                     class="reply-btn"
                 >
-                  回复
+                  {{ $t('travelNote.reply') }}
                 </el-button>
                 <el-button
                     v-if="comment.childList?.length"
@@ -147,7 +143,7 @@
                     @click="toggleChildren(comment)"
                     class="toggle-btn"
                 >
-                  {{ comment.showChildren ? '收起' : `展开${comment.childList.length}条回复` }}
+                  {{ comment.showChildren ? $t('travelNote.collapse') : $t('travelNote.expandReplies', { count: comment.childList.length }) }}
                 </el-button>
               </div>
             </div>
@@ -157,17 +153,17 @@
                   v-model="replyContent"
                   type="textarea"
                   :rows="2"
-                  placeholder="写下你的回复..."
+                  :placeholder="$t('travelNote.writeReply')"
               />
               <div class="form-actions">
-                <el-button size="small" @click="cancelReply">取消</el-button>
+                <el-button size="small" @click="cancelReply">{{ $t('common.cancel') }}</el-button>
                 <el-button
                     type="primary"
                     size="small"
                     @click="submitReply(comment)"
                     :disabled="!replyContent"
                 >
-                  提交
+                  {{ $t('travelNote.submitReply') }}
                 </el-button>
               </div>
             </div>
@@ -214,14 +210,14 @@
       </div>
       <!-- 底部操作栏 -->
       <div class="action-footer">
-        <el-tooltip :content="isLiked ?'取消点赞' : '点个赞'" placement="top">
+        <el-tooltip :content="isFavorited ? $t('scenic.unfavoriteTooltip') : $t('scenic.favoriteTooltip')" placement="top">
           <el-button
               circle
               size="large"
-              :type="isLiked ? 'success' : 'info'"
-              :icon="Pointer"
-              @click="handleLike"
-              class="like-button"
+              :type="isFavorited ? 'warning' : 'default'"
+              :icon="isFavorited ? StarFilled : Star"
+              @click="handleFavorite"
+              :class="['favorite-button', { 'is-favorited': isFavorited }]"
           />
         </el-tooltip>
       </div>
@@ -231,14 +227,16 @@
 </template>
 <script setup>
 import request from "@/utils/http.js";
-import {ref,computed,toRaw} from "vue";
+import {ref,computed,toRaw,watch,onMounted} from "vue";
 import {useRoute} from "vue-router";
 import router from "@/router/index.js";
-import { Calendar, Clock, Delete, Pointer, Star,} from "@element-plus/icons-vue";
+import { Calendar, Clock, Delete, Pointer, Star, StarFilled, ChatDotRound} from "@element-plus/icons-vue";
 import dayjs from "dayjs";
 import {ElMessage, ElMessageBox} from "element-plus";
 import { useUserStore } from '@/stores/user'
+import {useI18n} from 'vue-i18n';
 
+const {t: $t} = useI18n();
 const userStore = useUserStore()
 const currentUser = computed(() => userStore.userInfo)
 
@@ -246,7 +244,7 @@ const route = useRoute()
 const id = ref(route.params.id)
 const info = ref({});
 const searchForm = ref({
-  typeCode: '游记',
+  typeCode: 'TRAVEL_NOTE',
   parentStatus: '1',
   associationId: id.value,
 });
@@ -259,6 +257,7 @@ const pageInfo = ref({
   total: 0
 });
 const isLiked = ref(false)
+const isFavorited = ref(false)
 // 评价相关状态
 const showCommentForm = ref(false)
 const newComment = ref('')
@@ -274,8 +273,25 @@ const currentParent = ref(null) // 当前回复的父评论
 const drawerVisible = ref(false)
 const unreadCount = ref(0)
 
-loadComments()
-getInfo()
+// 监听路由参数变化，重新加载数据
+watch(() => route.params.id, (newId) => {
+  if (newId) {
+    id.value = newId
+    searchForm.value.associationId = newId
+    // 重置状态
+    isLiked.value = false
+    isFavorited.value = false
+    // 重新加载数据
+    getInfo()
+    loadComments()
+  }
+}, { immediate: true })
+
+// 组件挂载时加载数据
+onMounted(() => {
+  getInfo()
+  loadComments()
+})
 
 /**
  * 改变分页数量
@@ -297,7 +313,9 @@ function currentChange(e) {
 function getInfo() {
   request.get("/travelNote/selectById/" + id.value,).then(res => {
     info.value = res.data
-    isLiked.value = res.data.liked
+    isLiked.value = res.data.liked || false
+    isFavorited.value = res.data.favorited || false
+    console.log('游记收藏状态:', isFavorited.value)
   })
   //增加浏览量
   request.get("/travelNote/putViewCount/" + id.value,).then(res => {
@@ -307,9 +325,9 @@ function getInfo() {
 function handleDelete(info) {
   let ids = [info.id]
   let title = info.title
-  ElMessageBox.confirm(`此操作将永久删除标题为[${title}]的数据, 是否继续?`, '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
+  ElMessageBox.confirm($t('travelNote.deleteNoteConfirm', { title }), $t('message.confirmOperation'), {
+    confirmButtonText: $t('travelNote.confirmDelete'),
+    cancelButtonText: $t('travelNote.cancelDelete'),
     type: 'warning',
     center: true
   }).then(() => {
@@ -318,7 +336,7 @@ function handleDelete(info) {
         return
       }
       ElMessage({
-        message: "操作成功",
+        message: $t('message.deleteSuccess'),
         type: 'success'
       });
       router.push('/travelNote')
@@ -326,7 +344,7 @@ function handleDelete(info) {
   }).catch(() => {
     ElMessage({
       type: 'info',
-      message: '已取消删除'
+      message: $t('travelNote.deleteCancelled')
     });
     tableComponents.value.clearSelection();
   });
@@ -368,7 +386,7 @@ function batchDelete(rows) {
         return
       }
       ElMessage({
-        message: "操作成功",
+        message: t('travelDetails.operationSuccess'),
         type: 'success'
       });
       getPageList()
@@ -376,42 +394,59 @@ function batchDelete(rows) {
   }).catch(() => {
     ElMessage({
       type: 'info',
-      message: '已取消删除'
+      message: t('travelDetails.deleteCancelled')
     });
     tableComponents.value.clearSelection();
   });
 }
-function handleLike() {
+
+
+function handleFavorite() {
   let formData = {
-    typeCode: '游记',
+    typeCode: 'TRAVEL_NOTE',
     associationId: id.value,
   }
-  let liked = isLiked.value
-  //点赞
-  if (!liked) {
-    request.post("/likes/add", formData).then(res => {
+  let favorited = isFavorited.value
+  console.log('当前收藏状态:', favorited)
+  //收藏
+  if (!favorited) {
+    request.post("/favorite/add", formData).then(res => {
       if (!res) {
         return
       }
-      dialogOpen.value = false
       ElMessage({
+        message: $t('favorite.addSuccess'),
         type: 'success'
       });
+      // 直接更新状态，不需要重新请求
+      isFavorited.value = true
+      console.log('收藏后状态:', isFavorited.value)
+    }).catch(err => {
+      console.error('收藏失败:', err)
+      // 如果是已经收藏过了，更新状态
+      if (err.response?.data?.msg?.includes('已经收藏')) {
+        isFavorited.value = true
+        ElMessage({
+          message: $t('scenic.alreadyFavorited'),
+          type: 'info'
+        });
+      }
     })
-    // 更新界面信息
-    getInfo();
   } else {
-    request.post("/likes/del", formData).then(res => {
+    request.post("/favorite/del", formData).then(res => {
       if (!res) {
         return
       }
-      dialogOpen.value = false
       ElMessage({
+        message: $t('favorite.removeSuccess'),
         type: 'success'
       });
+      // 直接更新状态，不需要重新请求
+      isFavorited.value = false
+      console.log('取消收藏后状态:', isFavorited.value)
+    }).catch(err => {
+      console.error('取消收藏失败:', err)
     })
-    // 更新界面信息
-    getInfo();
   }
 }
 
@@ -432,7 +467,7 @@ function submitComment (info) {
   try {
     submitting.value = true
     let formData = {
-      typeCode: '游记',
+      typeCode: 'TRAVEL_NOTE',
       associationId: id.value,
       content: newComment.value,
     }
@@ -446,9 +481,9 @@ function submitComment (info) {
       getInfo();
       dialogOpen.value = false
     })
-    ElMessage.success('评价提交成功')
+    ElMessage.success($t('travelNote.commentSubmitted'))
   } catch (error) {
-    ElMessage.error(error.response?.data?.message || '提交失败')
+    ElMessage.error(error.response?.data?.message || $t('comment.submitFailed'))
   } finally {
     submitting.value = false
   }
@@ -473,7 +508,7 @@ const toggleReplyForm = (commentId) => {
 const submitReply = async () => {
   try {
     const formData = {
-      typeCode: '游记',
+      typeCode: 'TRAVEL_NOTE',
       associationId: id.value,
       content: replyContent.value,
       parentId: currentParent.value.id
@@ -486,10 +521,10 @@ const submitReply = async () => {
       loadComments();
       getInfo();
       cancelReply()
-      ElMessage.success('回复成功')
+      ElMessage.success($t('travelNote.replySuccess'))
     }
   } catch (error) {
-    ElMessage.error(error.response?.data?.message || '回复失败')
+    ElMessage.error(error.response?.data?.message || $t('travelNote.replyFailed'))
   }
 }
 
@@ -918,10 +953,26 @@ const handleChatToggle = () => {
     }
   }
 
-  .like-button {
-    &.is-liked {
-      background: var(--success-color);
-      border-color: var(--success-color);
+  .favorite-button {
+    transition: all 0.3s ease;
+    
+    &.is-favorited {
+      background: var(--warning-color);
+      border-color: var(--warning-color);
+      color: #fff;
+      
+      &:hover {
+        background: #d89b38;
+        border-color: #d89b38;
+        transform: scale(1.05);
+      }
+    }
+    
+    &:not(.is-favorited) {
+      &:hover {
+        color: var(--warning-color);
+        border-color: var(--warning-color);
+      }
     }
   }
 }

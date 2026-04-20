@@ -1,14 +1,14 @@
 <template>
   <div class="notification-container">
     <!-- 标题 -->
-    <h1 class="notification-title">我的通知</h1>
+    <h1 class="notification-title">{{ $t('menu.myNotifications') }}</h1>
 
     <!-- 分类标签 -->
     <el-tabs v-model="activeName" @tab-change="handleTabChange">
-      <el-tab-pane label="全部" name="全部"></el-tab-pane>
-      <el-tab-pane label="未读" name="未读"></el-tab-pane>
-      <el-tab-pane label="订单" name="订单"></el-tab-pane>
-      <el-tab-pane label="系统通知" name="系统通知"></el-tab-pane>
+      <el-tab-pane :label="$t('notice.all')" name="ALL"></el-tab-pane>
+      <el-tab-pane :label="$t('notice.unread')" name="UNREAD"></el-tab-pane>
+      <el-tab-pane :label="$t('notice.order')" name="ORDER"></el-tab-pane>
+      <el-tab-pane :label="$t('notice.systemNotification')" name="SYSTEM"></el-tab-pane>
     </el-tabs>
 
     <!-- 通知列表 -->
@@ -21,21 +21,25 @@
           @selection-change="selectionChange"
           @row-click="handleRowClick"
           border>
-        <el-table-column prop="typeCode" label="通知类型"></el-table-column>
-        <el-table-column prop="title" label="标题"></el-table-column>
-        <el-table-column prop="content" label="内容"></el-table-column>
-        <el-table-column prop="createTime" label="时间" width="180"></el-table-column>
-        <el-table-column label="状态" width="100">
+        <el-table-column prop="typeCode" :label="$t('notice.notificationType')">
           <template #default="scope">
-            <el-tag v-if="scope.row.isRead==='未读'" type="warning">{{ scope.row.isRead }}</el-tag>
-            <el-tag v-else-if="scope.row.isRead==='已读'" type="success">{{ scope.row.isRead }}</el-tag>
+            {{ getTypeLabel(scope.row.typeCode) }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180">
+        <el-table-column prop="title" :label="$t('notice.noticeTitle')"></el-table-column>
+        <el-table-column prop="content" :label="$t('notice.content')"></el-table-column>
+        <el-table-column prop="createTime" :label="$t('notice.time')" width="180"></el-table-column>
+        <el-table-column :label="$t('notice.status')" width="100">
+          <template #default="scope">
+            <el-tag v-if="scope.row.isRead==='NO'" type="warning">{{ $t('notice.unread') }}</el-tag>
+            <el-tag v-else-if="scope.row.isRead==='YES'" type="success">{{ $t('notice.read') }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column :label="$t('notice.operation')" width="180">
           <template #default="{ row }">
-            <el-button type="text" @click.stop="viewDetail(row)">查看</el-button>
-            <el-button type="text" @click.stop="markAsRead(row)">标记已读</el-button>
-            <el-button type="text" @click.stop="deleteNotification(row)">删除</el-button>
+            <el-button type="text" @click.stop="viewDetail(row)">{{ $t('notice.view') }}</el-button>
+            <el-button type="text" @click.stop="markAsRead(row)">{{ $t('notice.markAsRead') }}</el-button>
+            <el-button type="text" @click.stop="deleteNotification(row)">{{ $t('notice.delete') }}</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -55,29 +59,29 @@
     <!-- 查看通知详情弹窗 -->
     <el-dialog
         v-model="detailDialogVisible"
-        title="通知详情"
+        :title="$t('notice.notificationDetails')"
         width="500px"
     >
       <el-form :model="currentNotification" label-width="80px">
-        <el-form-item label="类型">
-          <el-input v-model="currentNotification.typeCode" readonly></el-input>
+        <el-form-item :label="$t('notice.type')">
+          <el-input :value="getTypeLabel(currentNotification.typeCode)" readonly></el-input>
         </el-form-item>
-        <el-form-item label="标题">
+        <el-form-item :label="$t('notice.noticeTitle')">
           <el-input v-model="currentNotification.title" readonly></el-input>
         </el-form-item>
-        <el-form-item label="内容">
+        <el-form-item :label="$t('notice.content')">
           <el-input v-model="currentNotification.content" type="textarea" :rows="4" readonly></el-input>
         </el-form-item>
-        <el-form-item label="时间">
+        <el-form-item :label="$t('notice.time')">
           <el-input v-model="currentNotification.createTime" readonly></el-input>
         </el-form-item>
-        <el-form-item label="状态">
-          <el-tag v-if="currentNotification.isRead === '未读'" type="warning">未读</el-tag>
-          <el-tag v-else-if="currentNotification.isRead === '已读'" type="success">已读</el-tag>
+        <el-form-item :label="$t('notice.status')">
+          <el-tag v-if="currentNotification.isRead === 'NO'" type="warning">{{ $t('notice.unread') }}</el-tag>
+          <el-tag v-else-if="currentNotification.isRead === 'YES'" type="success">{{ $t('notice.read') }}</el-tag>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="detailDialogVisible = false">关闭</el-button>
+        <el-button @click="detailDialogVisible = false">{{ $t('notice.close') }}</el-button>
       </template>
     </el-dialog>
 
@@ -90,7 +94,19 @@ import {Check, Close, Delete, Edit, Refresh, Plus, Search} from '@element-plus/i
 import {ref, toRaw} from "vue";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {useRoute} from "vue-router";
+import {useI18n} from 'vue-i18n';
 
+const {t: $t} = useI18n();
+
+// Функция для получения русского названия типа уведомления
+function getTypeLabel(typeCode) {
+  const typeMap = {
+    'SYSTEM': $t('notice.systemNotification'),
+    'PAYMENT': $t('notice.order'),
+    'ORDER': $t('notice.order')
+  }
+  return typeMap[typeCode] || typeCode
+}
 
 const drawerVisible = ref(false)
 const unreadCount = ref(0)
@@ -111,10 +127,15 @@ const searchForm = ref({
   content: undefined,
 
 });
-const activeName = ref('全部')
-// 当前选中的通知详情
-const currentNotification = ref({});
-const detailDialogVisible = ref(false);
+const activeName = ref('ALL')
+
+// 类型代码映射
+const typeCodeMap = {
+  'ALL': null,           // 全部
+  'UNREAD': null,        // 未读
+  'ORDER': 'ORDER',      // 订单类型（可能是PAYMENT或ORDER）
+  'SYSTEM': 'SYSTEM'     // 系统通知
+}
 
 getPageList()
 
@@ -125,17 +146,21 @@ function getPageList() {
   let data = Object.assign(toRaw(searchForm.value), toRaw(pageInfo.value))
   
   // 根据标签页类型设置不同的过滤参数
-  if (activeName.value === '全部') {
-    // 查询所有通知（不设置typeCode和isRead）
+  if (activeName.value === 'ALL') {
+    // 查询所有通知
     delete data.typeCode
     delete data.isRead
-  } else if (activeName.value === '未读') {
+  } else if (activeName.value === 'UNREAD') {
     // 查询未读通知
     delete data.typeCode
-    data.isRead = '未读'
-  } else {
-    // 查询特定类型的通知（订单、系统通知等）
-    data.typeCode = activeName.value
+    data.isRead = 'NO'
+  } else if (activeName.value === 'ORDER') {
+    // 查询订单相关通知（PAYMENT类型）
+    data.typeCode = 'PAYMENT'
+    delete data.isRead
+  } else if (activeName.value === 'SYSTEM') {
+    // 查询系统通知
+    data.typeCode = 'SYSTEM'
     delete data.isRead
   }
   
@@ -146,6 +171,10 @@ function getPageList() {
     pageInfo.value.total = res.data.total
   })
 }
+
+// 当前选中的通知详情
+const currentNotification = ref({});
+const detailDialogVisible = ref(false);
 
 /**
  * 选择分页
@@ -216,7 +245,7 @@ function submit() {
   formRef.value.validate((valid) => {
     if (!valid){
       ElMessage({
-        message: "验证失败，请检查表单!",
+        message: t('notice.validationFailed'),
         type: 'warning'
       });
       return
@@ -229,7 +258,7 @@ function submit() {
         }
         dialogOpen.value = false
         ElMessage({
-          message: "操作成功",
+          message: t('notice.operationSuccess'),
           type: 'success'
         });
         getPageList()
@@ -242,7 +271,7 @@ function submit() {
         }
         dialogOpen.value = false
         ElMessage({
-          message: "操作成功",
+          message: t('notice.operationSuccess'),
           type: 'success'
         });
         getPageList()
@@ -289,7 +318,7 @@ function batchDelete(rows) {
         return
       }
       ElMessage({
-        message: "操作成功",
+        message: t('notice.operationSuccess'),
         type: 'success'
       });
       getPageList()
@@ -297,7 +326,7 @@ function batchDelete(rows) {
   }).catch(() => {
     ElMessage({
       type: 'info',
-      message: '已取消删除'
+      message: t('notice.deleteCancelled')
     });
     tableComponents.value.clearSelection();
   });
@@ -325,7 +354,7 @@ function viewDetail(row) {
 }
 // 标记为已读
 const markAsRead = (row) => {
-  row.isRead = "已读";
+  row.isRead = "YES";
   //更新
   request.put("/notice/update", row).then(res => {
     if (!res) {
@@ -333,7 +362,7 @@ const markAsRead = (row) => {
     }
     dialogOpen.value = false
     ElMessage({
-      message: "标记已读成功",
+      message: $t('notice.markReadSuccess'),
       type: 'success'
     });
     getPageList()
@@ -343,9 +372,9 @@ const markAsRead = (row) => {
 // 删除通知
 const deleteNotification = (row) => {
   let ids = [row.id]
-  ElMessageBox.confirm(`此操作将永久删除ID为[${ids}]的数据, 是否继续?`, '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
+  ElMessageBox.confirm($t('notice.deleteConfirm', { ids }), $t('message.confirmOperation'), {
+    confirmButtonText: $t('common.confirm'),
+    cancelButtonText: $t('common.cancel'),
     type: 'warning',
     center: true
   }).then(() => {
@@ -354,7 +383,7 @@ const deleteNotification = (row) => {
         return
       }
       ElMessage({
-        message: "删除成功",
+        message: $t('notice.deleteSuccess'),
         type: 'success'
       });
       getPageList()
@@ -362,7 +391,7 @@ const deleteNotification = (row) => {
   }).catch(() => {
     ElMessage({
       type: 'info',
-      message: '已取消删除'
+      message: $t('notice.deleteCancelled')
     });
     tableComponents.value.clearSelection();
   });

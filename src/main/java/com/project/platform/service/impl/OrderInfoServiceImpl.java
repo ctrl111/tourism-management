@@ -113,7 +113,7 @@ public class OrderInfoServiceImpl implements OrderInfoService {
         // 验证景点有效性
         ScenicInfo scenic = scenicInfoMapper.selectById(scenicId);
         if (scenic == null) {
-            throw new CustomException("景点不存在");
+            throw new CustomException("Достопримечательность не найдена");
         }
         
         // 计算总金额
@@ -123,7 +123,7 @@ public class OrderInfoServiceImpl implements OrderInfoService {
         // 验证余额
         User user = userMapper.selectById(currentUser.getId());
         if (user.getBalance().compareTo(totalAmount) < 0) {
-            throw new CustomException("余额不足，支付失败");
+            throw new CustomException("Недостаточно средств");
         }
         
         // 创建订单
@@ -135,14 +135,14 @@ public class OrderInfoServiceImpl implements OrderInfoService {
         order.setQuantity(quantity);
         order.setUnitPrice(unitPrice);
         order.setTotalAmount(totalAmount);
-        order.setStatus("已支付");
+        order.setStatus("PAID"); // 已支付状态
         
         // 解析游玩日期
         try {
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
             order.setVisitDate(formatter.parse(visitDate));
         } catch (ParseException e) {
-            throw new CustomException("日期格式错误");
+            throw new CustomException("Неверный формат даты");
         }
         
         // 扣除余额
@@ -153,18 +153,18 @@ public class OrderInfoServiceImpl implements OrderInfoService {
         
         // 发送通知
         Notice notice = new Notice();
-        notice.setTypeCode("订单");
+        notice.setTypeCode("Заказ");
         notice.setUserId(currentUser.getId());
-        notice.setContent("您的订单已支付成功，订单号为：" + order.getOrderNo());
-        notice.setIsRead("未读");
-        notice.setTitle("订单支付成功");
+        notice.setContent("Заказ успешно оплачен. Номер заказа: " + order.getOrderNo());
+        notice.setIsRead("UNREAD");
+        notice.setTitle("Оплата выполнена");
         noticeMapper.insert(notice);
         
         return order.getOrderNo();
     }
 
     /**
-     * 购买门票（使用DTO）- 模拟支付流程
+     * 购买门票（使用DTO）- 创建待支付订单
      * @param dto 购票信息
      * @return 订单号
      */
@@ -177,44 +177,74 @@ public class OrderInfoServiceImpl implements OrderInfoService {
         // 验证景点有效性
         ScenicInfo scenic = scenicInfoMapper.selectById(dto.getId());
         if (scenic == null) {
-            throw new CustomException("景点不存在");
+            throw new CustomException("Достопримечательность не найдена");
+        }
+        
+        // 检查景点状态
+        if ("INACTIVE".equals(scenic.getStatus())) {
+            throw new CustomException("Бронирование временно недоступно");
+        }
+        
+        // 检查库存（预检查，实际扣减在支付时进行）
+        if (scenic.getStock() != null && scenic.getStock() < dto.getNumber()) {
+            throw new CustomException("Недостаточно билетов. Доступно: " + scenic.getStock());
+        }
+        
+        // 验证购买数量
+        if (dto.getNumber() == null || dto.getNumber() <= 0) {
+            throw new CustomException("Количество должно быть больше нуля");
+        }
+        
+        if (dto.getNumber() > 10) {
+            throw new CustomException("Максимум 10 билетов за раз");
         }
         
         // 计算总金额
         BigDecimal unitPrice = scenic.getPrice();
         BigDecimal totalAmount = unitPrice.multiply(BigDecimal.valueOf(dto.getNumber()));
         
-        // 创建订单（模拟支付，不扣除余额）
+        // 创建订单（待支付状态）
         OrderInfo order = new OrderInfo();
         order.setUserId(currentUser.getId());
-        order.setOrderNo(UUID.randomUUID().toString().replace("-", ""));
+        order.setOrderNo(generateOrderNo());
         order.setScenicId(dto.getId());
         order.setScenicName(scenic.getName());
         order.setQuantity(dto.getNumber());
         order.setUnitPrice(unitPrice);
         order.setTotalAmount(totalAmount);
-        order.setStatus("待支付"); // 模拟支付流程，订单状态为"待支付"
+        order.setStatus("PENDING"); // 待支付状态
         
         // 解析游玩日期
         try {
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
             order.setVisitDate(formatter.parse(dto.getVisitDate()));
         } catch (ParseException e) {
-            throw new CustomException("日期格式错误");
+            throw new CustomException("Неверный формат даты. Используйте формат yyyy-MM-dd");
         }
         
-        // 保存订单（不扣除余额，只创建订单记录）
+        // 保存订单
         orderMapper.insert(order);
         
         // 发送通知
         Notice notice = new Notice();
-        notice.setTypeCode("订单");
+        notice.setTypeCode("Заказ");
         notice.setUserId(currentUser.getId());
-        notice.setContent("您的订单已创建成功，订单号为：" + order.getOrderNo() + "，请尽快支付");
-        notice.setIsRead("未读");
-        notice.setTitle("订单创建成功");
+        notice.setContent("Заказ создан. Номер: " + order.getOrderNo() + ". Сумма: " + totalAmount + " ₽. Оплатите в течение 30 минут");
+        notice.setIsRead("NO");
+        notice.setTitle("Заказ создан");
         noticeMapper.insert(notice);
         
         return order.getOrderNo();
+    }
+    
+    /**
+     * 生成订单号
+     * 格式：yyyyMMddHHmmss + 6位随机数
+     */
+    private String generateOrderNo() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+        String timestamp = sdf.format(new java.util.Date());
+        int random = (int) ((Math.random() * 9 + 1) * 100000);
+        return timestamp + random;
     }
 }

@@ -19,6 +19,8 @@ public interface FavoriteService {
 
     void insert(Favorite entity);
 
+    void deleteFavorite(Favorite entity);
+
     void updateById(Favorite entity);
 
     void removeByIds(List<Integer> id);

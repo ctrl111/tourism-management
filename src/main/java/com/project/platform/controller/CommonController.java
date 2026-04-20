@@ -47,7 +47,11 @@ public class CommonController {
      */
     @PutMapping("register")
     public ResponseVO register(@RequestBody JSONObject data) {
+        // 注册只能注册普通用户，如果没有传type，默认为USER
         String type = data.getString("type");
+        if (type == null || type.trim().isEmpty()) {
+            type = "USER";
+        }
         CommonService commonService = getCommonService(type);
         commonService.register(data);
         return ResponseVO.ok();
@@ -131,12 +135,17 @@ public class CommonController {
      */
 
     private CommonService getCommonService(String type) {
+        // 如果type为空，默认为USER
+        if (type == null || type.trim().isEmpty()) {
+            type = "USER";
+        }
+        
         switch (type) {
             case "ADMIN":
             case "USER":
                 return userService;
             default:
-                throw new CustomException("用户类型错误");
+                throw new CustomException("Неверный тип пользователя: " + type);
         }
     }
 }

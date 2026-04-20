@@ -3,27 +3,27 @@
     <el-space direction="vertical" alignment="left" style="width: 100%">
       <el-card>
         <el-form ref="searchFormComponents" :model="searchForm" inline>
-          <el-form-item label="用户名" prop="username">
+          <el-form-item :label="$t('adminManage.username')" prop="username">
             <el-input v-model="searchForm.username" clearable></el-input>
           </el-form-item>
-          <el-form-item label="手机号" prop="phone">
+          <el-form-item :label="$t('adminManage.phone')" prop="phone">
             <el-input v-model="searchForm.phone" clearable></el-input>
           </el-form-item>
-          <el-form-item label="状态" prop="status">
-            <el-select v-model="searchForm.status" placeholder="请选择" clearable style="width: 150px">
-              <el-option label="启用" value="启用"/>
-              <el-option label="禁用" value="禁用"/>
+          <el-form-item :label="$t('adminManage.status')" prop="status">
+            <el-select v-model="searchForm.status" :placeholder="$t('adminManage.pleaseSelect')" clearable style="width: 150px">
+              <el-option :label="$t('status.ACTIVE')" value="ACTIVE"/>
+              <el-option :label="$t('status.INACTIVE')" value="INACTIVE"/>
             </el-select>
           </el-form-item>
           <el-form-item label="">
-            <el-button type="primary" :icon="Search" @click="search">搜索</el-button>
-            <el-button :icon="Refresh" @click="resetSearch">重置</el-button>
+            <el-button type="primary" :icon="Search" @click="search">{{ $t('adminManage.search') }}</el-button>
+            <el-button :icon="Refresh" @click="resetSearch">{{ $t('adminManage.reset') }}</el-button>
           </el-form-item>
         </el-form>
         <el-space>
-          <el-button type="primary" @click="add" :icon="Plus">新增</el-button>
+          <el-button type="primary" @click="add" :icon="Plus">{{ $t('adminManage.add') }}</el-button>
           <el-button type="danger" :icon="Delete" @click="batchDelete(null)" :disabled="selectionRows.length<=0">
-            批量删除
+            {{ $t('adminManage.batchDelete') }}
           </el-button>
         </el-space>
       </el-card>
@@ -35,33 +35,31 @@
                   border
                   @selection-change="selectionChange">
           <el-table-column type="selection" width="55"></el-table-column>
-          <el-table-column prop="id" label="ID" width="50"></el-table-column>
-          <el-table-column prop="username" label="用户名称"></el-table-column>
-          <el-table-column prop="nickname" label="昵称"></el-table-column>
-          <el-table-column label="用户头像">
+          <el-table-column prop="username" :label="$t('adminManage.userName')"></el-table-column>
+          <el-table-column :label="$t('adminManage.userAvatar')">
             <template #default="scope">
               <el-image style="width: 50px; height: 50px" :src="scope.row.avatarUrl"
                         :preview-src-list="[scope.row.avatarUrl]"
                         :preview-teleported="true"></el-image>
             </template>
           </el-table-column>
-          <el-table-column prop="phone" label="电话"></el-table-column>
-          <el-table-column prop="email" label="邮箱" width="150"></el-table-column>
-          <el-table-column prop="status" label="状态">
+          <el-table-column prop="phone" :label="$t('adminManage.telephone')"></el-table-column>
+          <el-table-column prop="email" :label="$t('adminManage.email')" width="150"></el-table-column>
+          <el-table-column prop="status" :label="$t('adminManage.status')">
             <template #default="scope">
-              <el-tag type="success" v-if="scope.row.status==='启用'">启用</el-tag>
-              <el-tag type="danger" v-if="scope.row.status==='禁用'">禁用</el-tag>
+              <el-tag type="success" v-if="scope.row.status==='ACTIVE'">{{ $t('status.ACTIVE') }}</el-tag>
+              <el-tag type="danger" v-if="scope.row.status==='INACTIVE'">{{ $t('status.INACTIVE') }}</el-tag>
             </template>
           </el-table-column>
-          <el-table-column fixed="right" label="高级操作" width="140">
+          <el-table-column fixed="right" :label="$t('adminManage.advancedOperations')" width="140">
             <template #default="scope">
-              <el-button type="success" :icon="RefreshLeft" @click="resetPassword( scope.row)">重置密码</el-button>
+              <el-button type="success" :icon="RefreshLeft" @click="resetPassword( scope.row)">{{ $t('adminManage.resetPassword') }}</el-button>
             </template>
           </el-table-column>
-          <el-table-column fixed="right" label="操作" width="200">
+          <el-table-column fixed="right" :label="$t('adminManage.operation')" width="200">
             <template #default="scope">
-              <el-button :icon="Edit" @click="edit(scope.$index, scope.row)">编辑</el-button>
-              <el-button :icon="Delete" type="danger" @click="deleteOne(scope.$index, scope.row)">删除</el-button>
+              <el-button :icon="Edit" @click="edit(scope.$index, scope.row)">{{ $t('adminManage.edit') }}</el-button>
+              <el-button :icon="Delete" type="danger" @click="deleteOne(scope.$index, scope.row)">{{ $t('adminManage.delete') }}</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -81,43 +79,39 @@
     <el-dialog
         v-model="dialogOpen"
         v-if="dialogOpen"
-        :title="formData.id?'编辑':'新增'"
+        :title="formData.id ? $t('adminManage.editTitle') : $t('adminManage.addTitle')"
         width="800px"
     >
       <el-form ref="formRef" :model="formData" label-width="100px" inline>
-        <el-form-item label="头像" prop="avatarUrl" style="width: 100%"
-                      :rules="[{required:true,message:'不能为空',trigger:[ 'blur','change']}]">
+        <el-form-item :label="$t('adminManage.avatar')" prop="avatarUrl" style="width: 100%"
+                      :rules="[{required:true,message: $t('adminManage.cannotBeEmpty'),trigger:[ 'blur','change']}]">
           <MyUpLoad type="imageCard" :limit="1" :files="formData.avatarUrl"
                     @setFiles="formData.avatarUrl =$event"></MyUpLoad>
         </el-form-item>
-        <el-form-item label="用户名" prop="username"
-                      :rules="[{required:true,message:'不能为空',trigger:[ 'blur','change']}]">
-          <el-input v-model="formData.username" placeholder="用户名" :disabled="formData.id!=null"></el-input>
+        <el-form-item :label="$t('adminManage.usernameLabel')" prop="username"
+                      :rules="[{required:true,message: $t('adminManage.cannotBeEmpty'),trigger:[ 'blur','change']}]">
+          <el-input v-model="formData.username" :placeholder="$t('adminManage.usernamePlaceholder')" :disabled="formData.id!=null"></el-input>
         </el-form-item>
-        <el-form-item label="名称" prop="nickname"
-                      :rules="[{required:true,message:'不能为空',trigger:[ 'blur','change']}]">
-          <el-input v-model="formData.nickname" placeholder="昵称"></el-input>
+        <el-form-item :label="$t('adminManage.telephoneLabel')" prop="phone"
+                      :rules="[{required:true,message: $t('adminManage.cannotBeEmpty'),trigger:[ 'blur','change']}]">
+          <el-input v-model="formData.phone" :placeholder="$t('adminManage.telephonePlaceholder')"></el-input>
         </el-form-item>
-        <el-form-item label="电话" prop="phone"
-                      :rules="[{required:true,message:'不能为空',trigger:[ 'blur','change']}]">
-          <el-input v-model="formData.phone" placeholder="电话"></el-input>
+        <el-form-item :label="$t('adminManage.emailLabel')" prop="email"
+                      :rules="[{required:true,message: $t('adminManage.cannotBeEmpty'),trigger:[ 'blur','change']}]">
+          <el-input v-model="formData.email" :placeholder="$t('adminManage.emailPlaceholder')"></el-input>
         </el-form-item>
-        <el-form-item label="邮箱" prop="email"
-                      :rules="[{required:true,message:'不能为空',trigger:[ 'blur','change']}]">
-          <el-input v-model="formData.email" placeholder="邮箱"></el-input>
-        </el-form-item>
-        <el-form-item label="状态" prop="status"
-                      :rules="[{required:true,message:'不能为空',trigger:[ 'blur','change']}]">
+        <el-form-item :label="$t('adminManage.statusLabel')" prop="status"
+                      :rules="[{required:true,message: $t('adminManage.cannotBeEmpty'),trigger:[ 'blur','change']}]">
           <el-radio-group v-model="formData.status">
-            <el-radio label="启用"></el-radio>
-            <el-radio label="禁用"></el-radio>
+            <el-radio label="ACTIVE">{{ $t('status.ACTIVE') }}</el-radio>
+            <el-radio label="INACTIVE">{{ $t('status.INACTIVE') }}</el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>
       <template #footer>
         <div class="dialog-footer">
-          <el-button type="primary" @click="submit" :icon="Check">提交</el-button>
-          <el-button @click="closeDialog" :icon="Close">取消</el-button>
+          <el-button type="primary" @click="submit" :icon="Check">{{ $t('adminManage.submit') }}</el-button>
+          <el-button @click="closeDialog" :icon="Close">{{ $t('adminManage.cancel') }}</el-button>
         </div>
       </template>
     </el-dialog>
@@ -235,7 +229,7 @@ function submit() {
   formRef.value.validate((valid) => {
     if (!valid) {
       ElMessage({
-        message: "验证失败，请检查必填项!",
+        message: "Проверка не пройдена, проверьте обязательные поля!",
         type: 'warning'
       });
       return
@@ -247,7 +241,7 @@ function submit() {
         }
         dialogOpen.value = false
         ElMessage({
-          message: res.msg + " 新增用户密码默认为：123456",
+          message: res.msg + " Пароль нового пользователя по умолчанию: 123456",
           type: 'success'
         });
         getPageList()
@@ -260,7 +254,7 @@ function submit() {
         }
         dialogOpen.value = false
         ElMessage({
-          message: "操作成功",
+          message: "Операция выполнена успешно",
           type: 'success'
         });
         getPageList()
@@ -298,9 +292,9 @@ function batchDelete(rows) {
     rows = selectionRows.value;
   }
   let ids = rows.map(item => item.id);
-  ElMessageBox.confirm(`此操作将永久删除ID为[${ids}]的数据, 是否继续?`, '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
+  ElMessageBox.confirm(`Это действие навсегда удалит данные с ID [${ids}]. Продолжить?`, 'Подсказка', {
+    confirmButtonText: 'Подтвердить',
+    cancelButtonText: 'Отмена',
     type: 'warning',
     center: true
   }).then(() => {
@@ -309,7 +303,7 @@ function batchDelete(rows) {
         return
       }
       ElMessage({
-        message: "操作成功",
+        message: "Операция выполнена успешно",
         type: 'success'
       });
       getPageList()
@@ -318,7 +312,7 @@ function batchDelete(rows) {
   }).catch(() => {
     ElMessage({
       type: 'info',
-      message: '已取消删除'
+      message: 'Удаление отменено'
     });
     tableComponents.value.clearSelection();
   });
@@ -334,7 +328,7 @@ function resetPassword(row) {
       return
     }
     ElMessage({
-      message: "操作成功",
+      message: "Операция выполнена успешно",
       type: 'success'
     });
   })

@@ -35,19 +35,30 @@ public class ScenicInfoController {
      */
     @GetMapping("page")
     public ResponseVO<PageVO<ScenicInfo>> page(@RequestParam Map<String, Object> query, @RequestParam(defaultValue = "1") Integer pageNum, @RequestParam(defaultValue = "10") Integer pageSize) {
-        if (query.get("categoryType") != null&& !query.get("categoryType").toString().equals("")) {
+        if (query.get("categoryType") != null && !query.get("categoryType").toString().equals("")) {
             String categoryType = query.get("categoryType").toString();
-            query.put("categoryType",categoryType);
+            query.put("categoryType", categoryType);
         }
+        
         PageVO<ScenicInfo> page = scenicInfoService.page(query, pageNum, pageSize);
+        
+        // 批量查询所有分类，避免N+1问题
+        List<ScenicCategory> allCategories = scenicCategoryService.list();
+        Map<Integer, String> categoryMap = allCategories.stream()
+                .collect(java.util.stream.Collectors.toMap(
+                        ScenicCategory::getId,
+                        ScenicCategory::getName
+                ));
+        
+        // 设置分类名称
         page.getList().forEach(scenicInfo -> {
-            ScenicCategory scenicCategory = scenicCategoryService.selectById(scenicInfo.getCategoryId());
-            if (scenicCategory != null) {
-                scenicInfo.setCategoryType(scenicCategory.getName());
+            String categoryName = categoryMap.get(scenicInfo.getCategoryId());
+            if (categoryName != null) {
+                scenicInfo.setCategoryType(categoryName);
             }
         });
+        
         return ResponseVO.ok(page);
-
     }
 
     /**
@@ -60,19 +71,30 @@ public class ScenicInfoController {
      */
     @GetMapping("homelist")
     public ResponseVO<PageVO<ScenicInfo>> homePage(@RequestParam Map<String, Object> query, @RequestParam(defaultValue = "1") Integer pageNum, @RequestParam(defaultValue = "10") Integer pageSize) {
-        if (query.get("categoryType") != null&& !query.get("categoryType").toString().equals("")) {
+        if (query.get("categoryType") != null && !query.get("categoryType").toString().equals("")) {
             String categoryType = query.get("categoryType").toString();
-            query.put("categoryType",categoryType);
+            query.put("categoryType", categoryType);
         }
+        
         PageVO<ScenicInfo> page = scenicInfoService.homePage(query, pageNum, pageSize);
+        
+        // 批量查询所有分类，避免N+1问题
+        List<ScenicCategory> allCategories = scenicCategoryService.list();
+        Map<Integer, String> categoryMap = allCategories.stream()
+                .collect(java.util.stream.Collectors.toMap(
+                        ScenicCategory::getId,
+                        ScenicCategory::getName
+                ));
+        
+        // 设置分类名称
         page.getList().forEach(scenicInfo -> {
-            ScenicCategory scenicCategory = scenicCategoryService.selectById(scenicInfo.getCategoryId());
-            if (scenicCategory != null) {
-                scenicInfo.setCategoryType(scenicCategory.getName());
+            String categoryName = categoryMap.get(scenicInfo.getCategoryId());
+            if (categoryName != null) {
+                scenicInfo.setCategoryType(categoryName);
             }
         });
+        
         return ResponseVO.ok(page);
-
     }
 
     /**

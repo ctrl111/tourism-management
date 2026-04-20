@@ -3,8 +3,17 @@
 <mapper namespace="com.project.platform.mapper.CommentInfoMapper">
     <!-- 分页查询 -->
     <select id="queryPage"  resultType="com.project.platform.entity.CommentInfo">
-        SELECT comment_info.*
+        SELECT 
+            comment_info.*,
+            CASE 
+                WHEN comment_info.type_code = 'SCENIC' THEN scenic_info.name
+                WHEN comment_info.type_code = 'TRAVEL_NOTE' THEN travel_note.title
+                ELSE NULL
+            END AS associationName
         FROM comment_info
+        LEFT JOIN scenic_info ON comment_info.type_code = 'SCENIC' AND comment_info.association_id = scenic_info.id
+        LEFT JOIN travel_note ON comment_info.type_code = 'TRAVEL_NOTE' AND comment_info.association_id = travel_note.id
+        LEFT JOIN user ON comment_info.user_id = user.id
         <include refid="queryConditions"/>
         ORDER BY comment_info.create_time DESC
         LIMIT #{offset}, #{pageSize}
@@ -22,10 +31,16 @@
                 AND comment_info.name LIKE CONCAT('%', #{query.name}, '%')
             </if>
             <if test="query.typeCode != null and query.typeCode.trim() != ''">
-                AND comment_info.type_code =  #{query.typeCode}
+                AND comment_info.type_code = #{query.typeCode}
+            </if>
+            <if test="query.content != null and query.content.trim() != ''">
+                AND comment_info.content LIKE CONCAT('%', #{query.content}, '%')
+            </if>
+            <if test="query.userName != null and query.userName.trim() != ''">
+                AND user.username LIKE CONCAT('%', #{query.userName}, '%')
             </if>
             <if test="query.associationId != null">
-                AND comment_info.association_id =  #{query.associationId}
+                AND comment_info.association_id = #{query.associationId}
             </if>
             <if test="query.parentStatus != null">
                 AND comment_info.parent_id is null
@@ -89,4 +104,14 @@
             #{id}
         </foreach>
     </delete>
+
+    <!-- 获取统计数据 -->
+    <select id="getStatistics" resultType="map">
+        SELECT 
+            COUNT(*) as total,
+            SUM(CASE WHEN DATE(create_time) = CURDATE() THEN 1 ELSE 0 END) as todayCount,
+            SUM(CASE WHEN type_code = 'SCENIC' THEN 1 ELSE 0 END) as scenicCount,
+            SUM(CASE WHEN type_code = 'TRAVEL_NOTE' THEN 1 ELSE 0 END) as noteCount
+        FROM comment_info
+    </select>
 </mapper>

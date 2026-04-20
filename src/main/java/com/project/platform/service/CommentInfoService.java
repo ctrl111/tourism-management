@@ -23,4 +23,6 @@ public interface CommentInfoService {
 
     void removeByIds(List<Integer> id);
 
+    Map<String, Object> getStatistics();
+
 }

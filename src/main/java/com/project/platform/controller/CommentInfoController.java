@@ -95,4 +95,15 @@ public class CommentInfoController {
         return ResponseVO.ok();
     }
 
+    /**
+     * 获取评论统计数据
+     *
+     * @return
+     */
+    @GetMapping("statistics")
+    public ResponseVO<Map<String, Object>> statistics() {
+        Map<String, Object> stats = commentInfoService.getStatistics();
+        return ResponseVO.ok(stats);
+    }
+
 }

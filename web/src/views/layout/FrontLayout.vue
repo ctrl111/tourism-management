@@ -6,7 +6,7 @@
         <!-- 网站Logo和标题 -->
         <div class="logo">
           <router-link to="/front/index">
-            <span class="system-name">旅游推荐系统</span>
+            <span class="system-name">{{ $t('menu.systemName') }}</span>
           </router-link>
         </div>
 
@@ -18,10 +18,9 @@
             router
             @select="handleMenuSelect"
         >
-          <el-menu-item index="/front/index">首页</el-menu-item>
-          <el-menu-item index="/front/scenic">景点导航</el-menu-item>
-          <el-menu-item index="/front/travelNote">游记故事</el-menu-item>
-          <el-menu-item index="/front/notice">系统通知</el-menu-item>
+          <el-menu-item index="/front/index">{{ $t('menu.home') }}</el-menu-item>
+          <el-menu-item index="/front/scenic">{{ $t('menu.scenicNavigation') }}</el-menu-item>
+          <el-menu-item index="/front/travelNote">{{ $t('menu.travelStories') }}</el-menu-item>
 
           <!-- 动态菜单内容（根据用户类型或系统配置动态渲染） -->
           <el-menu-item
@@ -48,22 +47,22 @@
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item command="personalCenter">
-                    <el-icon><User /></el-icon>个人中心
+                    <el-icon><User /></el-icon>{{ $t('menu.personalCenter') }}
+                  </el-dropdown-item>
+                  <el-dropdown-item command="notice">
+                    <el-icon><Bell /></el-icon>{{ $t('menu.myNotifications') }}
                   </el-dropdown-item>
                   <el-dropdown-item command="orders">
-                    <el-icon><Document /></el-icon>我的订单
+                    <el-icon><Document /></el-icon>{{ $t('menu.myOrders') }}
                   </el-dropdown-item>
                   <el-dropdown-item command="travelNoteManage">
-                    <el-icon><Notebook /></el-icon>我的游记
+                    <el-icon><Notebook /></el-icon>{{ $t('menu.myTravelNotes') }}
                   </el-dropdown-item>
                   <el-dropdown-item command="favorite">
-                    <el-icon><Star /></el-icon>我的收藏
-                  </el-dropdown-item>
-                  <el-dropdown-item command="viewHistory">
-                    <el-icon><Clock /></el-icon>浏览历史
+                    <el-icon><Star /></el-icon>{{ $t('menu.favorite') }}
                   </el-dropdown-item>
                   <el-dropdown-item divided command="logout">
-                    <el-icon><SwitchButton /></el-icon>退出登录
+                    <el-icon><SwitchButton /></el-icon>{{ $t('common.logout') }}
                   </el-dropdown-item>
                 </el-dropdown-menu>
               </template>
@@ -71,8 +70,8 @@
           </template>
           <template v-else>
             <!-- 未登录状态 -->
-            <el-button link @click="goToLogin" class="login-btn">登录</el-button>
-            <el-button type="primary" @click="goToRegister" class="register-btn">注册</el-button>
+            <el-button link @click="goToLogin" class="login-btn">{{ $t('common.login') }}</el-button>
+            <el-button type="primary" @click="goToRegister" class="register-btn">{{ $t('common.register') }}</el-button>
           </template>
         </div>
       </div>
@@ -87,8 +86,8 @@
     <el-footer class="footer">
       <div class="footer-content">
         <div class="footer-info">
-          <p>版权所有 ©2025 旅游推荐系统</p>
-          <p class="copyright-note">官方网站浏览</p>
+          <p>{{ $t('common.copyright') }}</p>
+          <p class="copyright-note">{{ $t('common.copyrightNote') }}</p>
         </div>
       </div>
     </el-footer>
@@ -106,11 +105,14 @@ import {
   Star,
   Clock,
   SwitchButton,
-  Notebook
+  Notebook,
+  Bell
 } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
 import { useMenuStore } from '@/stores/menu'
+import {useI18n} from 'vue-i18n';
 
+const {t: $t} = useI18n();
 const router = useRouter()
 const route = useRoute()
 const userStore = useUserStore()
@@ -181,6 +183,9 @@ function handleUserCommand(command) {
     case 'personalCenter':
       router.push('/front/personalCenter')
       break
+    case 'notice':
+      router.push('/front/notice')
+      break
     case 'orders':
       // 跳转到个人中心的订单管理标签页
       router.push('/front/personalCenter?type=orderManage')
@@ -193,10 +198,6 @@ function handleUserCommand(command) {
       // 跳转到个人中心的收藏标签页
       router.push('/front/personalCenter?type=favorite')
       break
-    case 'viewHistory':
-      // 跳转到个人中心的浏览历史标签页
-      router.push('/front/personalCenter?type=viewHistory')
-      break
     case 'logout':
       handleLogout()
       break
@@ -207,9 +208,9 @@ function handleUserCommand(command) {
  * 退出登录处理
  */
 function handleLogout() {
-  ElMessageBox.confirm('确定要退出登录吗?', '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
+  ElMessageBox.confirm($t('common.logoutConfirm'), $t('message.confirmOperation'), {
+    confirmButtonText: $t('common.confirm'),
+    cancelButtonText: $t('common.cancel'),
     type: 'warning'
   })
     .then(() => {
@@ -217,7 +218,7 @@ function handleLogout() {
       userStore.logout()
       menuStore.setMenuContent([])
       
-      ElMessage.success('退出成功，正在跳转到登录页')
+      ElMessage.success($t('common.logoutSuccess'))
 
       // 使用 window.location.href 强制跳转到登录页并刷新页面
       // 添加 fromLogout 参数，告诉登录页不要自动登录

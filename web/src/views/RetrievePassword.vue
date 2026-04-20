@@ -5,42 +5,42 @@
         <el-space>
           <img src="../assets/logo.png" width="100%" style="width: 55px">
           <el-space direction="vertical" style="width: 100%" size="small">
-            <h2 style="font-style: oblique">管理系统</h2>
-            <span style="font-style: oblique;font-size: 15px">javadh.com</span>
+            <h2 style="font-style: oblique">{{ $t('retrievePassword.title') }}</h2>
+            <span style="font-style: oblique;font-size: 15px">Туристическая система</span>
           </el-space>
         </el-space>
-        <el-form :model="formData" label-width="80px" :rules="rules" ref="formRef" style="width: 100%">
-          <el-form-item label="类型" prop="type">
-            <el-select v-model="formData.type" placeholder="请选择用户类型">
-              <el-option label="管理员" value="ADMIN"></el-option>
-              <el-option label="用户" value="USER"></el-option>
+        <el-form :model="formData" label-width="100px" :rules="rules" ref="formRef" style="width: 100%">
+          <el-form-item :label="$t('user.userType')" prop="type">
+            <el-select v-model="formData.type" :placeholder="$t('form.pleaseSelect', { field: $t('user.userType') })">
+              <el-option :label="$t('user.admin')" value="ADMIN"></el-option>
+              <el-option :label="$t('user.normalUser')" value="USER"></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="手机号" prop="tel"
-                        :rules="[{required:true,message:'请输入手机号',trigger:[ 'blur','change']}]">
+          <el-form-item :label="$t('user.phone')" prop="tel"
+                        :rules="[{required:true,message:$t('form.pleaseEnter', { field: $t('user.phone') }),trigger:[ 'blur','change']}]">
             <el-input
                 style="width: 180px"
-                placeholder="请输入手机号"
+                :placeholder="$t('form.pleaseEnter', { field: $t('user.phone') })"
                 v-model.trim="formData.tel"
                 clearable
             >
             </el-input>
           </el-form-item>
-          <el-form-item label="验证码" prop="code"
-                        :rules="[{required:true,message:'请输入验证码',trigger:[ 'blur','change']}]">
+          <el-form-item :label="$t('login.captcha')" prop="code"
+                        :rules="[{required:true,message:$t('form.pleaseEnter', { field: $t('login.captcha') }),trigger:[ 'blur','change']}]">
             <el-input
                 style="width: 180px"
-                placeholder="请输入验证码"
+                :placeholder="$t('form.pleaseEnter', { field: $t('login.captcha') })"
                 v-model.trim="formData.code"
                 clearable
             >
             </el-input>
           </el-form-item>
-          <el-form-item label="新密码" prop="password"
-                        :rules="[{required:true,message:'请输入密码',trigger:[ 'blur','change']}]">
+          <el-form-item :label="$t('retrievePassword.newPassword')" prop="password"
+                        :rules="[{required:true,message:$t('form.pleaseEnter', { field: $t('retrievePassword.newPassword') }),trigger:[ 'blur','change']}]">
             <el-input
                 style="width: 180px"
-                placeholder="请输入密码"
+                :placeholder="$t('form.pleaseEnter', { field: $t('retrievePassword.newPassword') })"
                 show-password
                 v-model.trim="formData.password"
                 clearable
@@ -49,9 +49,9 @@
           </el-form-item>
           <el-form-item label="" style="width: 100%">
             <el-space direction="vertical" alignment="left" style="width: 100%">
-              <el-button @click="submitForm()" type="success" style="width: 100%">重置密码</el-button>
+              <el-button @click="submitForm()" type="success" style="width: 100%">{{ $t('retrievePassword.retrieve') }}</el-button>
               <router-link tag="span" :to="{path:'login'}">
-                <el-button type="text" class="button" style="float: right">返回登录</el-button>
+                <el-button type="text" class="button" style="float: right">{{ $t('retrievePassword.backToLogin') }}</el-button>
               </router-link>
             </el-space>
 
@@ -64,10 +64,11 @@
 <script setup>
 import {ref} from 'vue';
 import {ElMessage} from 'element-plus';
+import { useI18n } from 'vue-i18n';
 import http from "@/utils/http.js";
-import MyUpLoad from "@/components/MyUpload.vue";
 import router from "@/router/index.js";
 
+const { t } = useI18n();
 const formRef = ref(null);
 const formData = ref({
   type: 'USER',
@@ -86,7 +87,7 @@ const submitForm = () => {
         return
       }
       ElMessage({
-        message: "重置成功，正在跳转",
+        message: t('retrievePassword.retrieveSuccess'),
         type: "success"
       });
       router.push({path: "/login"})

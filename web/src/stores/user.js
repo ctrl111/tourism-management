@@ -1,5 +1,8 @@
 import { defineStore } from 'pinia'
 import request from '@/utils/http.js'
+import i18n from '@/i18n'
+
+const { t } = i18n.global
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -101,20 +104,20 @@ export const useUserStore = defineStore('user', {
             return {
               success: true,
               data: userData,
-              message: '登录成功'
+              message: t('message.loginSuccess')
             }
           }
         }
         
         return {
           success: false,
-          message: response?.msg || '登录失败'
+          message: response?.msg || t('message.loginFailed')
         }
       } catch (error) {
         console.error('登录失败:', error)
         return {
           success: false,
-          message: error.message || '登录失败，请稍后重试'
+          message: error.message || t('message.loginFailedRetry')
         }
       }
     },
@@ -195,12 +198,19 @@ export const useUserStore = defineStore('user', {
               // 如果刷新失败但有缓存，继续使用缓存
             }
             
+            console.log('✅ 已加载', type, '会话')
             return true
           } catch (e) {
             console.error('解析用户信息失败:', e)
           }
         }
       }
+      
+      // 如果没有找到任何会话，清空状态
+      this.token = ''
+      this.userInfo = null
+      this.isLoggedIn = false
+      this.userType = null
       
       return false
     },

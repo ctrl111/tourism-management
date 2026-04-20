@@ -3,18 +3,18 @@
     <el-space direction="vertical" alignment="left" style="width: 100%">
       <el-card>
         <el-form ref="searchFormComponents" :model="searchForm" inline>
-          <el-form-item label="分类名称" prop="name">
+          <el-form-item :label="$t('categoryManage.categoryName')" prop="name">
             <el-input v-model="searchForm.name" clearable></el-input>
           </el-form-item>
 
           <el-form-item label="">
-            <el-button type="primary" :icon="Search" @click="search">搜索</el-button>
-            <el-button :icon="Refresh" @click="resetSearch">重置</el-button>
+            <el-button type="primary" :icon="Search" @click="search">{{ $t('categoryManage.search') }}</el-button>
+            <el-button :icon="Refresh" @click="resetSearch">{{ $t('categoryManage.reset') }}</el-button>
           </el-form-item>
         </el-form>
         <el-space>
-          <el-button type="primary" @click="add" :icon="Plus">新增</el-button>
-          <el-button type="danger" :icon="Delete" @click="batchDelete(null)" :disabled="selectionRows.length<=0">批量删除</el-button>
+          <el-button type="primary" @click="add" :icon="Plus">{{ $t('categoryManage.add') }}</el-button>
+          <el-button type="danger" :icon="Delete" @click="batchDelete(null)" :disabled="selectionRows.length<=0">{{ $t('categoryManage.batchDelete') }}</el-button>
         </el-space>
       </el-card>
       <el-card>
@@ -25,13 +25,12 @@
                   @selection-change="selectionChange"
                   border>
           <el-table-column type="selection" width="55"></el-table-column>
-          <el-table-column prop="id" label="ID" width="50"></el-table-column>
-          <el-table-column prop="name" label="分类名称"></el-table-column>
-          <el-table-column prop="createTime" label="创建时间"></el-table-column>
-          <el-table-column fixed="right" label="操作" width="200">
+          <el-table-column prop="name" :label="$t('categoryManage.categoryName')"></el-table-column>
+          <el-table-column prop="createTime" :label="$t('categoryManage.createTime')"></el-table-column>
+          <el-table-column fixed="right" :label="$t('categoryManage.operation')" width="200">
             <template #default="scope">
-              <el-button :icon="Edit" @click="edit(scope.$index, scope.row)">编辑</el-button>
-              <el-button :icon="Delete" type="danger" @click="deleteOne(scope.$index, scope.row)">删除</el-button>
+              <el-button :icon="Edit" @click="edit(scope.$index, scope.row)">{{ $t('categoryManage.edit') }}</el-button>
+              <el-button :icon="Delete" type="danger" @click="deleteOne(scope.$index, scope.row)">{{ $t('categoryManage.delete') }}</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -51,12 +50,12 @@
     <el-dialog
         v-model="dialogOpen"
         v-if="dialogOpen"
-        :title="formData.id?'编辑':'新增'"
+        :title="formData.id ? $t('categoryManage.editTitle') : $t('categoryManage.addTitle')"
         width="500"
     >
       <el-form ref="formRef" :model="formData" label-width="100px">
         <slot name="content">
-          <el-form-item label="分类名称" prop="name"  :rules="[{required:true,message:'不能为空',trigger:[ 'blur','change']}]">
+          <el-form-item :label="$t('categoryManage.categoryNameLabel')" prop="name"  :rules="[{required:true,message: $t('categoryManage.cannotBeEmpty'),trigger:[ 'blur','change']}]">
             <el-input v-model="formData.name"></el-input>
           </el-form-item>
 
@@ -64,8 +63,8 @@
       </el-form>
       <template #footer>
         <div class="dialog-footer">
-          <el-button type="primary" @click="submit" :icon="Check">提交</el-button>
-          <el-button @click="closeDialog" :icon="Close">取消</el-button>
+          <el-button type="primary" @click="submit" :icon="Check">{{ $t('categoryManage.submit') }}</el-button>
+          <el-button @click="closeDialog" :icon="Close">{{ $t('categoryManage.cancel') }}</el-button>
         </div>
       </template>
     </el-dialog>
@@ -180,7 +179,7 @@ function submit() {
   formRef.value.validate((valid) => {
     if (!valid){
       ElMessage({
-        message: "验证失败，请检查表单!",
+        message: "Проверка не пройдена, проверьте форму!",
         type: 'warning'
       });
       return
@@ -193,7 +192,7 @@ function submit() {
         }
         dialogOpen.value = false
         ElMessage({
-          message: "操作成功",
+          message: "Операция выполнена успешно",
           type: 'success'
         });
         getPageList()
@@ -206,7 +205,7 @@ function submit() {
         }
         dialogOpen.value = false
         ElMessage({
-          message: "操作成功",
+          message: "Операция выполнена успешно",
           type: 'success'
         });
         getPageList()
@@ -242,9 +241,9 @@ function batchDelete(rows) {
     rows = selectionRows.value;
   }
   let ids = rows.map(item => item.id);
-  ElMessageBox.confirm(`此操作将永久删除ID为[${ids}]的数据, 是否继续?`, '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
+  ElMessageBox.confirm(`Это действие навсегда удалит данные с ID [${ids}]. Продолжить?`, 'Подсказка', {
+    confirmButtonText: 'Подтвердить',
+    cancelButtonText: 'Отмена',
     type: 'warning',
     center: true
   }).then(() => {
@@ -253,7 +252,7 @@ function batchDelete(rows) {
         return
       }
       ElMessage({
-        message: "操作成功",
+        message: "Операция выполнена успешно",
         type: 'success'
       });
       getPageList()
@@ -261,7 +260,7 @@ function batchDelete(rows) {
   }).catch(() => {
     ElMessage({
       type: 'info',
-      message: '已取消删除'
+      message: 'Удаление отменено'
     });
     tableComponents.value.clearSelection();
   });

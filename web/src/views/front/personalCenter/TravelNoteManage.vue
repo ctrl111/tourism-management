@@ -1,7 +1,7 @@
 <template>
   <div class="travel-note-manage">
     <div class="header-actions">
-      <el-button type="primary" :icon="Plus" @click="handleAdd">发布游记</el-button>
+      <el-button type="primary" :icon="Plus" @click="handleAdd">{{ $t('personalCenter.publishNote') }}</el-button>
     </div>
 
     <el-table
@@ -10,32 +10,24 @@
         border
         v-loading="loading"
     >
-      <el-table-column prop="cover" label="封面" width="120">
+      <el-table-column prop="cover" :label="$t('personalCenter.cover')" width="120">
         <template #default="{ row }">
           <el-image
               :src="row.cover"
               fit="cover"
               style="width: 80px; height: 60px; border-radius: 4px;"
-              :preview-src-list="[row.cover]"
           />
         </template>
       </el-table-column>
-      <el-table-column prop="title" label="标题" min-width="200" show-overflow-tooltip />
-      <el-table-column prop="destination" label="目的地" width="120" />
-      <el-table-column prop="days" label="天数" width="80">
+      <el-table-column prop="title" :label="$t('personalCenter.title')" min-width="200" show-overflow-tooltip />
+      <el-table-column prop="likesCount" :label="$t('personalCenter.likesCount')" width="100" />
+      <el-table-column prop="commentsCount" :label="$t('personalCenter.commentsCount')" width="100" />
+      <el-table-column prop="createTime" :label="$t('personalCenter.publishTime')" width="180" />
+      <el-table-column :label="$t('common.operation')" width="180" fixed="right">
         <template #default="{ row }">
-          {{ row.days }} 天
-        </template>
-      </el-table-column>
-      <el-table-column prop="viewCount" label="浏览量" width="100" />
-      <el-table-column prop="likesCount" label="点赞数" width="100" />
-      <el-table-column prop="commentsCount" label="评论数" width="100" />
-      <el-table-column prop="createTime" label="发布时间" width="180" />
-      <el-table-column label="操作" width="180" fixed="right">
-        <template #default="{ row }">
-          <el-button type="primary" size="small" link @click="handleView(row)">查看</el-button>
-          <el-button type="warning" size="small" link @click="handleEdit(row)">编辑</el-button>
-          <el-button type="danger" size="small" link @click="handleDelete(row)">删除</el-button>
+          <el-button type="primary" size="small" link @click="handleView(row)">{{ $t('personalCenter.view') }}</el-button>
+          <el-button type="warning" size="small" link @click="handleEdit(row)">{{ $t('personalCenter.edit') }}</el-button>
+          <el-button type="danger" size="small" link @click="handleDelete(row)">{{ $t('personalCenter.delete') }}</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -54,7 +46,7 @@
     <!-- 编辑/新增弹窗 -->
     <el-dialog
         v-model="dialogOpen"
-        :title="formData.id ? '编辑游记' : '发布游记'"
+        :title="formData.id ? $t('personalCenter.editNote') : $t('personalCenter.publishNewNote')"
         width="800px"
         @close="closeDialog"
     >
@@ -64,33 +56,34 @@
           :rules="rules"
           label-width="100px"
       >
-        <el-form-item label="游记标题" prop="title">
-          <el-input v-model="formData.title" placeholder="请输入游记标题" />
+        <el-form-item :label="$t('personalCenter.noteTitle')" prop="title">
+          <el-input v-model="formData.title" :placeholder="$t('personalCenter.pleaseEnterTitle')" />
         </el-form-item>
-        <el-form-item label="目的地" prop="destination">
-          <el-input v-model="formData.destination" placeholder="请输入目的地" />
-        </el-form-item>
-        <el-form-item label="出行时间" prop="travelTime">
+        <el-form-item :label="$t('personalCenter.travelDate')" prop="travelTime">
           <el-date-picker
               v-model="formData.travelTime"
               type="date"
-              placeholder="选择出行时间"
+              :placeholder="$t('personalCenter.selectTravelDate')"
+              value-format="YYYY-MM-DD"
               style="width: 100%"
           />
         </el-form-item>
-        <el-form-item label="行程天数" prop="days">
+        <el-form-item :label="$t('personalCenter.tripDays')" prop="days">
           <el-input-number v-model="formData.days" :min="1" :max="365" />
         </el-form-item>
-        <el-form-item label="封面图片" prop="cover">
-          <MyUpload v-model="formData.cover" />
+        <el-form-item :label="$t('personalCenter.coverImage')" prop="cover">
+          <MyUpload v-if="dialogOpen" type="imageCard" :limit="1" :files="formData.cover"
+                    @setFiles="handleCoverChange" />
         </el-form-item>
-        <el-form-item label="游记内容" prop="content">
-          <MyEditor v-model="formData.content" />
+        <el-form-item :label="$t('personalCenter.noteContent')" prop="content">
+          <MyEditor :content="formData.content"
+                    @content-change="handleContentChange"
+                    v-if="dialogOpen" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="closeDialog">取消</el-button>
-        <el-button type="primary" @click="submit" :loading="submitting">提交</el-button>
+        <el-button @click="closeDialog">{{ $t('personalCenter.cancel') }}</el-button>
+        <el-button type="primary" @click="submit" :loading="submitting">{{ $t('personalCenter.submit') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -124,12 +117,11 @@ const formData = ref({})
 const submitting = ref(false)
 
 const rules = {
-  title: [{ required: true, message: '请输入游记标题', trigger: 'blur' }],
-  destination: [{ required: true, message: '请输入目的地', trigger: 'blur' }],
-  travelTime: [{ required: true, message: '请选择出行时间', trigger: 'change' }],
-  days: [{ required: true, message: '请输入行程天数', trigger: 'blur' }],
-  cover: [{ required: true, message: '请上传封面图片', trigger: 'change' }],
-  content: [{ required: true, message: '请输入游记内容', trigger: 'blur' }]
+  title: [{ required: true, message: 'Пожалуйста, введите заголовок заметки', trigger: 'blur' }],
+  travelTime: [{ required: true, message: 'Пожалуйста, выберите дату поездки', trigger: 'change' }],
+  days: [{ required: true, message: 'Пожалуйста, введите количество дней', trigger: 'blur' }],
+  images: [{ required: true, message: 'Пожалуйста, загрузите обложку', trigger: 'change' }],
+  content: [{ required: true, message: 'Пожалуйста, введите содержание заметки', trigger: 'blur' }]
 }
 
 onMounted(() => {
@@ -181,6 +173,30 @@ function handleAdd() {
 }
 
 /**
+ * 处理封面图片变化
+ */
+function handleCoverChange(files) {
+  console.log('封面图片变化:', files)
+  formData.value.cover = files
+  console.log('formData.cover 更新为:', formData.value.cover)
+  // 手动触发表单验证
+  if (formRef.value) {
+    formRef.value.validateField('cover')
+  }
+}
+
+/**
+ * 处理内容变化
+ */
+function handleContentChange(content) {
+  formData.value.content = content
+  // 手动触发表单验证
+  if (formRef.value) {
+    formRef.value.validateField('content')
+  }
+}
+
+/**
  * 编辑游记
  */
 function handleEdit(row) {
@@ -194,7 +210,7 @@ function handleEdit(row) {
 function submit() {
   formRef.value.validate((valid) => {
     if (!valid) {
-      ElMessage.warning('请完善表单信息')
+      ElMessage.warning('Пожалуйста, заполните форму')
       return
     }
 
@@ -202,9 +218,11 @@ function submit() {
     const url = formData.value.id ? '/travelNote/update' : '/travelNote/add'
     const method = formData.value.id ? 'put' : 'post'
 
+    console.log('提交的数据:', formData.value)
+
     request[method](url, formData.value).then(res => {
       if (res) {
-        ElMessage.success('操作成功')
+        ElMessage.success('Операция выполнена успешно')
         closeDialog()
         getPageList()
       }
@@ -226,14 +244,14 @@ function closeDialog() {
  * 删除游记
  */
 function handleDelete(row) {
-  ElMessageBox.confirm(`确定要删除游记"${row.title}"吗？`, '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
+  ElMessageBox.confirm(`Вы уверены, что хотите удалить заметку "${row.title}"?`, 'Подсказка', {
+    confirmButtonText: 'Подтвердить',
+    cancelButtonText: 'Отмена',
     type: 'warning'
   }).then(() => {
     request.delete('/travelNote/delBatch', { data: [row.id] }).then(res => {
       if (res) {
-        ElMessage.success('删除成功')
+        ElMessage.success('Удалено успешно')
         getPageList()
       }
     })

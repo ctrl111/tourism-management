@@ -14,23 +14,19 @@ public class User  {
      */
     private Integer id;
     /**
-     * 用户名
+     * 用户名（可修改，初始为手机号或邮箱）
      */
     private String username;
-    /**
-     * 昵称
-     */
-    private String nickname;
     /**
      * 密码
      */
     private String password;
     /**
-     *  电话
+     * 手机号（可用于登录，与邮箱至少填一个）
      */
     private String phone;
     /**
-     * 邮箱
+     * 邮箱（可用于登录，与手机号至少填一个）
      */
     private String email;
     /**

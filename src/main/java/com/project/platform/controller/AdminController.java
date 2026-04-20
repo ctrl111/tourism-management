@@ -50,7 +50,7 @@ public class AdminController {
         User entity = userService.selectById(id);
         // 验证是否为管理员
         if (entity != null && !"ADMIN".equals(entity.getRole())) {
-            return ResponseVO.fail(400, "该用户不是管理员");
+            return ResponseVO.fail(400, "Этот пользователь не является администратором");
         }
         return ResponseVO.ok(entity);
     }

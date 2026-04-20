@@ -67,7 +67,7 @@ public class NoticeServiceImpl  implements NoticeService {
         if (dto != null && dto.getType() != null && dto.getType().equals("USER")) {
             if (notice != null && !notice.getUserId().equals(dto.getId())) {
                 // 不是该用户的通知，返回 null 或抛出异常
-                throw new RuntimeException("无权查看该通知");
+                throw new RuntimeException("У вас нет прав на просмотр этого уведомления");
             }
         }
         
@@ -88,7 +88,7 @@ public class NoticeServiceImpl  implements NoticeService {
                 notice.setTypeCode(entity.getTypeCode());
                 notice.setTitle(entity.getTitle());
                 notice.setContent(entity.getContent());
-                notice.setIsRead("未读");
+                notice.setIsRead("UNREAD");
                 noticeMapper.insert(notice);
             });
         } else {
@@ -97,12 +97,12 @@ public class NoticeServiceImpl  implements NoticeService {
             check(entity);
             
             if (entity.getIsRead() == null || entity.getIsRead().isEmpty()) {
-                entity.setIsRead("未读");
+                entity.setIsRead("UNREAD");
             }
             
             // 确保 userId 不为空
             if (entity.getUserId() == null) {
-                throw new RuntimeException("通知必须指定用户ID，不允许创建公共通知");
+                throw new RuntimeException("Уведомление должно иметь ID пользователя");
             }
             
             noticeMapper.insert(entity);
@@ -116,7 +116,7 @@ public class NoticeServiceImpl  implements NoticeService {
         if (dto != null && dto.getType() != null && dto.getType().equals("USER")) {
             Notice existNotice = noticeMapper.selectById(entity.getId());
             if (existNotice != null && !existNotice.getUserId().equals(dto.getId())) {
-                throw new RuntimeException("无权修改该通知");
+                throw new RuntimeException("У вас нет прав на изменение этого уведомления");
             }
         }
         
@@ -136,7 +136,7 @@ public class NoticeServiceImpl  implements NoticeService {
             for (Integer id : ids) {
                 Notice notice = noticeMapper.selectById(id);
                 if (notice != null && !notice.getUserId().equals(dto.getId())) {
-                    throw new RuntimeException("无权删除该通知");
+                    throw new RuntimeException("У вас нет прав на удаление этого уведомления");
                 }
             }
         }

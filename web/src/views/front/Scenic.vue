@@ -5,7 +5,7 @@
       <div class="search-header">
         <el-input
             v-model="searchForm.name"
-            placeholder="请输入景点名称"
+            :placeholder="$t('scenic.enterScenicName')"
             size="large"
             class="search-input"
             clearable
@@ -14,14 +14,14 @@
             <Search style="width: 2em; height: 2em; margin-right: 10px" />
           </template>
         </el-input>
-        <el-button type="primary" :icon="Search" @click="search" class="search-button">搜索</el-button>
+        <el-button type="primary" :icon="Search" @click="search" class="search-button">{{ $t('common.search') }}</el-button>
       </div>
 
       <div class="filter-area">
         <div class="filter-item">
-          <span class="filter-label">分类：</span>
+          <span class="filter-label">{{ $t('scenic.categoryLabel') }}</span>
           <el-radio-group v-model="searchForm.categoryType" @change="search">
-            <el-radio-button label="" >全部</el-radio-button>
+            <el-radio-button label="" >{{ $t('scenic.allCategories') }}</el-radio-button>
             <el-radio-button
                 v-for="item in categoryList"
                 :key="item.id"
@@ -48,80 +48,62 @@
     </el-card>
 
     <!-- 景点列表 -->
-    <el-row :gutter="24" class="scenic-list">
-      <el-col
+    <div class="scenic-grid">
+      <div
           v-for="item in listData"
           :key="item.id"
-          :xs="24" :sm="12" :md="8" :lg="6"
-          class="scenic-item"
+          class="scenic-card"
+          @click="router.push('/front/scenicDetails/'+item.id)"
       >
-        <el-card
-            shadow="never"
-            class="scenic-card"
-            @click="router.push('/front/scenicDetails/'+item.id)"
-        >
-          <div class="card-cover">
-            <el-image
-                :src="item.coverImage"
-                fit="cover"
-                class="cover-image"
-                lazy
-            >
-              <template #placeholder>
-                <div class="image-placeholder">
-                  <el-icon class="placeholder-icon"><Picture /></el-icon>
-                  <span class="placeholder-text">加载中...</span>
-                </div>
-              </template>
-              <template #error>
-                <div class="image-placeholder">
-                  <el-icon class="placeholder-icon"><Picture /></el-icon>
-                  <span class="placeholder-text">暂无图片</span>
-                </div>
-              </template>
-            </el-image>
-            <div class="price-badge">
-              <span class="price-symbol">¥</span>
-              <span class="price-value">{{ item.price }}</span>
+        <el-image :src="item.coverImage" class="scenic-cover" fit="cover">
+          <template #error>
+            <div class="image-error">
+              <el-icon>
+                <Picture/>
+              </el-icon>
+              <span>{{ $t('scenic.imageLoadFailed') }}</span>
+            </div>
+          </template>
+        </el-image>
+        <div class="card-content">
+          <h4 class="scenic-title">{{ item.name }}</h4>
+          <div class="scenic-tags">
+            <el-tag type="info" size="small">{{ item.categoryType }}</el-tag>
+          </div>
+          <div class="scenic-stats">
+            <div class="stat-item">
+              <el-icon><Star /></el-icon>
+              <span>{{ item.countFavorite || 0 }}</span>
+            </div>
+            <div class="stat-item">
+              <el-icon><ChatDotRound /></el-icon>
+              <span>{{ item.countComment || 0 }}</span>
             </div>
           </div>
-
-          <div class="card-content">
-            <h4 class="scenic-title">{{ item.name }}</h4>
-
-            <div class="scenic-tags">
-              <el-tag class="category-tag" size="small">{{ item.categoryType }}</el-tag>
-              <div class="rating-tag">
-                <el-icon class="star-icon"><Star /></el-icon>
-                <span>{{ item.score }}</span>
-              </div>
+          <div class="scenic-info">
+            <div class="info-item">
+              <el-icon>
+                <Location/>
+              </el-icon>
+              <span class="address">{{ item.address }}</span>
             </div>
-
-            <div class="scenic-info">
-              <div class="info-item">
-                <el-icon class="info-icon"><Location /></el-icon>
-                <span class="address">{{ item.address || '暂无地址' }}</span>
-              </div>
+            <div class="info-item">
+              <el-icon>
+                <Clock/>
+              </el-icon>
+              <span>{{ item.openingHours || '08:00-18:00' }}</span>
             </div>
-
             <div class="scenic-footer">
-              <div class="comment-count">
-                <el-icon><ChatDotRound /></el-icon>
-                <span>{{ item.countComment }}条评论</span>
+              <div class="price">
+                <span class="current-price">￥{{ item.price }}</span>
+                <span class="original-price" v-if="item.originalPrice">¥{{ item.originalPrice }}</span>
               </div>
-              <el-button 
-                type="primary" 
-                size="small" 
-                class="book-btn"
-                @click.stop="openBookingDialog(item)"
-              >
-                立即预定
-              </el-button>
+              <el-button type="primary" size="small" @click.stop="openBookingDialog(item)">{{ $t('scenic.bookNow') }}</el-button>
             </div>
           </div>
-        </el-card>
-      </el-col>
-    </el-row>
+        </div>
+      </div>
+    </div>
 
     <!-- 分页 -->
     <div class="pagination-wrapper">
@@ -137,7 +119,7 @@
     </div>
     <el-dialog
         v-model="bookingDialogVisible"
-        :title="`预定 - ${currentScenic?.name}`"
+        :title="$t('order.bookingFor', { name: currentScenic?.name })"
         width="600px"
     >
       <el-form
@@ -146,17 +128,17 @@
           label-width="100px"
           :rules="bookingRules"
       >
-        <el-form-item label="游玩日期" prop="visitDate" :rules="[{required:true,message:'请选择日期',trigger:[ 'blur','change']}]">
+        <el-form-item :label="$t('order.visitDate')" prop="visitDate" :rules="[{required:true,message:$t('form.pleaseSelect', { field: $t('order.visitDate') }),trigger:[ 'blur','change']}]">
           <el-date-picker
               v-model="buyTicketForm.visitDate"
               type="date"
-              placeholder="选择游玩日期"
+              :placeholder="$t('order.selectDate')"
               value-format="YYYY-MM-DD"
               :disabled-date="disabledDate"
           />
         </el-form-item>
 
-        <el-form-item label="购买数量" prop="quantity" >
+        <el-form-item :label="$t('order.quantity')" prop="quantity" >
           <el-input-number
               v-model="buyTicketForm.number"
               :min="1"
@@ -165,7 +147,7 @@
           />
         </el-form-item>
 
-        <el-form-item label="总价">
+        <el-form-item :label="$t('order.totalPrice')">
         <span class="total-price">
           ￥{{ totalPrice}}
         </span>
@@ -173,25 +155,36 @@
       </el-form>
 
       <template #footer>
-        <el-button @click="bookingDialogVisible = false">取消</el-button>
+        <el-button @click="bookingDialogVisible = false">{{ $t('common.cancel') }}</el-button>
         <el-button
             type="primary"
             @click="confirmBooking"
         >
-          确认预定
+          {{ $t('order.confirmBooking') }}
         </el-button>
       </template>
     </el-dialog>
 
+    <!-- 支付对话框 -->
+    <PaymentDialog
+      v-model="paymentDialogVisible"
+      :order-no="paymentOrderNo"
+      :total-amount="paymentAmount"
+      @success="handlePaymentSuccess"
+    />
   </div>
 </template>
 
 <script setup>
 import request from "@/utils/http.js";
-import {Search, Star, ChatDotRound} from '@element-plus/icons-vue'
+import {Search, Star, ChatDotRound, Clock, Location, Picture} from '@element-plus/icons-vue'
 import {ref, toRaw,computed} from "vue";
 import router from "@/router/index.js";
 import {ElMessage, ElMessageBox} from "element-plus";
+import PaymentDialog from "@/components/PaymentDialog.vue";
+import {useI18n} from 'vue-i18n';
+
+const {t: $t} = useI18n();
 
 
 const drawerVisible = ref(false)
@@ -219,6 +212,11 @@ const buyTicketForm = ref({
   number: 1,
   totalPrice: 0,
 })
+
+// 支付相关
+const paymentDialogVisible = ref(false)
+const paymentOrderNo = ref('')
+const paymentAmount = ref(0)
 const searchForm = ref({
   categoryType: undefined,
   status: undefined
@@ -327,7 +325,7 @@ function submit() {
   formRef.value.validate((valid) => {
     if (!valid) {
       ElMessage({
-        message: "验证失败，请检查表单!",
+        message: t('scenic.validationFailed'),
         type: 'warning'
       });
       return
@@ -340,7 +338,7 @@ function submit() {
         }
         dialogOpen.value = false
         ElMessage({
-          message: "操作成功",
+          message: t('scenic.operationSuccess'),
           type: 'success'
         });
         getPageList()
@@ -353,7 +351,7 @@ function submit() {
         }
         dialogOpen.value = false
         ElMessage({
-          message: "操作成功",
+          message: t('scenic.operationSuccess'),
           type: 'success'
         });
         getPageList()
@@ -401,7 +399,7 @@ function batchDelete(rows) {
         return
       }
       ElMessage({
-        message: "操作成功",
+        message: t('scenic.operationSuccess'),
         type: 'success'
       });
       getPageList()
@@ -409,7 +407,7 @@ function batchDelete(rows) {
   }).catch(() => {
     ElMessage({
       type: 'info',
-      message: '已取消删除'
+      message: t('scenic.deleteCancelled')
     });
     tableComponents.value.clearSelection();
   });
@@ -429,7 +427,7 @@ function confirmBooking() {
   bookingFormRef.value.validate((valid) => {
     if (!valid){
       ElMessage({
-        message: "验证失败，请检查表单!",
+        message: $t('order.validationFailed'),
         type: 'warning'
       });
       return
@@ -441,10 +439,16 @@ function confirmBooking() {
         return
       }
       ElMessage({
-        message: "预定成功",
+        message: $t('order.bookingSuccess'),
         type: "success"
       });
       bookingDialogVisible.value = false
+      
+      // Бронирование успешно, открыть диалог оплаты
+      paymentOrderNo.value = res.data // Номер заказа от сервера
+      paymentAmount.value = totalPrice.value
+      paymentDialogVisible.value = true
+      
       getPageList()
     })
   })
@@ -452,6 +456,15 @@ function confirmBooking() {
 const totalPrice = computed(() => {
   return currentScenic.value?.price * buyTicketForm.value.number || 0;
 });
+
+/**
+ * 支付成功回调
+ */
+function handlePaymentSuccess() {
+  ElMessage.success($t('order.paySuccess'))
+  getPageList()
+}
+
 //聊天窗口
 const handleChatToggle = () => {
   drawerVisible.value = !drawerVisible.value
@@ -517,150 +530,86 @@ const handleChatToggle = () => {
   white-space: nowrap;
 }
 
-.scenic-list {
+.scenic-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
   margin-top: 24px;
 }
 
-.scenic-item {
-  margin-bottom: 24px;
-}
-
 .scenic-card {
-  cursor: pointer;
-  border-radius: 12px;
-  border: 1px solid #f0f0f0;
+  border-radius: 8px;
   overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  height: 100%;
+  background: white;
+  transition: transform 0.3s;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .scenic-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
-  border-color: #1890ff;
+  transform: translateY(-5px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
-.card-cover {
-  position: relative;
-  height: 200px;
-  overflow: hidden;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e8f4f8 100%);
-}
-
-.cover-image {
+.scenic-cover {
   width: 100%;
-  height: 100%;
-  transition: transform 0.3s;
+  height: 200px;
 }
 
-.scenic-card:hover .cover-image {
-  transform: scale(1.1);
-}
-
-.image-placeholder {
+.image-error {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e8f4f8 100%);
-  color: #bfbfbf;
-}
-
-.placeholder-icon {
-  font-size: 48px;
-  margin-bottom: 8px;
-  opacity: 0.5;
-}
-
-.placeholder-text {
-  font-size: 14px;
-  color: #8c8c8c;
-}
-
-.price-badge {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: linear-gradient(135deg, #ff9f00 0%, #ff6b00 100%);
-  color: white;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-weight: 700;
-  box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
-  display: flex;
-  align-items: baseline;
-  gap: 2px;
-}
-
-.price-symbol {
-  font-size: 12px;
-}
-
-.price-value {
-  font-size: 18px;
+  height: 200px;
+  background: #f5f7fa;
+  color: #c0c4cc;
 }
 
 .card-content {
-  padding: 16px;
+  padding: 15px;
 }
 
 .scenic-title {
   margin: 0 0 12px;
-  font-size: 18px;
-  font-weight: 700;
-  color: #262626;
+  font-size: 16px;
+  color: #333;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  line-height: 1.4;
 }
 
 .scenic-tags {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   margin-bottom: 12px;
+  display: flex;
+  gap: 8px;
 }
 
-.category-tag {
-  background: #e6f7ff;
-  color: #1890ff;
-  border: none;
-  font-weight: 600;
-  padding: 4px 12px;
-  border-radius: 4px;
+.scenic-stats {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: #666;
 }
 
-.rating-tag {
+.stat-item {
   display: flex;
   align-items: center;
   gap: 4px;
-  color: #faad14;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.star-icon {
-  font-size: 16px;
 }
 
 .scenic-info {
   margin: 12px 0;
-  font-size: 13px;
-  color: #8c8c8c;
+  font-size: 12px;
+  color: #666;
 }
 
 .info-item {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-bottom: 6px;
-}
-
-.info-icon {
-  font-size: 14px;
-  color: #1890ff;
+  gap: 5px;
+  margin-bottom: 8px;
 }
 
 .address {
@@ -674,31 +623,37 @@ const handleChatToggle = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 16px;
-  padding-top: 12px;
-  border-top: 1px solid #f0f0f0;
+  margin-top: 15px;
 }
 
-.comment-count {
+.price {
   display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 13px;
-  color: #8c8c8c;
+  align-items: baseline;
+  gap: 8px;
 }
 
-.book-btn {
-  background: linear-gradient(135deg, #ff9f00 0%, #ff6b00 100%);
-  border: none;
-  border-radius: 20px;
-  padding: 8px 20px;
-  font-weight: 600;
-  transition: all 0.3s;
+.current-price {
+  color: #ff6b6b;
+  font-weight: 500;
+  font-size: 16px;
 }
 
-.book-btn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(255, 107, 0, 0.4);
+.original-price {
+  color: #999;
+  font-size: 12px;
+  text-decoration: line-through;
+}
+
+@media (max-width: 1200px) {
+  .scenic-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .scenic-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .pagination-wrapper {

@@ -16,6 +16,9 @@ public interface ScenicInfoMapper {
     @Select("SELECT * FROM scenic_info WHERE id = #{id}")
     ScenicInfo selectById(Integer id);
 
+    @Select("SELECT COUNT(*) FROM scenic_info WHERE category_id = #{categoryId}")
+    int countByCategoryId(Integer categoryId);
+
     @Select("SELECT * FROM scenic_info")
     List<ScenicInfo> list();
 

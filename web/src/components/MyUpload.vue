@@ -13,7 +13,7 @@
         :on-exceed="handleExceed"
         :on-remove="handleRemove">
       <el-button size="small" type="primary"> {{
-          limit === 1 && fileList.length > 0 ? '点击替换' : '点击上传'
+          limit === 1 && fileList.length > 0 ? $t('upload.clickToReplace') : $t('upload.clickToUpload')
         }}
       </el-button>
       <div slot="tip" class="el-upload__tip">{{ tip }}</div>
@@ -29,11 +29,21 @@
 </template>
 
 <script setup>
-import {ref, reactive, onMounted} from 'vue';
+import {ref, reactive, onMounted, watch} from 'vue';
 import utils from "@/utils/tools.js";
 import {ElMessage, genFileId} from "element-plus";
+import {useI18n} from 'vue-i18n';
+
+const {t: $t} = useI18n();
 
 const props = defineProps({
+  /**
+   * v-model 绑定值
+   */
+  modelValue: {
+    type: String,
+    default: ""
+  },
   /**
    * 文件类型
    */
@@ -89,11 +99,43 @@ onMounted(() => {
   load();
 });
 
+// 监听 files prop 变化，重新加载文件列表
+watch(() => props.files, (newVal) => {
+  fileList.value = []
+  if (newVal) {
+    let files = newVal.split(",");
+    for (let file of files) {
+      let strings = file.split("/");
+      fileList.value.push({
+        name: strings[strings.length - 1],
+        url: file
+      });
+    }
+  }
+}, { immediate: false })
+
+// 监听 modelValue 变化，重新加载文件列表
+watch(() => props.modelValue, (newVal) => {
+  fileList.value = []
+  if (newVal) {
+    let files = newVal.split(",");
+    for (let file of files) {
+      let strings = file.split("/");
+      fileList.value.push({
+        name: strings[strings.length - 1],
+        url: file
+      });
+    }
+  }
+}, { immediate: false })
+
 //加载
 function load() {
-  if (props.files) {
+  // 优先使用 modelValue，如果没有则使用 files
+  const fileString = props.modelValue || props.files;
+  if (fileString) {
     //对文件按照，分割
-    let files = props.files.split(",");
+    let files = fileString.split(",");
     for (let file of files) {
       //切割文件名
       let strings = file.split("/");
@@ -142,7 +184,7 @@ function load() {
 }
 
 //回调父组件，设置文件数据
-const emit = defineEmits(['setFiles']);
+const emit = defineEmits(['update:modelValue', 'setFiles']);
 
 /**
  * 通知父组件文件改变
@@ -151,7 +193,9 @@ function setFiles() {
   let files = fileList.value.map((item) => {
     return item.url;
   });
-  emit("setFiles", files.join(","));
+  const filesString = files.join(",");
+  emit("update:modelValue", filesString);
+  emit("setFiles", filesString);
 }
 
 /**
@@ -212,7 +256,7 @@ function handleExceed(files) {
     upload.value.handleStart(file)
     upload.value.submit()
   } else {
-    ElMessage.warning(`最多只允许上传${props.limit}张图片`);
+    ElMessage.warning($t('upload.fileCountLimit', { count: props.limit }));
   }
 }
 

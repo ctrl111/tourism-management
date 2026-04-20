@@ -1,0 +1,434 @@
+/* ========================================
+   Стили для фронтенда (пользовательская часть)
+   ======================================== */
+
+/* Оптимизация главной страницы */
+.home-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Оптимизация карточек достопримечательностей */
+.scenic-card {
+  border-radius: 12px;
+  overflow: hidden;
+  background: white;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.scenic-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.scenic-cover {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+}
+
+.card-content {
+  padding: 16px;
+}
+
+.scenic-title {
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.4;
+  min-height: 44px;
+}
+
+.scenic-tags {
+  margin-bottom: 12px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.scenic-stats {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: #666;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.scenic-info {
+  margin: 12px 0;
+  font-size: 13px;
+  color: #666;
+}
+
+.info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.info-item .address {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.scenic-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.price {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.current-price {
+  color: #ff6b6b;
+  font-weight: 600;
+  font-size: 20px;
+}
+
+.original-price {
+  color: #999;
+  font-size: 13px;
+  text-decoration: line-through;
+}
+
+/* Оптимизация сетки карточек */
+.three-column-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+  margin-top: 20px;
+}
+
+/* Оптимизация заметок о путешествиях */
+.travel-notes-list {
+  padding: 8px 0;
+}
+
+.note-item {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.note-item:hover {
+  background: #e9ecef;
+  transform: translateX(4px);
+}
+
+.note-cover {
+  width: 140px;
+  height: 100px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
+.note-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.note-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.4;
+}
+
+.note-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #666;
+  flex-wrap: wrap;
+}
+
+.author {
+  font-weight: 500;
+  color: #333;
+}
+
+.travel-info {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  flex-wrap: wrap;
+}
+
+.travel-info .days {
+  color: var(--el-color-primary);
+  font-weight: 500;
+}
+
+.travel-info .date {
+  color: #666;
+}
+
+.comment-stat {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: #666;
+}
+
+/* Оптимизация заголовков секций */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Оптимизация ошибок загрузки изображений */
+.image-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background: #f5f7fa;
+  color: #c0c4cc;
+  font-size: 13px;
+  gap: 8px;
+}
+
+/* Оптимизация диалогов бронирования */
+.booking-dialog .el-form-item__label {
+  min-width: 140px !important;
+}
+
+.total-price {
+  font-size: 24px;
+  font-weight: 600;
+  color: #ff6b6b;
+}
+
+/* Адаптивность */
+@media (max-width: 1200px) {
+  .three-column-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .home-container {
+    padding: 0 12px;
+  }
+  
+  .three-column-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .note-item {
+    flex-direction: column;
+  }
+  
+  .note-cover {
+    width: 100%;
+    height: 180px;
+  }
+  
+  .scenic-title {
+    font-size: 15px;
+  }
+  
+  .header-title {
+    font-size: 18px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .three-column-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Оптимизация деталей достопримечательности */
+.scenic-details-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.scenic-details-header {
+  margin-bottom: 24px;
+}
+
+.scenic-details-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 16px;
+  line-height: 1.3;
+}
+
+.scenic-details-meta {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  font-size: 14px;
+  color: #666;
+}
+
+/* Оптимизация профиля пользователя */
+.profile-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 32px;
+  padding: 24px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.profile-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.profile-info {
+  flex: 1;
+}
+
+.profile-name {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.profile-stats {
+  display: flex;
+  gap: 32px;
+  margin-top: 16px;
+}
+
+.stat-box {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--el-color-primary);
+}
+
+.stat-label {
+  font-size: 13px;
+  color: #666;
+  margin-top: 4px;
+}
+
+/* Оптимизация комментариев */
+.comment-section {
+  margin-top: 32px;
+}
+
+.comment-item {
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.comment-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.comment-author {
+  font-weight: 600;
+  color: #333;
+}
+
+.comment-time {
+  font-size: 13px;
+  color: #999;
+}
+
+.comment-content {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.6;
+}
+
+/* Оптимизация кнопок действий */
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.action-buttons .el-button {
+  flex: 1;
+  min-width: 120px;
+}
+
+@media (max-width: 768px) {
+  .action-buttons .el-button {
+    flex: 1 1 100%;
+  }
+}

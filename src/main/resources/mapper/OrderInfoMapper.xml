@@ -33,6 +33,10 @@
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="orderNo != null">order_no,</if>
             <if test="userId != null">user_id,</if>
+            <if test="scenicId != null">scenic_id,</if>
+            <if test="scenicName != null">scenic_name,</if>
+            <if test="quantity != null">quantity,</if>
+            <if test="unitPrice != null">unit_price,</if>
             <if test="totalAmount != null">total_amount,</if>
             <if test="status != null">status,</if>
             <if test="visitDate != null">visit_date,</if>
@@ -42,13 +46,15 @@
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="orderNo != null">#{orderNo},</if>
             <if test="userId != null">#{userId},</if>
+            <if test="scenicId != null">#{scenicId},</if>
+            <if test="scenicName != null">#{scenicName},</if>
+            <if test="quantity != null">#{quantity},</if>
+            <if test="unitPrice != null">#{unitPrice},</if>
             <if test="totalAmount != null">#{totalAmount},</if>
             <if test="status != null">#{status},</if>
             <if test="visitDate != null">#{visitDate},</if>
             <if test="createTime != null">#{createTime},</if>
         </trim>
-
-
     </insert>
 
     <!-- 更新 -->
@@ -60,6 +66,18 @@
             </if>
             <if test="userId != null">
                 user_id = #{userId},
+            </if>
+            <if test="scenicId != null">
+                scenic_id = #{scenicId},
+            </if>
+            <if test="scenicName != null">
+                scenic_name = #{scenicName},
+            </if>
+            <if test="quantity != null">
+                quantity = #{quantity},
+            </if>
+            <if test="unitPrice != null">
+                unit_price = #{unitPrice},
             </if>
             <if test="totalAmount != null">
                 total_amount = #{totalAmount},

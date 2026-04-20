@@ -6,9 +6,9 @@
       <el-card shadow="hover" class="section-card">
         <template #header>
           <div class="card-header">
-            <span class="header-title">精选景点推荐</span>
+            <span class="header-title">{{ $t('scenic.featured') }}</span>
             <el-button type="primary" link @click="router.push('/front/scenic')">
-              更多景点
+              {{ $t('scenic.moreScenic') }}
               <el-icon>
                 <ArrowRight/>
               </el-icon>
@@ -27,7 +27,7 @@
                   <el-icon>
                     <Picture/>
                   </el-icon>
-                  <span>图片加载失败</span>
+                  <span>{{ $t('scenic.imageLoadFailed') }}</span>
                 </div>
               </template>
             </el-image>
@@ -35,8 +35,16 @@
               <h4 class="scenic-title">{{ item.name }}</h4>
               <div class="scenic-tags">
                 <el-tag type="info" size="small">{{ item.categoryType }}</el-tag>
-                <el-tag type="warning" size="small">{{ item.score }}分</el-tag>
-                <el-tag type="warning" size="small">{{ item.countComment }}条点评</el-tag>
+              </div>
+              <div class="scenic-stats">
+                <div class="stat-item">
+                  <el-icon><Star /></el-icon>
+                  <span>{{ item.countFavorite || 0 }}</span>
+                </div>
+                <div class="stat-item">
+                  <el-icon><ChatDotRound /></el-icon>
+                  <span>{{ item.countComment || 0 }}</span>
+                </div>
               </div>
               <div class="scenic-info">
                 <div class="info-item">
@@ -56,7 +64,7 @@
                     <span class="current-price">￥{{ item.price }}</span>
                     <span class="original-price">¥{{ item.originalPrice }}</span>
                   </div>
-                  <el-button type="primary" size="small" @click.stop="openBookingDialog(item)">立即预定</el-button>
+                  <el-button type="primary" size="small" @click.stop="openBookingDialog(item)">{{ $t('scenic.bookNow') }}</el-button>
                 </div>
               </div>
             </div>
@@ -70,9 +78,9 @@
           <el-card shadow="hover" class="section-card">
             <template #header>
               <div class="card-header">
-                <span class="header-title">热门游记分享</span>
+                <span class="header-title">{{ $t('travelNote.hotNotes') }}</span>
                 <el-button type="primary" link @click="router.push('/front/travelNote')">
-                  更多游记
+                  {{ $t('travelNote.moreNotes') }}
                   <el-icon>
                     <ArrowRight/>
                   </el-icon>
@@ -91,7 +99,7 @@
                         <el-icon>
                           <Picture/>
                         </el-icon>
-                        <span>图片加载失败</span>
+                        <span>{{ $t('scenic.imageLoadFailed') }}</span>
                       </div>
                     </template>
                   </el-image>
@@ -103,18 +111,17 @@
                       <el-icon>
                         <View/>
                       </el-icon>
-                      {{ item.viewCount | formatNumber }}
+                      {{ item.viewCount || 0 }}
                       <el-icon><Star /></el-icon>
-                      {{ item.likesCount | formatNumber }}
+                      {{ item.likesCount || 0 }}
                     </div>
-                    <p class="note-excerpt">{{ item.excerpt }}</p>
                     <div class="travel-info">
-                      <span class="days">{{ item.days }}天行程</span>
-                      <span class="date">行程时间：{{ item.travelTime }}</span>
+                      <span class="days">{{ $t('travelNote.daysTrip', { days: item.days || 1 }) }}</span>
+                      <span class="date">{{ $t('travelNote.tripTime', { time: item.travelTime || '' }) }}</span>
                     </div>
                     <div class="comment-stat">
                       <el-icon><ChatDotRound /></el-icon>
-                      {{ item.commentsCount | formatNumber }}
+                      {{ item.commentsCount || 0 }}
                     </div>
                   </div>
                 </div>
@@ -126,7 +133,7 @@
     </div>
     <el-dialog
         v-model="bookingDialogVisible"
-        :title="`预定 - ${currentScenic?.name}`"
+        :title="$t('order.bookingFor', { name: currentScenic?.name })"
         width="600px"
     >
       <el-form
@@ -134,17 +141,17 @@
           :model="buyTicketForm"
           label-width="100px"
       >
-        <el-form-item label="游玩日期" prop="visitDate" :rules="[{required:true,message:'请选择日期',trigger:[ 'blur','change']}]">
+        <el-form-item :label="$t('order.visitDate')" prop="visitDate" :rules="[{required:true,message:$t('form.pleaseSelect', { field: $t('order.visitDate') }),trigger:[ 'blur','change']}]">
           <el-date-picker
               v-model="buyTicketForm.visitDate"
               type="date"
-              placeholder="选择游玩日期"
+              :placeholder="$t('order.selectDate')"
               value-format="YYYY-MM-DD"
               :disabled-date="disabledDate"
           />
         </el-form-item>
 
-        <el-form-item label="购买数量" prop="quantity" >
+        <el-form-item :label="$t('order.quantity')" prop="quantity" >
           <el-input-number
               v-model="buyTicketForm.number"
               :min="1"
@@ -153,7 +160,7 @@
           />
         </el-form-item>
 
-        <el-form-item label="总价">
+        <el-form-item :label="$t('order.totalPrice')">
         <span class="total-price">
           ￥{{ totalPrice}}
         </span>
@@ -161,16 +168,23 @@
       </el-form>
 
       <template #footer>
-        <el-button @click="bookingDialogVisible = false">取消</el-button>
+        <el-button @click="bookingDialogVisible = false">{{ $t('common.cancel') }}</el-button>
         <el-button
             type="primary"
             @click="confirmBooking"
         >
-          确认预定
+          {{ $t('order.confirmBooking') }}
         </el-button>
       </template>
     </el-dialog>
 
+    <!-- 支付对话框 -->
+    <PaymentDialog
+      v-model="paymentDialogVisible"
+      :order-no="paymentOrderNo"
+      :total-amount="paymentAmount"
+      @success="handlePaymentSuccess"
+    />
   </div>
 </template>
 
@@ -180,6 +194,10 @@ import request from "@/utils/http.js";
 import router from "@/router/index.js";
 import {ArrowRight, ChatDotRound, HotWater, Location, Picture, PriceTag, Star, View} from "@element-plus/icons-vue";
 import {ElMessage} from "element-plus";
+import PaymentDialog from "@/components/PaymentDialog.vue";
+import {useI18n} from 'vue-i18n';
+
+const {t: $t} = useI18n();
 
 
 const drawerVisible = ref(false)
@@ -197,6 +215,11 @@ const buyTicketForm = ref({
   totalPrice: 0,
 })
 
+// 支付相关
+const paymentDialogVisible = ref(false)
+const paymentOrderNo = ref('')
+const paymentAmount = ref(0)
+
 // 景点数据
 const scenicList = ref([])
 
@@ -206,21 +229,64 @@ const travelNotes = ref([])
 // 数据获取方法
 const fetchData = () => {
   try {
+    // 获取推荐景点数据（使用协同过滤）
+    request.get('/recommendation/forCurrentUser', {
+      params: {
+        limit: 6
+      }
+    }).then(res => {
+      console.log('========== 推荐接口返回 ==========')
+      console.log('返回数据类型:', typeof res, '是否为数组:', Array.isArray(res))
+      console.log('返回数据长度:', res ? res.length : 'null')
+      console.log('返回数据内容:', res)
+      
+      if (res && Array.isArray(res) && res.length > 0) {
+        scenicList.value = res
+        console.log('✓ 使用推荐结果:', res.length, '个景点')
+        console.log('推荐景点列表:', res.map(s => `ID:${s.id} ${s.name}`).join(', '))
+        console.log('提示：查看后端日志确认是协同过滤还是热门推荐')
+      } else {
+        console.log('✗ 推荐结果为空')
+        console.log('可能原因：')
+        console.log('  1. 用户未登录')
+        console.log('  2. 用户没有交互历史（未收藏、未购买）')
+        console.log('  3. 找不到相似用户')
+        console.log('  4. 所有推荐景点都已被用户交互过')
+        console.log('解决方案：运行 add_test_interactions.bat 添加测试数据')
+        scenicList.value = []
+      }
+    }).catch(error => {
+      console.error('✗ 推荐加载失败:', error)
+      console.error('错误详情:', error.response || error.message)
+      scenicList.value = []
+    })
+    
+    // 获取游记数据
     let paramsForm = {
       pageNum: 1,
       pageSize: 6
     }
-    // 获取景点数据
-    const scenicData = request.get('/scenicInfo/homelist', {
+    console.log('========== 开始获取游记数据 ==========')
+    console.log('请求参数:', paramsForm)
+    request.get('/travelNote/homelist', {
       params: paramsForm
     }).then(res => {
-      scenicList.value = res.data.list
-    })
-    // 获取游记数据
-    const travelNoteData = request.get('/travelNote/homelist', {
-      params: paramsForm
-    }).then(res => {
-      travelNotes.value = res.data.list
+      console.log('游记接口返回:', res)
+      console.log('游记数据类型:', typeof res, '是否有data:', res && res.data)
+      
+      // 后端返回格式：{ code: 200, msg: "...", data: { list: [...], total: 6 } }
+      if (res && res.data && res.data.list) {
+        console.log('游记列表长度:', res.data.list.length)
+        console.log('游记列表:', res.data.list)
+        travelNotes.value = res.data.list
+      } else {
+        console.warn('游记数据格式异常:', res)
+        travelNotes.value = []
+      }
+    }).catch(error => {
+      console.error('✗ 游记加载失败:', error)
+      console.error('错误详情:', error.response || error.message)
+      travelNotes.value = []
     })
   } catch (error) {
     console.error('数据加载失败:', error)
@@ -246,29 +312,42 @@ function confirmBooking() {
   bookingFormRef.value.validate((valid) => {
     if (!valid){
       ElMessage({
-        message: "验证失败，请检查表单!",
+        message: $t('order.validationFailed'),
         type: 'warning'
       });
       return
     }
     buyTicketForm.value.id = currentScenic.value.id
-    buyTicketForm.value.totalPrice = totalPrice
+    buyTicketForm.value.totalPrice = totalPrice.value
     request.post("/orderInfo/confirmBooking", buyTicketForm.value).then(res => {
       if (!res||res.code !== 200) {
         return
       }
       ElMessage({
-        message: "预定成功",
+        message: $t('order.bookingSuccess'),
         type: "success"
       });
       bookingDialogVisible.value = false
-      getPageList()
+      
+      // Предварительное бронирование успешно, открыть диалог оплаты
+      paymentOrderNo.value = res.data // Номер заказа, возвращенный сервером
+      paymentAmount.value = totalPrice.value
+      paymentDialogVisible.value = true
     })
   })
 }
 const totalPrice = computed(() => {
   return currentScenic.value?.price * buyTicketForm.value.number || 0;
 });
+
+/**
+ * Обработчик успешной оплаты
+ */
+function handlePaymentSuccess() {
+  ElMessage.success($t('order.paySuccess'))
+  fetchData()
+}
+
 //聊天窗口
 const handleChatToggle = () => {
   drawerVisible.value = !drawerVisible.value
@@ -308,25 +387,32 @@ fetchData()
 
 .three-column-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 24px;
 }
 
 .scenic-card {
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
   background: white;
-  transition: transform 0.3s;
+  transition: all 0.3s ease;
   cursor: pointer;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .scenic-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-8px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 }
 
 .scenic-cover {
   width: 100%;
-  height: 200px;
+  height: 220px;
+  object-fit: cover;
+  flex-shrink: 0;
 }
 
 .scenic-info {
@@ -354,10 +440,11 @@ fetchData()
 }
 
 .note-cover {
-  width: 120px;
-  height: 80px;
-  border-radius: 6px;
+  width: 140px;
+  height: 100px;
+  border-radius: 8px;
   flex-shrink: 0;
+  object-fit: cover;
 }
 
 .note-content {
@@ -367,7 +454,15 @@ fetchData()
 
 .note-title {
   margin: 0 0 8px;
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.4;
 }
 
 .note-meta {
@@ -375,6 +470,9 @@ fetchData()
   align-items: center;
   gap: 8px;
   margin: 8px 0;
+  font-size: 13px;
+  color: #666;
+  flex-wrap: wrap;
 }
 
 /* 线路列表样式 */
@@ -418,15 +516,25 @@ fetchData()
   border-radius: 4px;
 }
 .card-content {
-  padding: 15px 0;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 .scenic-title {
   margin: 0 0 12px;
   font-size: 16px;
+  font-weight: 600;
   color: #333;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.5;
+  min-height: 48px;
+  max-height: 48px;
+  word-break: break-word;
 }
 .scenic-tags {
   margin-bottom: 12px;
@@ -436,18 +544,32 @@ fetchData()
 .travel-info {
   display: flex;
   flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
 
   .days {
     color: var(--el-color-primary);
     font-weight: 500;
-    font-size: 14px;
   }
 
   .date {
     color: #666;
-    font-size: 12px;
   }
 }
+.scenic-stats {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: #666;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .scenic-info {
   margin: 12px 0;
   font-size: 12px;
@@ -456,28 +578,49 @@ fetchData()
 
 .info-item {
   display: flex;
-  align-items: center;
-  gap: 5px;
+  align-items: flex-start;
+  gap: 6px;
   margin-bottom: 8px;
+  line-height: 1.6;
+  font-size: 13px;
+}
+
+.info-item .address {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  word-break: break-word;
 }
 .scenic-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 15px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.price {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
 }
 
 .current-price {
   color: #ff6b6b;
-  font-weight: 500;
-  font-size: 16px;
+  font-weight: 600;
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
 }
 
 .original-price {
   color: #999;
-  font-size: 12px;
+  font-size: 13px;
   text-decoration: line-through;
-  margin-left: 8px;
+  font-variant-numeric: tabular-nums;
 }
 /* 新增样式 */
 .user-info {
@@ -528,8 +671,53 @@ fetchData()
   color: #c0c4cc;
 }
 
-/* 响应式调整 */
+/* Адаптивность для мобильных устройств - улучшенная поддержка русского */
 @media (max-width: 768px) {
+  .home-container {
+    padding: 0 12px;
+  }
+  
+  .three-column-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .note-item {
+    flex-direction: column;
+  }
+  
+  .note-cover {
+    width: 100%;
+    height: 180px;
+  }
+  
+  .scenic-title {
+    font-size: 15px;
+    min-height: 45px;
+    max-height: 45px;
+    line-height: 1.5;
+  }
+  
+  .card-header .header-title {
+    font-size: 18px;
+    line-height: 1.4;
+  }
+  
+  .scenic-footer {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+  
+  .scenic-footer .el-button {
+    width: 100%;
+    white-space: normal;
+    height: auto;
+    min-height: 36px;
+    line-height: 1.3;
+    padding: 8px 16px;
+  }
+  
   .route-covers {
     grid-template-columns: repeat(2, 1fr);
     height: 80px;
@@ -538,6 +726,29 @@ fetchData()
   .user-info {
     flex-direction: column;
     align-items: flex-start;
+  }
+  
+  .info-item {
+    font-size: 12px;
+  }
+  
+  .stat-item {
+    font-size: 12px;
+  }
+}
+
+/* Адаптивность для планшетов */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .three-column-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+}
+
+/* Адаптивность для больших экранов */
+@media (min-width: 1400px) {
+  .three-column-grid {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 </style>

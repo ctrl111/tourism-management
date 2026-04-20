@@ -8,7 +8,7 @@
           @click="add"
           class="create-btn"
       >
-        写游记
+        {{ $t('travelNote.writeNote') }}
       </el-button>
     </div>
 
@@ -17,7 +17,7 @@
       <div class="search-wrapper">
         <el-input
             v-model="searchForm.title"
-            placeholder="搜索游记标题"
+            :placeholder="$t('travelNote.searchNoteTitle')"
             class="search-input"
             size="large"
         >
@@ -26,7 +26,7 @@
           </template>
         </el-input>
         <el-button type="primary" size="large" @click="search">
-          搜索
+          {{ $t('common.search') }}
         </el-button>
       </div>
     </el-card>
@@ -56,7 +56,7 @@
                   <el-icon>
                     <Picture/>
                   </el-icon>
-                  <span>图片加载失败</span>
+                  <span>{{ $t('travelNote.coverLoadFailed') }}</span>
                 </div>
               </template>
             </el-image>
@@ -75,12 +75,8 @@
             <!-- 统计信息 -->
             <div class="card-stats">
               <div class="stat-item">
-                <el-icon><View /></el-icon>
-                {{ item.viewCount | formatNumber }}
-              </div>
-              <div class="stat-item">
                 <el-icon><Star /></el-icon>
-                {{ item.likesCount | formatNumber }}
+                {{ item.favoriteCount || 0 }}
               </div>
             </div>
           </div>
@@ -88,13 +84,11 @@
           <!-- 底部信息 -->
           <div class="card-footer">
             <div class="travel-info">
-              <span class="days">{{ item.days }}天行程</span>
-              <span class="date">行程时间：{{ item.travelTime }}</span>
-              <span class="date">发布时间：{{ formatDate(item.createTime) }}</span>
+              <span class="date">{{ $t('travelNote.itineraryTime', { time: item.travelTime }) }}</span>
             </div>
             <div class="comment-stat">
               <el-icon><ChatDotRound /></el-icon>
-              {{ item.commentsCount | formatNumber }}
+              {{ item.commentsCount || 0 }}
             </div>
           </div>
         </el-card>
@@ -114,39 +108,39 @@
     <!-- 发布/编辑对话框 -->
     <el-dialog
         v-model="dialogOpen"
-        :title="formData.id ? '编辑游记' : '发布新游记'"
+        :title="formData.id ? $t('travelNote.editNote') : $t('travelNote.publishNewNote')"
         width="800px"
         custom-class="note-editor-dialog"
     >
       <el-form ref="formRef" :model="formData" label-width="100px">
-        <el-form-item label="游记标题" prop="title" :rules="[{required:true,message:'不能为空',trigger:[ 'blur','change']}]">
+        <el-form-item :label="$t('travelNote.noteTitle')" prop="title" :rules="[{required:true,message:$t('form.required', { field: $t('travelNote.noteTitle') }),trigger:[ 'blur','change']}]">
           <el-input
               v-model="formData.title"
-              placeholder="请输入吸引人的标题"
+              :placeholder="$t('travelNote.attractiveTitle')"
               maxlength="50"
               show-word-limit
           />
         </el-form-item>
-        <el-form-item label="行程信息">
+        <el-form-item :label="$t('travelNote.tripInfo')">
           <el-row :gutter="20">
             <el-col :span="12">
-              <el-form-item prop="travelTime" :rules="[{required:true,message:'请选择日期',trigger:[ 'blur','change']}]" >
+              <el-form-item prop="travelTime" :rules="[{required:true,message:$t('form.pleaseSelect', { field: $t('order.visitDate') }),trigger:[ 'blur','change']}]" >
                 <el-date-picker
                     v-model="formData.travelTime"
                     type="date"
                     value-format="YYYY-MM-DD"
-                    placeholder="选择出行日期"
+                    :placeholder="$t('travelNote.selectTravelDate')"
                     style="width: 100%"
                 />
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item prop="days" :rules="[{required:true,message:'不能为空',trigger:[ 'blur','change']}]" >
+              <el-form-item prop="days" :rules="[{required:true,message:$t('form.required', { field: $t('travelNote.travelDays') }),trigger:[ 'blur','change']}]" >
                 <el-input-number
                     v-model="formData.days"
                     :min="1"
                     :max="30"
-                    placeholder="旅行天数"
+                    :placeholder="$t('travelNote.travelDays')"
                     style="width: 100%"
                 />
               </el-form-item>
@@ -154,26 +148,26 @@
           </el-row>
         </el-form-item>
 
-        <el-form-item label="封面图片" prop="images" :rules="[{required:true,message:'请上传封面图',trigger:[ 'blur','change']}]">
-          <MyUpLoad v-if="dialogOpen"  type="imageCard" :limit="1" :files="formData.images"
-                    @setFiles="formData.images =$event"></MyUpLoad>
+        <el-form-item :label="$t('travelNote.coverImage')" prop="cover" :rules="[{required:true,message:$t('travelNote.uploadCover'),trigger:[ 'blur','change']}]">
+          <MyUpLoad v-if="dialogOpen" type="imageCard" :limit="1" :files="formData.cover"
+                    @setFiles="formData.cover =$event"></MyUpLoad>
         </el-form-item>
 
-        <el-form-item label="游记内容" prop="content" :rules="[{required:true,message:'不能为空',trigger:[ 'blur','change']}]">
+        <el-form-item :label="$t('travelNote.noteContent')" prop="content" :rules="[{required:true,message:$t('form.required', { field: $t('travelNote.content') }),trigger:[ 'blur','change']}]">
           <MyEditor :content="formData.content"
-                    placeholder="开始书写你的精彩旅程..."
+                    :placeholder="$t('travelNote.startWriting')"
                     @content-change="formData.content =$event"
                     v-if="dialogOpen"></MyEditor>
         </el-form-item>
       </el-form>
 
       <template #footer>
-        <el-button @click="dialogOpen = false">取消</el-button>
+        <el-button @click="dialogOpen = false">{{ $t('common.cancel') }}</el-button>
         <el-button
             type="primary"
             @click="submit"
         >
-          {{ formData.id ? '更新游记' : '立即发布' }}
+          {{ formData.id ? $t('travelNote.updateNote') : $t('travelNote.publishNow') }}
         </el-button>
       </template>
     </el-dialog>
@@ -190,6 +184,9 @@ import MyEditor from "@/components/MyEditor.vue";
 import MyUpLoad from "@/components/MyUpload.vue";
 import router from "@/router/index.js";
 import dayjs from 'dayjs'
+import {useI18n} from 'vue-i18n';
+
+const {t: $t} = useI18n();
 
 
 const drawerVisible = ref(false)
@@ -305,7 +302,7 @@ function submit() {
   formRef.value.validate((valid) => {
     if (!valid){
       ElMessage({
-        message: "验证失败，请检查表单!",
+        message: $t('order.validationFailed'),
         type: 'warning'
       });
       return
@@ -318,7 +315,7 @@ function submit() {
         }
         dialogOpen.value = false
         ElMessage({
-          message: "操作成功",
+          message: $t('message.addSuccess'),
           type: 'success'
         });
         getPageList()
@@ -331,7 +328,7 @@ function submit() {
         }
         dialogOpen.value = false
         ElMessage({
-          message: "操作成功",
+          message: $t('message.updateSuccess'),
           type: 'success'
         });
         getPageList()
@@ -378,7 +375,7 @@ function batchDelete(rows) {
         return
       }
       ElMessage({
-        message: "操作成功",
+        message: t('travelNote.operationSuccess'),
         type: 'success'
       });
       getPageList()
@@ -386,7 +383,7 @@ function batchDelete(rows) {
   }).catch(() => {
     ElMessage({
       type: 'info',
-      message: '已取消删除'
+      message: t('travelNote.deleteCancelled')
     });
     tableComponents.value.clearSelection();
   });

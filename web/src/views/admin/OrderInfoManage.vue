@@ -3,14 +3,14 @@
     <el-space direction="vertical" alignment="left" style="width: 100%">
       <el-card>
         <el-form ref="searchFormComponents" :model="searchForm" inline>
-          <el-form-item label="状态" prop="status">
-            <el-select v-model="searchForm.status" placeholder="请选择" clearable filterable style="width: 150px">
+          <el-form-item :label="$t('orderManage.status')" prop="status">
+            <el-select v-model="searchForm.status" :placeholder="$t('orderManage.pleaseSelect')" clearable filterable style="width: 150px">
               <el-option :label="item" :value="item" :key="item" v-for="item in statusList"></el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="">
-            <el-button type="primary" :icon="Search" @click="search">搜索</el-button>
-            <el-button :icon="Refresh" @click="resetSearch">重置</el-button>
+            <el-button type="primary" :icon="Search" @click="search">{{ $t('orderManage.search') }}</el-button>
+            <el-button :icon="Refresh" @click="resetSearch">{{ $t('orderManage.reset') }}</el-button>
           </el-form-item>
         </el-form>
         <el-space>
@@ -27,23 +27,46 @@
                   @row-click="showDetail"
                   border>
           <el-table-column type="selection" width="55"></el-table-column>
-          <el-table-column prop="id" label="ID" width="50"></el-table-column>
-          <el-table-column prop="userName" label="用户" width="120">
+          <el-table-column prop="userName" :label="$t('orderManage.user')" width="120" show-overflow-tooltip>
             <template #default="{row}">
               {{ row.user?.username }}
             </template>
           </el-table-column>
-          <el-table-column prop="orderNo" label="订单号" width="300"></el-table-column>
-          <el-table-column prop="scenicName" label="景点" width="120"></el-table-column>
-          <el-table-column prop="quantity" label="数量" width="120"></el-table-column>
-          <el-table-column prop="totalAmount" label="订单总金额" width="120"></el-table-column>
-          <el-table-column prop="status" label="支付状态" width="120"></el-table-column>
-          <el-table-column prop="visitDate" label="预定日期" width="180"></el-table-column>
-          <el-table-column prop="createTime" label="创建时间" width="180"></el-table-column>
-          <el-table-column fixed="right" label="操作" width="200">
+          <el-table-column prop="orderNo" :label="$t('orderManage.orderNo')" min-width="220" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="scenicName" :label="$t('orderManage.scenic')" min-width="150" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="quantity" :label="$t('orderManage.quantity')" width="100"></el-table-column>
+          <el-table-column prop="totalAmount" :label="$t('orderManage.totalAmount')" width="120"></el-table-column>
+          <el-table-column prop="status" :label="$t('orderManage.paymentStatus')" width="140">
             <template #default="scope">
-              <el-button :icon="Edit" @click="edit(scope.$index, scope.row,$event)">编辑</el-button>
-              <el-button :icon="Delete" type="danger" @click="deleteOne(scope.$index, scope.row,scope.event)">删除</el-button>
+              <el-tag v-if="scope.row.status === 'PENDING'" type="warning">{{ $t('orderManage.pending') }}</el-tag>
+              <el-tag v-else-if="scope.row.status === 'PAID'" type="success">{{ $t('orderManage.paid') }}</el-tag>
+              <el-tag v-else-if="scope.row.status === 'CANCELLED'" type="info">{{ $t('orderManage.cancelled') }}</el-tag>
+              <el-tag v-else-if="scope.row.status === 'REFUNDED'" type="danger">{{ $t('orderManage.refunded') }}</el-tag>
+              <el-tag v-else type="info">{{ $t('status.' + scope.row.status) }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="visitDate" :label="$t('orderManage.visitDate')" width="180"></el-table-column>
+          <el-table-column prop="createTime" :label="$t('orderManage.createTime')" width="180"></el-table-column>
+          <el-table-column fixed="right" :label="$t('orderManage.operation')" width="280">
+            <template #default="scope">
+              <el-button 
+                :icon="Edit" 
+                @click="edit(scope.$index, scope.row, $event)"
+                size="small"
+              >{{ $t('orderManage.edit') }}</el-button>
+              <el-button 
+                v-if="scope.row.status === 'PAID'"
+                type="warning" 
+                :icon="RefreshRight" 
+                @click="refundOrder(scope.row, $event)"
+                size="small"
+              >{{ $t('orderManage.refund') }}</el-button>
+              <el-button 
+                :icon="Delete" 
+                type="danger" 
+                @click="deleteOne(scope.$index, scope.row, $event)"
+                size="small"
+              >{{ $t('orderManage.delete') }}</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -68,16 +91,16 @@
     >
       <el-form ref="formRef" :model="formData" label-width="100px">
         <slot name="content">
-          <el-form-item label="订单号" prop="orderNo"  :rules="[{required:true,message:'不能为空',trigger:[ 'blur','change']}]">
+          <el-form-item :label="$t('orderManage.orderNoLabel')" prop="orderNo"  :rules="[{required:true,message:$t('orderManage.cannotBeEmpty'),trigger:[ 'blur','change']}]">
             <el-input v-model="formData.orderNo" disabled></el-input>
           </el-form-item>
-          <el-form-item label="订单总金额" prop="totalAmount"  :rules="[{required:true,message:'不能为空',trigger:[ 'blur','change']}]">
+          <el-form-item :label="$t('orderManage.totalAmountLabel')" prop="totalAmount"  :rules="[{required:true,message:$t('orderManage.cannotBeEmpty'),trigger:[ 'blur','change']}]">
             <el-input v-model="formData.totalAmount"></el-input>
           </el-form-item>
-          <el-form-item label="支付状态" prop="status"  :rules="[{required:true,message:'不能为空',trigger:[ 'blur','change']}]">
+          <el-form-item :label="$t('orderManage.paymentStatusLabel')" prop="status"  :rules="[{required:true,message:$t('orderManage.cannotBeEmpty'),trigger:[ 'blur','change']}]">
             <el-input v-model="formData.status"></el-input>
           </el-form-item>
-          <el-form-item label="预定日期" prop="visitDate"  :rules="[{required:true,message:'不能为空',trigger:[ 'blur','change']}]">
+          <el-form-item :label="$t('orderManage.visitDateLabel')" prop="visitDate"  :rules="[{required:true,message:$t('orderManage.cannotBeEmpty'),trigger:[ 'blur','change']}]">
             <el-date-picker
                 v-model="formData.visitDate"
                 type="date"
@@ -98,56 +121,28 @@
     </el-dialog>
     <el-dialog
         v-model="detailDialogVisible"
-        title="订单详情"
+        :title="$t('orderManage.orderDetails')"
         width="800px"
     >
       <el-descriptions :column="2" border>
-        <el-descriptions-item label="订单号">{{ currentOrder.orderNo }}</el-descriptions-item>
-        <el-descriptions-item label="用户姓名">{{ currentOrder.user?.username }}</el-descriptions-item>
-        <el-descriptions-item label="景点名称">{{ currentOrder.scenicName }}</el-descriptions-item>
-        <el-descriptions-item label="购买数量">{{ currentOrder.quantity }}</el-descriptions-item>
-        <el-descriptions-item label="总金额">{{ currentOrder.totalAmount }}元</el-descriptions-item>
-        <el-descriptions-item label="支付状态">
-          <el-tag :type="currentOrder.status === '已支付' ? 'success' : 'danger'">
-            {{ currentOrder.status }}
-          </el-tag>
+        <el-descriptions-item :label="$t('orderManage.orderNoLabel')">{{ currentOrder.orderNo }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('orderManage.userName')">{{ currentOrder.user?.username }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('orderManage.scenicName')">{{ currentOrder.scenicName }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('orderManage.purchaseQuantity')">{{ currentOrder.quantity }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('orderManage.totalAmountLabel')">{{ currentOrder.totalAmount }} ₽</el-descriptions-item>
+        <el-descriptions-item :label="$t('orderManage.paymentStatusLabel')">
+          <el-tag v-if="currentOrder.status === 'PENDING'" type="warning">{{ $t('orderManage.pending') }}</el-tag>
+          <el-tag v-else-if="currentOrder.status === 'PAID'" type="success">{{ $t('orderManage.paid') }}</el-tag>
+          <el-tag v-else-if="currentOrder.status === 'CANCELLED'" type="info">{{ $t('orderManage.cancelled') }}</el-tag>
+          <el-tag v-else-if="currentOrder.status === 'REFUNDED'" type="danger">{{ $t('orderManage.refunded') }}</el-tag>
+          <el-tag v-else type="info">{{ $t('status.' + currentOrder.status) }}</el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="预定日期">{{ currentOrder.visitDate }}</el-descriptions-item>
-        <el-descriptions-item label="下单时间">{{ currentOrder.createTime }}</el-descriptions-item>
-        <el-descriptions-item label="订单明细" :span="2">
-          <!-- 添加空状态处理 -->
-          <el-table
-              :data="currentOrder?.orderItemList"
-              border
-              style="width: 100%; margin-top: 10px"
-              v-loading="detailLoading"
-          >
-            <!-- 列定义保持不变 -->
-            <el-table-column prop="scenicName" label="景点" width="200">
-              <template #default="{row}">{{ row.scenicName }}</template>
-            </el-table-column>
-            <el-table-column prop="quantity" label="数量" width="80">
-              <template #default="{row}">{{ row.quantity || 0 }}张</template>
-            </el-table-column>
-            <el-table-column prop="price" label="单价" width="100">
-              <template #default="{row}">
-                ￥{{ (Number(row.price) || 0).toFixed(2) }}
-              </template>
-            </el-table-column>
-            <el-table-column prop="totalPrice" label="小计" width="120">
-              <template #default="{row}">
-                ￥{{ ((Number(row.price) || 0) * (Number(row.quantity) || 0)).toFixed(2) }}
-              </template>
-            </el-table-column>
-            <!-- 空状态 -->
-            <template #empty>
-              <div class="empty-tip">暂无订单明细数据</div>
-            </template>
-          </el-table>
-        </el-descriptions-item>
+        <el-descriptions-item :label="$t('orderManage.visitDateLabel')">{{ currentOrder.visitDate }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('orderManage.createTime')">{{ currentOrder.createTime }}</el-descriptions-item>
       </el-descriptions>
+      
       <template #footer>
-        <el-button @click="detailDialogVisible = false">关闭</el-button>
+        <el-button @click="detailDialogVisible = false">{{ $t('orderManage.close') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -155,7 +150,7 @@
 
 <script setup>
 import request from "@/utils/http.js";
-import {Check, Close, Delete, Edit, Refresh, Plus, Search} from '@element-plus/icons-vue'
+import {Check, Close, Delete, Edit, Refresh, Plus, Search, RefreshRight} from '@element-plus/icons-vue'
 import {ref, toRaw} from "vue";
 import {ElMessage, ElMessageBox} from "element-plus";
 
@@ -172,7 +167,7 @@ const pageInfo = ref({
   //总条数
   total: 0
 });
-const statusList = ref(['已支付', '未支付', '支付失败'])
+const statusList = ref(['PENDING', 'PAID', 'CANCELLED', 'REFUNDED'])
 const searchForm = ref({
 
 });
@@ -275,7 +270,7 @@ function submit() {
   formRef.value.validate((valid) => {
     if (!valid){
       ElMessage({
-        message: "验证失败，请检查表单!",
+        message: "Проверка не пройдена, проверьте форму!",
         type: 'warning'
       });
       return
@@ -288,7 +283,7 @@ function submit() {
         }
         dialogOpen.value = false
         ElMessage({
-          message: "操作成功",
+          message: "Операция выполнена успешно",
           type: 'success'
         });
         getPageList()
@@ -301,7 +296,7 @@ function submit() {
         }
         dialogOpen.value = false
         ElMessage({
-          message: "操作成功",
+          message: "Операция выполнена успешно",
           type: 'success'
         });
         getPageList()
@@ -338,9 +333,9 @@ function batchDelete(rows) {
     rows = selectionRows.value;
   }
   let ids = rows.map(item => item.id);
-  ElMessageBox.confirm(`此操作将永久删除ID为[${ids}]的数据, 是否继续?`, '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
+  ElMessageBox.confirm(`Это действие навсегда удалит данные с ID [${ids}]. Продолжить?`, 'Подсказка', {
+    confirmButtonText: 'Подтвердить',
+    cancelButtonText: 'Отмена',
     type: 'warning',
     center: true
   }).then(() => {
@@ -349,7 +344,7 @@ function batchDelete(rows) {
         return
       }
       ElMessage({
-        message: "操作成功",
+        message: "Операция выполнена успешно",
         type: 'success'
       });
       getPageList()
@@ -357,10 +352,39 @@ function batchDelete(rows) {
   }).catch(() => {
     ElMessage({
       type: 'info',
-      message: '已取消删除'
+      message: 'Удаление отменено'
     });
     tableComponents.value.clearSelection();
   });
+}
+
+/**
+ * 退款订单
+ */
+function refundOrder(row, event) {
+  event?.stopPropagation()
+  
+  ElMessageBox.confirm(
+    `Подтвердить возврат заказа ${row.orderNo}? Сумма возврата ¥${row.totalAmount} будет возвращена на баланс пользователя.`,
+    'Подтверждение возврата',
+    {
+      confirmButtonText: 'Подтвердить возврат',
+      cancelButtonText: 'Отмена',
+      type: 'warning'
+    }
+  ).then(() => {
+    request.post('/payment/refund', null, {
+      params: { orderNo: row.orderNo }
+    }).then(res => {
+      if (!res) {
+        return
+      }
+      ElMessage.success('Возврат выполнен успешно')
+      getPageList()
+    })
+  }).catch(() => {
+    ElMessage.info('Возврат отменён')
+  })
 }
 </script>
 

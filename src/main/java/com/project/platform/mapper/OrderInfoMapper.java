@@ -16,6 +16,18 @@ public interface OrderInfoMapper {
     @Select("SELECT * FROM order_info WHERE id = #{id}")
     OrderInfo selectById(Integer id);
 
+    @Select("SELECT * FROM order_info WHERE order_no = #{orderNo}")
+    OrderInfo selectByOrderNo(String orderNo);
+
+    @Select("SELECT * FROM order_info WHERE user_id = #{userId}")
+    List<OrderInfo> selectByUserId(Integer userId);
+
+    @Select("SELECT COUNT(*) FROM order_info WHERE scenic_id = #{scenicId}")
+    int countByScenicId(Integer scenicId);
+
+    @Select("SELECT * FROM order_info WHERE scenic_id = #{scenicId}")
+    List<OrderInfo> queryByScenicId(Integer scenicId);
+
     @Select("SELECT * FROM order_info")
     List<OrderInfo> list();
 

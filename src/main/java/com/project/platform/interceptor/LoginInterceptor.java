@@ -31,7 +31,15 @@ public class LoginInterceptor implements HandlerInterceptor {
         //获取header的token参数
         String token = request.getHeader("token");
         log.info("登录校验开始，token：{}", token);
+        
+        // 检查是否是可选登录的路径（公开接口但支持登录状态）
+        boolean isOptionalAuth = isOptionalAuthPath(request.getRequestURI());
+        
         if (token == null || token.isEmpty()) {
+            if (isOptionalAuth) {
+                log.info("可选登录接口，token为空，允许访问但不设置用户信息");
+                return true;
+            }
             log.info("token为空，请求被拦截");
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return false;
@@ -39,13 +47,30 @@ public class LoginInterceptor implements HandlerInterceptor {
         Claims claims = JwtUtils.verifyJwt(token);
         //获取用户ID
         if (claims == null) {
+            if (isOptionalAuth) {
+                log.info("可选登录接口，token无效，允许访问但不设置用户信息");
+                return true;
+            }
             log.warn("token无效，请求被拦截");
-            throw new CustomException(HttpStatus.UNAUTHORIZED,"token无效，请求被拦截");
+            throw new CustomException(HttpStatus.UNAUTHORIZED,"Недействительный токен");
         } else {
             CurrentUserDTO currentUserDTO = JSON.parseObject(claims.get("currentUser").toString(), CurrentUserDTO.class);
             CurrentUserThreadLocal.set(currentUserDTO);
+            log.info("用户信息已设置到ThreadLocal: userId={}", currentUserDTO.getId());
             return true;
         }
+    }
+    
+    /**
+     * 判断是否是可选登录的路径
+     * 这些路径允许未登录访问，但如果登录了会提供额外功能（如收藏状态）
+     */
+    private boolean isOptionalAuthPath(String path) {
+        return path.startsWith("/scenicInfo/selectById/") 
+            || path.startsWith("/travelNote/selectById/")
+            || path.startsWith("/scenicInfo/putViewCount/")
+            || path.startsWith("/travelNote/putViewCount/")
+            || path.equals("/commentsInfo/page");
     }
 
     @Override

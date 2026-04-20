@@ -1,7 +1,7 @@
 <template>
   <el-container class="admin-wrapper" style="height: 100%;">
     <el-aside width="200px" class="my-aside">
-      <h3 class="title">旅游推荐系统</h3>
+      <h3 class="title">{{ $t('menu.systemName') }}</h3>
       <el-menu
           style="width: 100%; overflow: hidden;"
           active-text-color="#409EFF"
@@ -15,22 +15,22 @@
           <el-icon>
             <HomeOutlined/>
           </el-icon>
-          <span>首页</span>
+          <span>{{ $t('menu.home') }}</span>
         </el-menu-item>
 
         <!-- 用户管理 -->
         <el-sub-menu index="user">
           <template #title>
             <el-icon><User /></el-icon>
-            <span>用户管理</span>
+            <span>{{ $t('menu.userManage') }}</span>
           </template>
           <el-menu-item index="/admin/admin">
             <el-icon><Lock /></el-icon>
-            <span>管理员管理</span>
+            <span>{{ $t('menu.adminManage') }}</span>
           </el-menu-item>
           <el-menu-item index="/admin/user">
             <el-icon><UserFilled /></el-icon>
-            <span>游客管理</span>
+            <span>{{ $t('menu.touristManagement') }}</span>
           </el-menu-item>
         </el-sub-menu>
 
@@ -38,23 +38,23 @@
         <el-sub-menu index="scenic">
           <template #title>
             <el-icon><Grid /></el-icon>
-            <span>景点信息管理</span>
+            <span>{{ $t('menu.scenicInfoManagement') }}</span>
           </template>
           <el-menu-item index="/admin/scenicCategory">
             <el-icon><Menu /></el-icon>
-            <span>分类管理</span>
+            <span>{{ $t('menu.categoryManagement') }}</span>
           </el-menu-item>
           <el-menu-item index="/admin/scenicInfo">
             <el-icon><LocationFilled /></el-icon>
-            <span>景点管理</span>
+            <span>{{ $t('menu.scenicManagement') }}</span>
           </el-menu-item>
           <el-menu-item index="/admin/commentsInfo">
             <el-icon><ChatDotSquare /></el-icon>
-            <span>评论管理</span>
+            <span>{{ $t('menu.commentManagement') }}</span>
           </el-menu-item>
           <el-menu-item index="/admin/order">
             <el-icon><ShoppingCart /></el-icon>
-            <span>订单管理</span>
+            <span>{{ $t('menu.orderManagement') }}</span>
           </el-menu-item>
         </el-sub-menu>
 
@@ -62,23 +62,20 @@
         <el-sub-menu index="content">
           <template #title>
             <el-icon><Document /></el-icon>
-            <span>内容审核</span>
+            <span>{{ $t('menu.contentReview') }}</span>
           </template>
           <el-menu-item index="/admin/travelNote">
             <el-icon><Notebook /></el-icon>
-            <span>游记分享</span>
+            <span>{{ $t('menu.travelNoteSharing') }}</span>
           </el-menu-item>
         </el-sub-menu>
 
-        <el-menu-item index="/admin/viewHistory">
-          <el-icon><View /></el-icon>
-          <span>用户浏览历史管理</span>
-        </el-menu-item>
-
         <el-menu-item index="/admin/notice">
           <el-icon><Message /></el-icon>
-          <span>系统通知管理</span>
+          <span>{{ $t('menu.systemNoticeManagement') }}</span>
         </el-menu-item>
+
+
 
       </el-menu>
       </el-aside>
@@ -109,9 +106,9 @@
                   </div>
                   <template #dropdown>
                     <el-dropdown-menu>
-                      <el-dropdown-item><span @click="editCurrentUser">个人信息</span></el-dropdown-item>
-                      <el-dropdown-item><span @click="editPassword">修改密码</span></el-dropdown-item>
-                      <el-dropdown-item divided><span @click="logout">退出登录</span></el-dropdown-item>
+                      <el-dropdown-item><span @click="editCurrentUser">{{ $t('user.personalInfo') }}</span></el-dropdown-item>
+                      <el-dropdown-item><span @click="editPassword">{{ $t('user.changePassword') }}</span></el-dropdown-item>
+                      <el-dropdown-item divided><span @click="logout">{{ $t('common.logout') }}</span></el-dropdown-item>
                     </el-dropdown-menu>
                   </template>
                 </el-dropdown>
@@ -145,10 +142,7 @@ import {
   ShoppingCart,
   Document,
   Notebook,
-  Guide,
-  View,
-  Message,
-  PictureFilled
+  Message
 } from '@element-plus/icons-vue'
 import "@/styles/admin.css";
 import { useUserStore } from '@/stores/user'
@@ -168,13 +162,13 @@ onMounted(async () => {
   
   // 检查登录状态和权限
   if (!hasAdminSession || !userStore.getIsLoggedIn) {
-    ElMessage.warning('请先登录管理员账号')
+    ElMessage.warning('Пожалуйста, войдите в аккаунт администратора')
     window.location.href = "/login"
     return
   }
   
   if (userStore.getUserType !== 'ADMIN') {
-    ElMessage.warning('您没有权限访问后台管理系统')
+    ElMessage.warning('У вас нет прав доступа к системе управления')
     window.location.href = "/login"
   }
 })
@@ -185,7 +179,7 @@ function handleMenuSelect(key, keyPath) {
 
 function logout() {
   ElMessage({
-    message: '退出登录成功，正在跳转',
+    message: 'Выход выполнен успешно, переход на страницу входа',
     type: 'success'
   });
   

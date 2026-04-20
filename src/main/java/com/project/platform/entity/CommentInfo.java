@@ -38,6 +38,11 @@ public class CommentInfo {
      * 评论时间
      */
     private LocalDateTime createTime;
+    
+    /**
+     * 关联对象名称 (景点名称或游记标题)
+     */
+    private String associationName;
 
     private User user;
 

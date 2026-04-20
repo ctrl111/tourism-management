@@ -7,10 +7,13 @@ import com.project.platform.dto.UpdatePasswordDTO;
 import com.project.platform.entity.User;
 import com.project.platform.exception.CustomException;
 import com.project.platform.mapper.UserMapper;
+import com.project.platform.service.FileService;
 import com.project.platform.service.UserService;
 import com.project.platform.utils.CurrentUserThreadLocal;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -24,10 +27,13 @@ import java.util.Map;
  * 用户信息
  */
 @Service
+@Slf4j
 @Tag(name = "用户管理", description = "用户相关操作API")
 public class UserServiceImpl implements UserService {
     @Resource
     private UserMapper userMapper;
+    @Resource
+    private FileService fileService;
     @Value("${resetPassword}")
     private String resetPassword;
 
@@ -58,6 +64,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public void updateById(User entity) {
         check(entity);
+        
+        // 如果密码为空或null，则不更新密码（保留原密码）
+        if (entity.getPassword() == null || entity.getPassword().trim().isEmpty()) {
+            User existingUser = userMapper.selectById(entity.getId());
+            entity.setPassword(existingUser.getPassword());
+        }
+        
         userMapper.updateById(entity);
     }
     private void check(User entity) {
@@ -65,32 +78,142 @@ public class UserServiceImpl implements UserService {
     }
     @Override
     public void removeByIds(List<Integer> ids) {
+        // 删除用户前，先删除关联的头像文件
+        for (Integer id : ids) {
+            User user = userMapper.selectById(id);
+            if (user != null && StringUtils.isNotBlank(user.getAvatarUrl())) {
+                boolean deleted = fileService.deleteFileByUrl(user.getAvatarUrl());
+                if (deleted) {
+                    log.info("删除用户头像成功: userId={}, avatarUrl={}", id, user.getAvatarUrl());
+                }
+            }
+        }
         userMapper.removeByIds(ids);
     }
 
     @Override
     public CurrentUserDTO login(String username, String password) {
-        User user = userMapper.selectByUsername(username);
+        User user = null;
+        
+        // Убираем + и пробелы из username для проверки
+        String cleanUsername = username.replaceAll("[+\\s-]", "");
+        
+        // 尝试用手机号登录 (российский формат: +7XXXXXXXXXX, 7XXXXXXXXXX или 8XXXXXXXXXX)
+        if (cleanUsername.matches("^[78]\\d{10}$")) {
+            // Ищем по оригинальному username (с +) и по очищенному
+            user = userMapper.selectByPhone(username);
+            if (user == null) {
+                user = userMapper.selectByPhone(cleanUsername);
+            }
+        }
+        // 尝试用邮箱登录
+        else if (username.contains("@")) {
+            user = userMapper.selectByEmail(username);
+        }
+        // 尝试用用户名登录
+        else {
+            user = userMapper.selectByUsername(username);
+        }
+        
         if (user == null || !user.getPassword().equals(password)) {
-            throw new CustomException("用户名或密码错误");
+            throw new CustomException("Неверное имя пользователя/телефон/email или пароль");
         }
-        if (user.getStatus().equals("禁用")) {
-            throw new CustomException("用户已禁用");
+        
+        // 检查用户状态（统一使用 ACTIVE/INACTIVE）
+        if ("INACTIVE".equals(user.getStatus())) {
+            throw new CustomException("Пользователь заблокирован, обратитесь к администратору");
         }
+        
         CurrentUserDTO currentUserDTO = new CurrentUserDTO();
         BeanUtils.copyProperties(user, currentUserDTO);
+        // 设置type为角色（ADMIN或USER）
+        currentUserDTO.setType(user.getRole());
         return currentUserDTO;
     }
 
     @Override
     public void register(JSONObject data) {
+        String phone = data.getString("phone");
+        String email = data.getString("email");
+        String password = data.getString("password");
+        
+        // 验证必填字段
+        if (password == null || password.trim().isEmpty()) {
+            throw new CustomException("Пароль не может быть пустым");
+        }
+        
+        // 验证密码长度（6-20位）
+        if (password.length() < 6 || password.length() > 20) {
+            throw new CustomException("Длина пароля должна быть от 6 до 20 символов");
+        }
+        
+        // 验证手机号和邮箱至少填一个
+        boolean hasPhone = phone != null && !phone.trim().isEmpty();
+        boolean hasEmail = email != null && !email.trim().isEmpty();
+        
+        if (!hasPhone && !hasEmail) {
+            throw new CustomException("Необходимо указать телефон или email");
+        }
+        
+        // 验证手机号格式（如果填写了）- российский формат: +7XXXXXXXXXX, 7XXXXXXXXXX или 8XXXXXXXXXX
+        if (hasPhone) {
+            // Убираем + и пробелы для валидации
+            String cleanPhone = phone.replaceAll("[+\\s-]", "");
+            if (!cleanPhone.matches("^[78]\\d{10}$")) {
+                throw new CustomException("Неверный формат номера телефона. Используйте формат: +7XXXXXXXXXX, 7XXXXXXXXXX или 8XXXXXXXXXX");
+            }
+        }
+        
+        // 验证邮箱格式（如果填写了）
+        if (hasEmail && !email.matches("^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$")) {
+            throw new CustomException("Неверный формат email");
+        }
+        
+        // 检查手机号是否已注册（如果填写了）
+        if (hasPhone) {
+            User existPhone = userMapper.selectByPhone(phone);
+            if (existPhone != null) {
+                throw new CustomException("Этот номер телефона уже зарегистрирован");
+            }
+        }
+        
+        // 检查邮箱是否已被使用（如果填写了）
+        if (hasEmail) {
+            User existEmail = userMapper.selectByEmail(email);
+            if (existEmail != null) {
+                throw new CustomException("Этот email уже используется");
+            }
+        }
+        
+        // 创建新用户
         User user = new User();
-        user.setUsername(data.getString("username"));
-        user.setNickname(data.getString("nickname"));
-        user.setAvatarUrl(data.getString("avatarUrl"));
-        user.setPassword(data.getString("password"));
-//        user.setBalance(100F);//新用户赠送 100余额
-        user.setStatus("启用");
+        user.setPassword(password);
+        
+        // 设置手机号和邮箱
+        if (hasPhone) {
+            user.setPhone(phone);
+        }
+        if (hasEmail) {
+            user.setEmail(email);
+        }
+        
+        // 设置初始用户名（优先使用手机号，其次使用邮箱）
+        if (hasPhone) {
+            user.setUsername(phone);
+        } else {
+            user.setUsername(email);
+        }
+        
+        // 设置头像（可选）
+        String avatarUrl = data.getString("avatarUrl");
+        user.setAvatarUrl(avatarUrl);
+        
+        // 设置默认值
+        user.setBalance(new BigDecimal("1000.00")); // 新用户赠送1000元余额
+        user.setStatus("ACTIVE"); // 状态：启用
+        user.setRole("USER"); // 角色：普通用户（注册只能注册普通用户）
+        
+        // 保存用户
         insert(user);
     }
 
@@ -98,10 +221,21 @@ public class UserServiceImpl implements UserService {
     @Override
     public void updateCurrentUserInfo(CurrentUserDTO currentUserDTO) {
         User user = userMapper.selectById(currentUserDTO.getId());
+        
+        // 如果更换了头像，删除旧头像文件
+        if (StringUtils.isNotBlank(currentUserDTO.getAvatarUrl()) 
+            && !currentUserDTO.getAvatarUrl().equals(user.getAvatarUrl())
+            && StringUtils.isNotBlank(user.getAvatarUrl())) {
+            boolean deleted = fileService.deleteFileByUrl(user.getAvatarUrl());
+            if (deleted) {
+                log.info("删除旧头像成功: userId={}, oldAvatarUrl={}", user.getId(), user.getAvatarUrl());
+            }
+        }
+        
         user.setId(currentUserDTO.getId());
-        user.setNickname(currentUserDTO.getNickname());
+        user.setUsername(currentUserDTO.getUsername()); // 允许修改用户名
         user.setAvatarUrl(currentUserDTO.getAvatarUrl());
-        user.setPhone(currentUserDTO.getTel());
+        user.setPhone(currentUserDTO.getPhone());
         user.setEmail(currentUserDTO.getEmail());
         userMapper.updateById(user);
     }
@@ -110,7 +244,7 @@ public class UserServiceImpl implements UserService {
     public void updateCurrentUserPassword(UpdatePasswordDTO updatePassword) {
         User user = userMapper.selectById(CurrentUserThreadLocal.getCurrentUser().getId());
         if (!user.getPassword().equals(updatePassword.getOldPassword())) {
-            throw new CustomException("旧密码不正确");
+            throw new CustomException("Неверный старый пароль");
         }
         user.setPassword(updatePassword.getNewPassword());
         userMapper.updateById(user);
@@ -127,7 +261,7 @@ public class UserServiceImpl implements UserService {
     public void retrievePassword(RetrievePasswordDTO retrievePasswordDTO) {
         User user = userMapper.selectByPhone(retrievePasswordDTO.getPhone());
         if (user == null) {
-            throw new CustomException("手机号不存在");
+            throw new CustomException("Номер телефона не существует");
         }
         //TODO 校验验证码
         user.setPassword(retrievePasswordDTO.getPassword());
@@ -157,8 +291,8 @@ public class UserServiceImpl implements UserService {
     public void consumption(Integer userId, BigDecimal amount) {
         User user = selectById(userId);
         user.setBalance(user.getBalance().subtract(amount));
-        if (user.getBalance().compareTo(new BigDecimal("0"))== 0) {
-            throw new CustomException("余额不足");
+        if (user.getBalance().compareTo(new BigDecimal("0")) < 0) {
+            throw new CustomException("Недостаточно средств");
         }
         userMapper.updateById(user);
     }

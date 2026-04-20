@@ -11,6 +11,7 @@ import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,7 +36,11 @@ public class UserController {
     @GetMapping("page")
     @Operation(summary = "分页查询")
     public ResponseVO<PageVO<User>> page(@RequestParam Map<String, Object> query, @RequestParam(defaultValue = "1") Integer pageNum, @RequestParam(defaultValue = "10") Integer pageSize) {
-        PageVO<User> page = userService.page(query, pageNum, pageSize);
+        // 添加role=USER过滤条件，只查询普通用户
+        Map<String, Object> userQuery = new HashMap<>(query);
+        userQuery.put("role", "USER");
+        
+        PageVO<User> page = userService.page(userQuery, pageNum, pageSize);
         return ResponseVO.ok(page);
 
     }

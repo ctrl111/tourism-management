@@ -65,8 +65,13 @@ public class ScenicInfo  {
     //评论数量
     private Integer countComment;
 
+    //收藏数量
+    private Integer countFavorite;
+
     //总评分
     private Double score;
 
+    //是否已收藏（非数据库字段）
+    private Boolean favorited;
 
 }

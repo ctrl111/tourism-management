@@ -17,6 +17,9 @@ import java.util.Map;
 public class ScenicCategoryServiceImpl  implements ScenicCategoryService {
     @Resource
     private ScenicCategoryMapper scenicCategoryMapper;
+    
+    @Resource
+    private com.project.platform.mapper.ScenicInfoMapper scenicInfoMapper;
 
     @Override
     public PageVO<ScenicCategory> page(Map<String, Object> query, Integer pageNum, Integer pageSize) {
@@ -52,6 +55,21 @@ public class ScenicCategoryServiceImpl  implements ScenicCategoryService {
     }
     @Override
     public void removeByIds(List<Integer> ids) {
+        for (Integer id : ids) {
+            ScenicCategory category = scenicCategoryMapper.selectById(id);
+            if (category == null) {
+                continue;
+            }
+            
+            // 检查是否有景点使用该分类
+            int scenicCount = scenicInfoMapper.countByCategoryId(id);
+            if (scenicCount > 0) {
+                throw new com.project.platform.exception.CustomException(
+                    String.format("Невозможно удалить категорию '%s', так как %d достопримечательностей используют эту категорию. Пожалуйста, сначала удалите или переместите эти достопримечательности.", 
+                    category.getName(), scenicCount)
+                );
+            }
+        }
         scenicCategoryMapper.removeByIds(ids);
     }
 }

@@ -45,6 +45,8 @@ public class TravelNote  {
 
     private Boolean Liked;
 
+    private Boolean favorited;
+
     private int viewCount;
 
     private int commentsCount;

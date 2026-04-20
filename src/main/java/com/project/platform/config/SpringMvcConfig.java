@@ -50,18 +50,10 @@ public class SpringMvcConfig implements WebMvcConfigurer {
                         "/travelNote/page",
                         
                         // 分类和筛选API
-                        "/scenicCategory/list",
+                        "/scenicCategory/list"
                         
-                        // 详情页公开API
-                        "/scenicInfo/detail/**",
-                        "/travelNote/detail/**",
-                        "/scenicInfo/selectById/**",
-                        "/travelNote/selectById/**",
-                        "/scenicInfo/putViewCount/**",
-                        "/travelNote/putViewCount/**",
-                        
-                        // 评论相关公开API
-                        "/commentsInfo/page"
+                        // 注意：详情页和评论API已移到拦截器内部处理（可选登录）
+                        // 这样可以在有token时设置用户信息，实现收藏等功能
                 );
     }
 

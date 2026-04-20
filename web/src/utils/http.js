@@ -1,6 +1,9 @@
 import axios from "axios";
 import router from "../router";
 import {ElMessage} from "element-plus";
+import i18n from '@/i18n'
+
+const { t } = i18n.global
 
 // 设置 Axios 的默认基础 URL
 axios.defaults.baseURL = import.meta.env.VITE_APP_API_URL;
@@ -28,17 +31,17 @@ http.interceptors.response.use(response => {
     switch (error.response.status) {
         case 401:
             localStorage.removeItem("token");
-            ElMessage({message: "请先登录", type: "error"});
+            ElMessage({message: t('message.pleaseLogin'), type: "error"});
             // router.push("/login");
             break;
         case 409:
             ElMessage({message: error.response.data.data, type: "error"});
             break;
         case 404:
-            ElMessage({message: "接口未找到", type: "error"});
+            ElMessage({message: t('http.apiNotFound'), type: "error"});
             break;
         case 500:
-            ElMessage({message: "服务异常", type: "error"});
+            ElMessage({message: t('http.serverError'), type: "error"});
             break;
         default:
             return Promise.reject(error);

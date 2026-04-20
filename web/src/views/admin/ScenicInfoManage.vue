@@ -3,25 +3,26 @@
     <el-space direction="vertical" alignment="left" style="width: 100%">
       <el-card>
         <el-form ref="searchFormComponents" :model="searchForm" inline>
-          <el-form-item label="景点分类" prop="categoryType">
+          <el-form-item :label="$t('scenicManage.scenicCategory')" prop="categoryType">
             <el-input v-model="searchForm.categoryType" clearable></el-input>
           </el-form-item>
-          <el-form-item label="景点名称" prop="name">
+          <el-form-item :label="$t('scenicManage.scenicName')" prop="name">
             <el-input v-model="searchForm.name" clearable></el-input>
           </el-form-item>
-          <el-form-item label="状态" prop="status">
-            <el-select v-model="searchForm.status" placeholder="请选择" clearable filterable style="width: 150px">
-              <el-option :label="item"  :value="item" :key="item" v-for="item in statusList"></el-option>
+          <el-form-item :label="$t('scenicManage.status')" prop="status">
+            <el-select v-model="searchForm.status" :placeholder="$t('scenicManage.pleaseSelect')" clearable filterable style="width: 150px">
+              <el-option :label="$t('status.ACTIVE')" value="ACTIVE"></el-option>
+              <el-option :label="$t('status.INACTIVE')" value="INACTIVE"></el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="">
-            <el-button type="primary" :icon="Search" @click="search">搜索</el-button>
-            <el-button :icon="Refresh" @click="resetSearch">重置</el-button>
+            <el-button type="primary" :icon="Search" @click="search">{{ $t('scenicManage.search') }}</el-button>
+            <el-button :icon="Refresh" @click="resetSearch">{{ $t('scenicManage.reset') }}</el-button>
           </el-form-item>
         </el-form>
         <el-space>
-          <el-button type="primary" @click="add" :icon="Plus">新增</el-button>
-          <el-button type="danger" :icon="Delete" @click="batchDelete(null)" :disabled="selectionRows.length<=0">批量删除</el-button>
+          <el-button type="primary" @click="add" :icon="Plus">{{ $t('scenicManage.add') }}</el-button>
+          <el-button type="danger" :icon="Delete" @click="batchDelete(null)" :disabled="selectionRows.length<=0">{{ $t('scenicManage.batchDelete') }}</el-button>
         </el-space>
       </el-card>
       <el-card>
@@ -32,30 +33,30 @@
                   @selection-change="selectionChange"
                   border>
           <el-table-column type="selection" width="55"></el-table-column>
-          <el-table-column prop="id" label="ID" width="50"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="categoryType" label="景点分类"  width="120"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="name" label="景点名称"></el-table-column>
-          <el-table-column prop="coverImage" label="封面图" width="130">
+          <el-table-column show-overflow-tooltip prop="categoryType" :label="$t('scenicManage.scenicCategory')" min-width="140"></el-table-column>
+          <el-table-column show-overflow-tooltip prop="name" :label="$t('scenicManage.scenicName')" min-width="180"></el-table-column>
+          <el-table-column prop="coverImage" :label="$t('scenicManage.coverImage')" width="120">
             <template #default="scope" >
-              <el-image v-if="scope.row.coverImage" style="width: 100px; height: 100px" :src="scope.row.coverImage" :preview-src-list="[scope.row.coverImage]" :preview-teleported="true" ></el-image>
+              <el-image v-if="scope.row.coverImage" style="width: 80px; height: 80px; border-radius: 4px;" :src="scope.row.coverImage" :preview-src-list="[scope.row.coverImage]" :preview-teleported="true" fit="cover"></el-image>
             </template>
           </el-table-column>
-          <el-table-column show-overflow-tooltip prop="address" label="地址" width="120"></el-table-column>
-          <el-table-column  show-overflow-tooltip prop="description" label="描述" width="120"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="openingHours" label="开放时间" width="100"></el-table-column>
-          <el-table-column  show-overflow-tooltip prop="price" label="收费价格" width="90"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="stock" label="门票库存" width="90"></el-table-column>
-          <el-table-column  show-overflow-tooltip  prop="status" label="状态" width="80">
+          <el-table-column show-overflow-tooltip prop="address" :label="$t('scenicManage.address')" min-width="150"></el-table-column>
+          <el-table-column show-overflow-tooltip prop="description" :label="$t('scenicManage.description')" min-width="180"></el-table-column>
+          <el-table-column show-overflow-tooltip prop="openingHours" :label="$t('scenicManage.openingHours')" width="120"></el-table-column>
+          <el-table-column show-overflow-tooltip prop="price" :label="$t('scenicManage.price')" width="100"></el-table-column>
+          <el-table-column show-overflow-tooltip prop="stock" :label="$t('scenicManage.ticketStock')" width="110"></el-table-column>
+          <el-table-column show-overflow-tooltip prop="status" :label="$t('scenicManage.status')" width="100">
             <template #default="scope">
-              <el-tag type="success" v-if="scope.row.status==='上架'">上架</el-tag>
-              <el-tag type="danger" v-if="scope.row.status==='下架'">下架</el-tag>
+              <el-tag type="success" v-if="scope.row.status==='ACTIVE' || scope.row.status==='ON_SALE' || scope.row.status==='上架'">{{ $t('status.ACTIVE') }}</el-tag>
+              <el-tag type="danger" v-else-if="scope.row.status==='INACTIVE' || scope.row.status==='OFF_SALE' || scope.row.status==='下架'">{{ $t('status.INACTIVE') }}</el-tag>
+              <el-tag type="info" v-else>{{ $t('status.' + scope.row.status) }}</el-tag>
             </template>
           </el-table-column>
-          <el-table-column show-overflow-tooltip prop="createTime" label="创建时间" width="180"></el-table-column>
-          <el-table-column fixed="right" label="操作" width="200">
+          <el-table-column show-overflow-tooltip prop="createTime" :label="$t('scenicManage.createTime')" width="180"></el-table-column>
+          <el-table-column fixed="right" :label="$t('scenicManage.operation')" width="200">
             <template #default="scope">
-              <el-button :icon="Edit" @click="edit(scope.$index, scope.row)">编辑</el-button>
-              <el-button :icon="Delete" type="danger" @click="deleteOne(scope.$index, scope.row)">删除</el-button>
+              <el-button :icon="Edit" @click="edit(scope.$index, scope.row)">{{ $t('scenicManage.edit') }}</el-button>
+              <el-button :icon="Delete" type="danger" @click="deleteOne(scope.$index, scope.row)">{{ $t('scenicManage.delete') }}</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -75,38 +76,38 @@
     <el-dialog
         v-model="dialogOpen"
         v-if="dialogOpen"
-        :title="formData.id?'编辑':'新增'"
+        :title="formData.id ? $t('scenicManage.editTitle') : $t('scenicManage.addTitle')"
         width="800px"
     >
       <el-form ref="formRef" :model="formData" label-width="100px" inline>
         <slot name="content">
-          <el-form-item label="景点分类" prop="categoryId" :rules="[{required:true,message:'不能为空',trigger:[ 'blur','change']}]">
-            <el-select v-model="formData.categoryId" placeholder="请选择分类" clearable filterable >
+          <el-form-item :label="$t('scenicManage.scenicCategory')" prop="categoryId" :rules="[{required:true,message: $t('scenicManage.cannotBeEmpty'),trigger:[ 'blur','change']}]">
+            <el-select v-model="formData.categoryId" :placeholder="$t('scenicManage.selectCategory')" clearable filterable >
               <el-option :label="item.name"  :value="item.id" :key="item" v-for="item in categoryList"></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="景点名称" prop="name"  :rules="[{required:true,message:'不能为空',trigger:[ 'blur','change']}]">
+          <el-form-item :label="$t('scenicManage.scenicNameLabel')" prop="name"  :rules="[{required:true,message: $t('scenicManage.cannotBeEmpty'),trigger:[ 'blur','change']}]">
             <el-input v-model="formData.name"></el-input>
           </el-form-item>
-          <el-form-item label="地址" prop="address"  :rules="[{required:true,message:'不能为空',trigger:[ 'blur','change']}]">
+          <el-form-item :label="$t('scenicManage.addressLabel')" prop="address"  :rules="[{required:true,message: $t('scenicManage.cannotBeEmpty'),trigger:[ 'blur','change']}]">
             <el-input v-model="formData.address"></el-input>
           </el-form-item>
-          <el-form-item label="开放时间" prop="openingHours"  :rules="[{required:true,message:'不能为空',trigger:[ 'blur','change']}]">
+          <el-form-item :label="$t('scenicManage.openingHoursLabel')" prop="openingHours"  :rules="[{required:true,message: $t('scenicManage.cannotBeEmpty'),trigger:[ 'blur','change']}]">
             <el-input v-model="formData.openingHours"></el-input>
           </el-form-item>
-          <el-form-item label="收费价格" prop="price"  :rules="[{required:true,message:'不能为空',trigger:[ 'blur','change']}]">
+          <el-form-item :label="$t('scenicManage.priceLabel')" prop="price"  :rules="[{required:true,message: $t('scenicManage.cannotBeEmpty'),trigger:[ 'blur','change']}]">
             <el-input type="number" v-model="formData.price"></el-input>
           </el-form-item>
-          <el-form-item label="门票库存" prop="stock"  :rules="[{required:true,message:'不能为空',trigger:[ 'blur','change']}]">
+          <el-form-item :label="$t('scenicManage.ticketStockLabel')" prop="stock"  :rules="[{required:true,message: $t('scenicManage.cannotBeEmpty'),trigger:[ 'blur','change']}]">
             <el-input type="number" v-model="formData.stock"></el-input>
           </el-form-item>
-          <el-form-item label="封面图" prop="coverImage" style="width: 100%"
-                        :rules="[{required:true,message:'请上传封面图',trigger:[ 'blur','change']}]">
+          <el-form-item :label="$t('scenicManage.coverImageLabel')" prop="coverImage" style="width: 100%"
+                        :rules="[{required:true,message: $t('scenicManage.uploadCoverImage'),trigger:[ 'blur','change']}]">
             <MyUpLoad type="imageCard" :limit="1" :files="formData.coverImage"
                       @setFiles="formData.coverImage =$event"></MyUpLoad>
           </el-form-item>
-          <el-form-item label="详情图" prop="detailImages"
-                        :rules="[{required:true,message:'请上传详情图片',trigger:[ 'blur','change']}]"
+          <el-form-item :label="$t('scenicManage.detailImages')" prop="detailImages"
+                        :rules="[{required:true,message: $t('scenicManage.uploadDetailImages'),trigger:[ 'blur','change']}]"
                         style="width: 100%">
             <MyUpLoad
                 type="imageList"
@@ -115,22 +116,22 @@
                 @setFiles="formData.detailImages =$event">
             </MyUpLoad>
           </el-form-item>
-          <el-form-item label="描述" prop="description" style="width: 85%" >
+          <el-form-item :label="$t('scenicManage.descriptionLabel')" prop="description" style="width: 85%" >
             <el-input type="textarea" :rows="3"  v-model="formData.description"></el-input>
           </el-form-item>
-          <el-form-item label="状态" prop="status"
-                        :rules="[{required:true,message:'不能为空',trigger:[ 'blur','change']}]">
+          <el-form-item :label="$t('scenicManage.statusLabel')" prop="status"
+                        :rules="[{required:true,message: $t('scenicManage.cannotBeEmpty'),trigger:[ 'blur','change']}]">
             <el-radio-group v-model="formData.status">
-              <el-radio label="上架"></el-radio>
-              <el-radio label="下架"></el-radio>
+              <el-radio label="ACTIVE">{{ $t('status.ACTIVE') }}</el-radio>
+              <el-radio label="INACTIVE">{{ $t('status.INACTIVE') }}</el-radio>
             </el-radio-group>
           </el-form-item>
         </slot>
       </el-form>
       <template #footer>
         <div class="dialog-footer">
-          <el-button type="primary" @click="submit" :icon="Check">提交</el-button>
-          <el-button @click="closeDialog" :icon="Close">取消</el-button>
+          <el-button type="primary" @click="submit" :icon="Check">{{ $t('scenicManage.submit') }}</el-button>
+          <el-button @click="closeDialog" :icon="Close">{{ $t('scenicManage.cancel') }}</el-button>
         </div>
       </template>
     </el-dialog>
@@ -160,7 +161,6 @@ const searchForm = ref({
   status: undefined
 });
 const categoryList = ref([]);
-const  statusList=ref(['上架','下架'])
 
 getCategoryList()
 getPageList()
@@ -252,7 +252,7 @@ function submit() {
   formRef.value.validate((valid) => {
     if (!valid){
       ElMessage({
-        message: "验证失败，请检查表单!",
+        message: "Проверка не пройдена, проверьте форму!",
         type: 'warning'
       });
       return
@@ -265,7 +265,7 @@ function submit() {
         }
         dialogOpen.value = false
         ElMessage({
-          message: "操作成功",
+          message: "Операция выполнена успешно",
           type: 'success'
         });
         getPageList()
@@ -278,7 +278,7 @@ function submit() {
         }
         dialogOpen.value = false
         ElMessage({
-          message: "操作成功",
+          message: "Операция выполнена успешно",
           type: 'success'
         });
         getPageList()
@@ -314,9 +314,9 @@ function batchDelete(rows) {
     rows = selectionRows.value;
   }
   let ids = rows.map(item => item.id);
-  ElMessageBox.confirm(`此操作将永久删除ID为[${ids}]的数据, 是否继续?`, '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
+  ElMessageBox.confirm(`Это действие навсегда удалит данные с ID [${ids}]. Продолжить?`, 'Подсказка', {
+    confirmButtonText: 'Подтвердить',
+    cancelButtonText: 'Отмена',
     type: 'warning',
     center: true
   }).then(() => {
@@ -325,7 +325,7 @@ function batchDelete(rows) {
         return
       }
       ElMessage({
-        message: "操作成功",
+        message: "Операция выполнена успешно",
         type: 'success'
       });
       getPageList()
@@ -333,7 +333,7 @@ function batchDelete(rows) {
   }).catch(() => {
     ElMessage({
       type: 'info',
-      message: '已取消删除'
+      message: 'Удаление отменено'
     });
     tableComponents.value.clearSelection();
   });

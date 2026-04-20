@@ -1,14 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.project.platform.mapper.FavoriteMapper">
+    <!-- ResultMap for Favorite with associations -->
+    <resultMap id="FavoriteResultMap" type="com.project.platform.entity.Favorite">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="typeCode" column="type_code"/>
+        <result property="associationId" column="association_id"/>
+        <result property="createTime" column="create_time"/>
+        <association property="scenicInfo" javaType="com.project.platform.entity.ScenicInfo">
+            <id property="id" column="scenic_id"/>
+            <result property="name" column="scenic_name"/>
+            <result property="address" column="scenic_address"/>
+            <result property="price" column="scenic_price"/>
+            <result property="coverImage" column="scenic_cover_image"/>
+            <result property="description" column="scenic_description"/>
+        </association>
+        <association property="travelNote" javaType="com.project.platform.entity.TravelNote">
+            <id property="id" column="travel_note_id"/>
+            <result property="title" column="travel_note_title"/>
+            <result property="content" column="travel_note_content"/>
+            <result property="cover" column="travel_note_cover"/>
+            <result property="days" column="travel_note_days"/>
+            <result property="userId" column="travel_note_user_id"/>
+            <association property="user" javaType="com.project.platform.entity.User">
+                <id property="id" column="travel_note_user_id"/>
+                <result property="username" column="travel_note_username"/>
+                <result property="avatarUrl" column="travel_note_avatar_url"/>
+            </association>
+        </association>
+    </resultMap>
+
     <!-- 分页查询 -->
-    <select id="queryPage"  resultType="com.project.platform.entity.Favorite">
-        SELECT favorite.*
+    <select id="queryPage" resultMap="FavoriteResultMap">
+        SELECT 
+            favorite.id,
+            favorite.user_id,
+            favorite.type_code,
+            favorite.association_id,
+            favorite.create_time,
+            si.id as scenic_id,
+            si.name as scenic_name,
+            si.address as scenic_address,
+            si.price as scenic_price,
+            si.cover_image as scenic_cover_image,
+            si.description as scenic_description,
+            tn.id as travel_note_id,
+            tn.title as travel_note_title,
+            tn.content as travel_note_content,
+            tn.cover as travel_note_cover,
+            tn.days as travel_note_days,
+            tn.user_id as travel_note_user_id,
+            u.username as travel_note_username,
+            u.avatar_url as travel_note_avatar_url
         FROM favorite
+        LEFT JOIN scenic_info si ON favorite.type_code = '景点' AND favorite.association_id = si.id
+        LEFT JOIN travel_note tn ON favorite.type_code = '游记' AND favorite.association_id = tn.id
+        LEFT JOIN user u ON tn.user_id = u.id
         <include refid="queryConditions"/>
         ORDER BY favorite.id DESC
         LIMIT #{offset}, #{pageSize}
     </select>
+    
     <!-- 查询总数 -->
     <select id="queryCount"  resultType="int">
         SELECT count(favorite.id) FROM favorite
@@ -18,7 +71,12 @@
     <!-- 查询条件 -->
     <sql id="queryConditions">
         <where>
-
+            <if test="query.userId != null">
+                AND favorite.user_id = #{query.userId}
+            </if>
+            <if test="query.typeCode != null and query.typeCode != ''">
+                AND favorite.type_code = #{query.typeCode}
+            </if>
         </where>
     </sql>
 
@@ -29,18 +87,24 @@
             <if test="userId != null">user_id,</if>
             <if test="typeCode != null">type_code,</if>
             <if test="associationId != null">association_id,</if>
-            <if test="collectTime != null">collect_time,</if>
+            <if test="createTime != null">create_time,</if>
         </trim>
         VALUES
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="userId != null">#{userId},</if>
             <if test="typeCode != null">#{typeCode},</if>
             <if test="associationId != null">#{associationId},</if>
-            <if test="collectTime != null">#{collectTime},</if>
+            <if test="createTime != null">#{createTime},</if>
         </trim>
-
-
     </insert>
+
+    <!-- 删除收藏 -->
+    <delete id="deleteFavorite">
+        DELETE FROM favorite
+        WHERE type_code = #{typeCode}
+        AND association_id = #{associationId}
+        AND user_id = #{userId}
+    </delete>
 
     <!-- 更新 -->
     <update id="updateById" parameterType="com.project.platform.entity.Favorite">
@@ -55,8 +119,8 @@
             <if test="associationId != null">
                 association_id = #{associationId},
             </if>
-            <if test="collectTime != null">
-                collect_time = #{collectTime},
+            <if test="createTime != null">
+                create_time = #{createTime},
             </if>
         </set>
         WHERE id = #{id}
