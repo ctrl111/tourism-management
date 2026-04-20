@@ -14,8 +14,8 @@ import router from './router'
 import i18n from './i18n'
 import { useUserStore } from './stores/user'
 
-// Импорт стилей адаптации для русского языка
-import './styles/russian-ui-adaptation.css'
+// 俄语UI优化样式 - 精简版
+import './styles/ru-ui.css'
 
 const app = createApp(App)
 
