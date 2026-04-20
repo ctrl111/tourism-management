@@ -51,6 +51,16 @@ body {
   line-height: 48px;
 }
 
+/* 子菜单项缩进 */
+.el-menu .el-menu-item {
+  padding-left: 48px !important;
+}
+
+/* 子菜单标题不缩进 */
+.el-submenu__title {
+  padding-left: 16px !important;
+}
+
 /* ==========================================
    表单优化 - 顶部对齐标签
    ========================================== */
