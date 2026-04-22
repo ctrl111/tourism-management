@@ -114,7 +114,7 @@ export const useUserStore = defineStore('user', {
           message: response?.msg || t('message.loginFailed')
         }
       } catch (error) {
-        console.error('登录失败:', error)
+
         return {
           success: false,
           message: error.message || t('message.loginFailedRetry')
@@ -131,7 +131,7 @@ export const useUserStore = defineStore('user', {
           return response.data
         }
       } catch (error) {
-        console.error('获取用户信息失败:', error)
+
         // 如果获取失败，清除登录状态
         this.logout()
       }
@@ -194,14 +194,14 @@ export const useUserStore = defineStore('user', {
             try {
               await this.fetchUserInfo()
             } catch (error) {
-              console.error('刷新用户信息失败:', error)
+
               // 如果刷新失败但有缓存，继续使用缓存
             }
             
-            console.log('✅ 已加载', type, '会话')
+
             return true
           } catch (e) {
-            console.error('解析用户信息失败:', e)
+
           }
         }
       }

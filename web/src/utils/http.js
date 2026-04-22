@@ -47,9 +47,6 @@ http.interceptors.response.use(response => {
             return Promise.reject(error);
     }
 });
-// 打印环境变量
-console.log("环境:", import.meta.env.NODE_ENV);
-console.log("服务器:", import.meta.env.VUE_APP_SERVER);
-console.log("所有环境变量:", import.meta.env);
+
 export default http;
 

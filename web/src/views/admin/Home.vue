@@ -1,12 +1,12 @@
 <template>
   <div class="dashboard-container">
     <!-- 数据概览卡片 -->
-    <el-row :gutter="20" class="stats-row">
-      <el-col :span="4">
+    <div class="stats-row">
+      <div class="stat-col">
         <el-card class="stat-card">
           <div class="stat-content">
             <div class="stat-icon user-icon">
-              <el-icon :size="32"><User /></el-icon>
+              <el-icon :size="22"><User /></el-icon>
             </div>
             <div class="stat-info">
               <div class="stat-value">{{ overview.userCount || 0 }}</div>
@@ -14,12 +14,12 @@
             </div>
           </div>
         </el-card>
-      </el-col>
-      <el-col :span="4">
+      </div>
+      <div class="stat-col">
         <el-card class="stat-card">
           <div class="stat-content">
             <div class="stat-icon scenic-icon">
-              <el-icon :size="32"><LocationFilled /></el-icon>
+              <el-icon :size="22"><LocationFilled /></el-icon>
             </div>
             <div class="stat-info">
               <div class="stat-value">{{ overview.scenicCount || 0 }}</div>
@@ -27,12 +27,12 @@
             </div>
           </div>
         </el-card>
-      </el-col>
-      <el-col :span="4">
+      </div>
+      <div class="stat-col">
         <el-card class="stat-card">
           <div class="stat-content">
             <div class="stat-icon order-icon">
-              <el-icon :size="32"><ShoppingCart /></el-icon>
+              <el-icon :size="22"><ShoppingCart /></el-icon>
             </div>
             <div class="stat-info">
               <div class="stat-value">{{ overview.orderCount || 0 }}</div>
@@ -40,12 +40,12 @@
             </div>
           </div>
         </el-card>
-      </el-col>
-      <el-col :span="4">
+      </div>
+      <div class="stat-col">
         <el-card class="stat-card">
           <div class="stat-content">
             <div class="stat-icon note-icon">
-              <el-icon :size="32"><Notebook /></el-icon>
+              <el-icon :size="22"><Notebook /></el-icon>
             </div>
             <div class="stat-info">
               <div class="stat-value">{{ overview.travelNoteCount || 0 }}</div>
@@ -53,25 +53,12 @@
             </div>
           </div>
         </el-card>
-      </el-col>
-      <el-col :span="4">
-        <el-card class="stat-card">
-          <div class="stat-content">
-            <div class="stat-icon route-icon">
-              <el-icon :size="32"><Guide /></el-icon>
-            </div>
-            <div class="stat-info">
-              <div class="stat-value">{{ overview.routeCount || 0 }}</div>
-              <div class="stat-label">{{ $t('dashboard.routeCount') }}</div>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :span="4">
+      </div>
+      <div class="stat-col">
         <el-card class="stat-card">
           <div class="stat-content">
             <div class="stat-icon revenue-icon">
-              <el-icon :size="32"><Money /></el-icon>
+              <el-icon :size="22"><Money /></el-icon>
             </div>
             <div class="stat-info">
               <div class="stat-value">￥{{ (overview.totalRevenue || 0).toFixed(2) }}</div>
@@ -79,8 +66,8 @@
             </div>
           </div>
         </el-card>
-      </el-col>
-    </el-row>
+      </div>
+    </div>
 
     <!-- 图表区域 -->
     <el-row :gutter="20" class="charts-row">
@@ -221,19 +208,22 @@ function initCategoryChart(data) {
       formatter: '{b}: {c} ({d}%)'
     },
     legend: {
-      orient: 'vertical',
-      right: '5%',
-      top: 'center',
+      orient: 'horizontal',
+      bottom: '0%',
+      left: 'center',
       textStyle: {
         fontSize: 12
-      }
+      },
+      itemGap: 15,
+      itemWidth: 20,
+      itemHeight: 12
     },
     series: [
       {
         name: t('dashboard.orderNumber'),
         type: 'pie',
-        radius: ['35%', '60%'],
-        center: ['35%', '50%'],
+        radius: ['40%', '65%'],
+        center: ['50%', '45%'],
         avoidLabelOverlap: true,
         itemStyle: {
           borderRadius: 10,
@@ -317,12 +307,20 @@ onBeforeUnmount(() => {
 }
 
 .stats-row {
+  display: flex;
+  gap: 20px;
   margin-bottom: 20px;
+}
+
+.stat-col {
+  flex: 1;
+  min-width: 0;
 }
 
 .stat-card {
   cursor: pointer;
   transition: all 0.3s;
+  height: 100%;
 }
 
 .stat-card:hover {
@@ -332,18 +330,25 @@ onBeforeUnmount(() => {
 
 .stat-content {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 15px;
+  gap: 8px;
+  text-align: center;
+  padding: 15px 10px;
 }
 
 .stat-icon {
-  width: 60px;
-  height: 60px;
-  border-radius: 12px;
+  width: 45px;
+  height: 45px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
+}
+
+.stat-icon .el-icon {
+  font-size: 22px;
 }
 
 .user-icon {
@@ -371,19 +376,22 @@ onBeforeUnmount(() => {
 }
 
 .stat-info {
-  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
 }
 
 .stat-value {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: bold;
   color: #303133;
-  margin-bottom: 5px;
 }
 
 .stat-label {
-  font-size: 14px;
+  font-size: 12px;
   color: #909399;
+  line-height: 1.3;
 }
 
 .charts-row {

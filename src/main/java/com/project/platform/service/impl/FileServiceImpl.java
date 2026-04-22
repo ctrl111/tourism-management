@@ -4,7 +4,6 @@ import cn.hutool.core.net.url.UrlBuilder;
 import com.project.platform.exception.CustomException;
 import com.project.platform.service.FileService;
 import com.project.platform.vo.FileInfoVO;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,16 +12,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
 @Service
-@Slf4j
 public class FileServiceImpl implements FileService {
 
     @Value("${server.ip}")
@@ -42,7 +37,7 @@ public class FileServiceImpl implements FileService {
     private String allowedTypes;
 
 
-    public FileInfoVO upload(MultipartFile multipartFile) throws IOException, NoSuchAlgorithmException {
+    public FileInfoVO upload(MultipartFile multipartFile) throws IOException {
         // 验证文件是否为空
         if (multipartFile == null || multipartFile.isEmpty()) {
             throw new CustomException("Файл не выбран");
@@ -72,8 +67,6 @@ public class FileServiceImpl implements FileService {
         
         // 直接转移文件到指定路径
         multipartFile.transferTo(new File(newFile.getAbsolutePath()));
-        
-        log.info("文件上传成功: {}, 原文件名: {}, 大小: {} bytes", newFileName, multipartFile.getOriginalFilename(), multipartFile.getSize());
         
         FileInfoVO fileInfoVO = new FileInfoVO();
         fileInfoVO.setUrl(getServer() + "/" + newFileName);
@@ -126,26 +119,16 @@ public class FileServiceImpl implements FileService {
     @Override
     public boolean deleteFile(String fileName) {
         if (StringUtils.isBlank(fileName)) {
-            log.warn("文件名为空，无法删除");
             return false;
         }
 
         try {
             File file = new File(getFilePath(fileName));
             if (file.exists() && file.isFile()) {
-                boolean deleted = file.delete();
-                if (deleted) {
-                    log.info("文件删除成功: {}", fileName);
-                } else {
-                    log.warn("文件删除失败: {}", fileName);
-                }
-                return deleted;
-            } else {
-                log.warn("文件不存在: {}", fileName);
-                return false;
+                return file.delete();
             }
+            return false;
         } catch (Exception e) {
-            log.error("删除文件时发生错误: {}", fileName, e);
             return false;
         }
     }
@@ -160,12 +143,9 @@ public class FileServiceImpl implements FileService {
         }
 
         try {
-            // 从URL中提取文件名
-            // 例如: http://localhost:1000/file/abc123.jpg -> abc123.jpg
             String fileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
             return deleteFile(fileName);
         } catch (Exception e) {
-            log.error("从URL删除文件时发生错误: {}", fileUrl, e);
             return false;
         }
     }

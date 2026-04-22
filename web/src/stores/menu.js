@@ -54,7 +54,6 @@ export const useMenuStore = defineStore('menu', {
         // 目前使用空数组，表示没有额外的动态菜单
         this.menuContent = []
       } catch (error) {
-        console.error('加载动态菜单失败:', error)
         this.menuContent = []
       }
     }

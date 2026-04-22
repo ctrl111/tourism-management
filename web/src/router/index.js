@@ -112,12 +112,6 @@ function getRoutes() {
                     name: 'travelNote',
                     component: () => import('../views/front/TravelNote.vue')
                 },
-
-                {
-                    path: 'notice',
-                    name: 'notice',
-                    component: () => import('../views/front/Notice.vue')
-                },
                 {
                     path: 'personalCenter',
                     name: 'personalCenter',
@@ -164,7 +158,6 @@ function getRoutes() {
         },
         component: () => import ('../views/404.vue')
     })
-    console.log('getDynamicRoutes', defaultRoutes)
     return defaultRoutes;
 }
 
@@ -185,8 +178,7 @@ const publicRoutes = [
  * 需要登录的前端路由
  */
 const requireAuthFrontRoutes = [
-    '/front/personalCenter',
-    '/front/notice'
+    '/front/personalCenter'
 ]
 
 /**
@@ -206,28 +198,22 @@ function requiresAuth(path) {
  * 检查路径是否公开访问
  */
 function isPublicRoute(path) {
-    console.log('📋 检查公开路由:', path)
-    
     // 精确匹配公开路由
     if (publicRoutes.includes(path)) {
-        console.log('  ✓ 在公开路由列表中')
         return true
     }
     
     // 检查详情页路由（允许未登录访问，支持任意ID格式）
     if (path.match(/^\/front\/scenicDetails\/.+$/) ||
         path.match(/^\/front\/travelDetails\/.+$/)) {
-        console.log('  ✓ 是详情页路由')
         return true
     }
     
     // 其他前端路由默认允许访问（除了需要认证的）
     if (path.startsWith('/front') && !requiresAuth(path)) {
-        console.log('  ✓ 前端路由且不需要认证')
         return true
     }
     
-    console.log('  ✗ 不是公开路由')
     return false
 }
 
@@ -242,19 +228,8 @@ router.beforeEach(async (to, from, next) => {
     
     // 如果目标路径的用户类型与当前不同，需要切换会话
     if (userStore.getUserType !== targetUserType) {
-        console.log('🔄 切换用户类型:', userStore.getUserType, '->', targetUserType)
         await userStore.initUserState(targetUserType)
     }
-    
-    // 调试信息
-    console.log('🔍 路由守卫:', {
-        path: to.path,
-        targetUserType,
-        isLoggedIn: userStore.getIsLoggedIn,
-        userType: userStore.getUserType,
-        isPublic: isPublicRoute(to.path),
-        requiresAuth: requiresAuth(to.path)
-    })
     
     // 如果访问登录页
     if (to.path === '/login') {
@@ -297,26 +272,21 @@ router.beforeEach(async (to, from, next) => {
     // 未登录用户
     // 检查是否为公开路由
     if (isPublicRoute(to.path)) {
-        console.log('✅ 公开路由，允许访问')
         next()
         return
     }
     
     // 需要登录的路由 - 只弹窗提示，不跳转
     if (requiresAuth(to.path)) {
-        console.log('⚠️ 需要登录，阻止访问')
         ElMessage.warning(t('router.pleaseLogin'))
         next(false) // 阻止导航，停留在当前页面
         return
     }
     
     // 其他路由：404或未匹配的路由
-    console.log('❓ 未知路由，路径:', to.path)
     if (to.path === '/404' || to.matched.length === 0) {
         next()
     } else {
-        // 理论上不应该到这里，因为前端路由都应该被 isPublicRoute 捕获
-        console.warn('⚠️ 未识别的路由，允许访问:', to.path)
         next()
     }
 })
@@ -325,7 +295,6 @@ router.beforeEach(async (to, from, next) => {
  * 路由错误处理
  */
 router.onError((error) => {
-    console.error('路由错误:', error)
     ElMessage.error(t('router.pageLoadError'))
 })
 

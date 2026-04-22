@@ -268,8 +268,7 @@ function downloadFile() {
   link.style.display = 'none';
   document.body.appendChild(link);
   link.href = previewFile.value.url;
-  console.log(previewFile.value);
-  link.setAttribute('download', previewFile.value.name); // 你可以自定义下载时的文件名
+  link.setAttribute('download', previewFile.value.name);
   link.click();
   link.remove();
 }

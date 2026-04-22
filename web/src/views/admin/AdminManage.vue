@@ -35,31 +35,31 @@
                   border
                   @selection-change="selectionChange">
           <el-table-column type="selection" width="55"></el-table-column>
-          <el-table-column prop="username" :label="$t('adminManage.userName')"></el-table-column>
-          <el-table-column :label="$t('adminManage.userAvatar')">
+          <el-table-column prop="username" :label="$t('adminManage.userName')" width="150" show-overflow-tooltip></el-table-column>
+          <el-table-column :label="$t('adminManage.userAvatar')" width="100" align="center">
             <template #default="scope">
               <el-image style="width: 50px; height: 50px" :src="scope.row.avatarUrl"
                         :preview-src-list="[scope.row.avatarUrl]"
                         :preview-teleported="true"></el-image>
             </template>
           </el-table-column>
-          <el-table-column prop="phone" :label="$t('adminManage.telephone')"></el-table-column>
-          <el-table-column prop="email" :label="$t('adminManage.email')" width="150"></el-table-column>
-          <el-table-column prop="status" :label="$t('adminManage.status')">
+          <el-table-column prop="phone" :label="$t('adminManage.telephone')" width="150"></el-table-column>
+          <el-table-column prop="email" :label="$t('adminManage.email')" min-width="200" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="status" :label="$t('adminManage.status')" width="120" align="center">
             <template #default="scope">
               <el-tag type="success" v-if="scope.row.status==='ACTIVE'">{{ $t('status.ACTIVE') }}</el-tag>
               <el-tag type="danger" v-if="scope.row.status==='INACTIVE'">{{ $t('status.INACTIVE') }}</el-tag>
             </template>
           </el-table-column>
-          <el-table-column fixed="right" :label="$t('adminManage.advancedOperations')" width="140">
+          <el-table-column fixed="right" :label="$t('adminManage.advancedOperations')" width="160">
             <template #default="scope">
-              <el-button type="success" :icon="RefreshLeft" @click="resetPassword( scope.row)">{{ $t('adminManage.resetPassword') }}</el-button>
+              <el-button type="success" size="small" :icon="RefreshLeft" @click="resetPassword(scope.row)">{{ $t('adminManage.resetPassword') }}</el-button>
             </template>
           </el-table-column>
           <el-table-column fixed="right" :label="$t('adminManage.operation')" width="200">
             <template #default="scope">
-              <el-button :icon="Edit" @click="edit(scope.$index, scope.row)">{{ $t('adminManage.edit') }}</el-button>
-              <el-button :icon="Delete" type="danger" @click="deleteOne(scope.$index, scope.row)">{{ $t('adminManage.delete') }}</el-button>
+              <el-button size="small" :icon="Edit" @click="edit(scope.$index, scope.row)">{{ $t('adminManage.edit') }}</el-button>
+              <el-button size="small" :icon="Delete" type="danger" @click="deleteOne(scope.$index, scope.row)">{{ $t('adminManage.delete') }}</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -172,7 +172,6 @@ function currentChange(e) {
 function sizeChange(e) {
   pageInfo.value.pageSize = e
   getPageList()
-  console.log(e)
 }
 
 /**

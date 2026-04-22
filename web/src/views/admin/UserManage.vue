@@ -223,7 +223,6 @@ function currentChange(e) {
 function sizeChange(e) {
   pageInfo.value.pageSize = e
   getPageList()
-  console.log(e)
 }
 
 /**

@@ -1,172 +1,411 @@
 /* ========================================
-   Стили для административной панели
+   管理后台样式 - 现代化设计
+   Admin Panel Styles - Modern Design
    ======================================== */
 
-.admin-wrapper .el-aside {
-  /*background-color: var(--menu-bg-color, #242f36) !important;*/
-}
-
-.admin-wrapper .el-menu-item.is-active, 
-.admin-wrapper .el-menu--horizontal > .el-menu-item.is-active {
-  border-bottom: none !important;
-}
-
-/* Оптимизация таблиц в админке */
+/* ==========================================
+   表格样式优化
+   ========================================== */
 .admin-wrapper .el-table {
-  font-size: 13px !important;
-}
-
-.admin-wrapper .el-table th {
-  background-color: #fafafa !important;
-  font-weight: 600 !important;
-  padding: 14px 10px !important;
-  white-space: nowrap;
-}
-
-.admin-wrapper .el-table td {
-  padding: 12px 10px !important;
-}
-
-.admin-wrapper .el-table .cell {
-  line-height: 1.5 !important;
-  word-break: break-word;
+  font-size: 13px;
+  border-radius: 8px;
   overflow: hidden;
 }
 
-/* Оптимизация изображений в таблицах */
+.admin-wrapper .el-table th.el-table__cell {
+  background-color: #f5f7fa;
+  font-weight: 600;
+  padding: 16px 12px;
+  white-space: nowrap;
+  color: #606266;
+  border-bottom: 2px solid #e4e7ed;
+}
+
+.admin-wrapper .el-table td.el-table__cell {
+  padding: 14px 12px;
+  vertical-align: top;
+}
+
+/* 表格单元格内容 */
+.admin-wrapper .el-table .cell {
+  line-height: 1.6;
+  padding: 4px 8px;
+  word-wrap: break-word;
+}
+
+/* 确保表格行有足够高度容纳按钮 */
+.admin-wrapper .el-table tbody tr {
+  min-height: 70px;
+}
+
+.admin-wrapper .el-table tbody td {
+  min-height: 70px;
+}
+
+/* 普通文本列 - 显示完整内容，不截断 */
+.admin-wrapper .el-table td:not(:last-child):not(.el-table-column--selection):not([class*="el-table-fixed-column"]) .cell {
+  white-space: normal;
+  word-wrap: break-word;
+  word-break: break-word;
+  line-height: 1.6;
+  padding: 8px 12px;
+}
+
+/* 确保操作列不被截断 */
+.admin-wrapper .el-table td[class*="el-table-fixed-column"],
+.admin-wrapper .el-table__fixed-right td,
+.admin-wrapper .el-table td:last-child {
+  overflow: visible !important;
+}
+
+.admin-wrapper .el-table td[class*="el-table-fixed-column"] .cell,
+.admin-wrapper .el-table__fixed-right .cell,
+.admin-wrapper .el-table td:last-child .cell {
+  overflow: visible !important;
+  white-space: normal !important;
+}
+
+/* 操作列 - 确保按钮完全可见 */
+.admin-wrapper .el-table__fixed-right-patch {
+  background-color: #f5f7fa;
+}
+
+.admin-wrapper .el-table__fixed-right {
+  box-shadow: -4px 0 8px rgba(0, 0, 0, 0.06);
+}
+
+.admin-wrapper .el-table__fixed-right .el-table__cell {
+  background-color: #fff;
+}
+
+/* 操作列按钮容器 - 确保按钮完全可见 */
+.admin-wrapper .el-table td[class*="el-table-fixed-column"] .cell,
+.admin-wrapper .el-table__fixed-right .cell,
+.admin-wrapper .el-table td:last-child .cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  overflow: visible !important;
+  padding: 10px 16px !important;
+  min-height: 60px;
+  line-height: 1.5;
+}
+
+/* 表格按钮样式 - 精简紧凑 */
+.admin-wrapper .el-table .el-button {
+  padding: 6px 12px;
+  font-size: 12px;
+  margin: 3px 0;
+  white-space: nowrap;
+  border-radius: 4px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  min-width: 70px;
+}
+
+.admin-wrapper .el-table .el-button + .el-button {
+  margin-left: 0;
+}
+
+.admin-wrapper .el-table .el-button--small {
+  padding: 5px 10px;
+  font-size: 12px;
+  min-width: 65px;
+}
+
+/* 链接按钮样式 */
+.admin-wrapper .el-table .el-button--link {
+  padding: 4px 8px;
+  margin: 0 2px;
+  min-width: auto;
+}
+
+/* 多按钮操作列优化 - 当按钮超过2个时自动换行 */
+.admin-wrapper .el-table td[class*="operation"] .cell,
+.admin-wrapper .el-table td[class*="Operation"] .cell {
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 6px 8px;
+  min-height: 70px;
+}
+
+/* 评论管理特殊样式 - 更多空间 */
+.admin-wrapper .el-table .comment-content,
+.admin-wrapper .el-table .object-info,
+.admin-wrapper .el-table .user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  min-width: 200px;
+}
+
+.admin-wrapper .el-table .comment-content .el-text,
+.admin-wrapper .el-table .object-name {
+  white-space: normal;
+  word-wrap: break-word;
+  line-height: 1.6;
+}
+
+/* 固定列操作按钮优化 */
+.admin-wrapper .el-table__fixed-right {
+  background-color: #fff;
+}
+
+.admin-wrapper .el-table__fixed-right .el-table__cell {
+  background-color: #fff !important;
+}
+
+/* 表格悬停时操作列也要高亮 */
+.admin-wrapper .el-table tbody tr:hover > td.el-table__fixed-right-patch,
+.admin-wrapper .el-table__fixed-right tbody tr:hover > td {
+  background-color: #f5f7fa !important;
+}
+
+/* 表格悬停效果 */
+.admin-wrapper .el-table tbody tr:hover > td {
+  background-color: #f5f7fa;
+}
+
+/* 表格斑马纹 */
+.admin-wrapper .el-table--striped .el-table__body tr.el-table__row--striped td {
+  background-color: #fafafa;
+}
+
+/* 表格内容自适应 - 确保长文本正确显示 */
+.admin-wrapper .el-table {
+  table-layout: auto;
+}
+
+.admin-wrapper .el-table__body {
+  width: 100%;
+}
+
+/* 表格列宽度优化 */
+.admin-wrapper .el-table .el-table__cell {
+  min-width: 80px;
+}
+
+/* 用户信息列 */
+.admin-wrapper .el-table .user-info {
+  min-width: 150px;
+}
+
+/* 评论内容列 */
+.admin-wrapper .el-table .comment-content {
+  min-width: 250px;
+  max-width: 400px;
+}
+
+/* 对象信息列 */
+.admin-wrapper .el-table .object-info {
+  min-width: 200px;
+}
+
+/* ==========================================
+   图片优化
+   ========================================== */
 .admin-wrapper .el-table .el-image {
   display: block;
   margin: 0 auto;
-  border-radius: 4px;
+  border-radius: 6px;
   overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
 }
 
-/* Оптимизация форм в админке - адаптация для русского языка */
+.admin-wrapper .el-table .el-image:hover {
+  transform: scale(1.05);
+}
+
+/* ==========================================
+   表单样式优化
+   ========================================== */
 .admin-wrapper .el-form-item__label {
-  min-width: 160px !important;
-  font-size: 14px !important;
-  font-weight: 500 !important;
-  white-space: normal !important;
-  line-height: 1.4 !important;
-  word-break: break-word !important;
+  font-size: 13px;
+  font-weight: 500;
+  color: #606266;
+  line-height: 32px;
 }
 
-/* Оптимизация поисковых форм - адаптация для русского языка */
-.admin-wrapper .search-form {
-  background: #f5f7fa;
-  padding: 20px;
+/* 搜索表单 */
+.admin-wrapper .el-card .el-form {
+  background: #fff;
+  padding: 16px;
   border-radius: 8px;
-  margin-bottom: 20px;
 }
 
-.admin-wrapper .search-form .el-form-item {
-  margin-bottom: 16px;
-}
-
-.admin-wrapper .search-form .el-form-item__label {
-  min-width: 120px !important;
-  white-space: normal !important;
-  line-height: 1.4 !important;
-}
-
-/* Оптимизация кнопок действий в таблицах - адаптация для русского языка */
-.admin-wrapper .el-table .el-button--small {
-  padding: 5px 14px !important;
-  font-size: 12px !important;
-  margin: 0 4px !important;
-  white-space: nowrap !important;
-  min-width: 70px !important;
-}
-
-/* Оптимизация панели инструментов */
-.admin-wrapper .toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.admin-wrapper .toolbar-left,
-.admin-wrapper .toolbar-right {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-/* Оптимизация карточек статистики */
-.admin-wrapper .stat-card {
-  padding: 20px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s;
-}
-
-.admin-wrapper .stat-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
-}
-
-.admin-wrapper .stat-card-title {
-  font-size: 14px;
-  color: #666;
+.admin-wrapper .el-form--inline .el-form-item {
+  margin-right: 16px;
   margin-bottom: 12px;
 }
 
-.admin-wrapper .stat-card-value {
-  font-size: 28px;
-  font-weight: 600;
-  color: #333;
+/* ==========================================
+   卡片样式
+   ========================================== */
+.admin-wrapper .el-card {
+  border-radius: 12px;
+  border: 1px solid #e4e7ed;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  margin-bottom: 16px;
+  transition: box-shadow 0.3s;
 }
 
-/* Оптимизация диалогов */
+.admin-wrapper .el-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.admin-wrapper .el-card__header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e4e7ed;
+  background-color: #fafafa;
+}
+
+.admin-wrapper .el-card__body {
+  padding: 20px;
+}
+
+/* ==========================================
+   按钮组样式
+   ========================================== */
+.admin-wrapper .el-space {
+  margin-bottom: 16px;
+}
+
+.admin-wrapper .el-button {
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.admin-wrapper .el-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.admin-wrapper .el-button--primary {
+  background: linear-gradient(135deg, #409eff 0%, #3a8ee6 100%);
+  border: none;
+}
+
+.admin-wrapper .el-button--danger {
+  background: linear-gradient(135deg, #f56c6c 0%, #f04747 100%);
+  border: none;
+}
+
+.admin-wrapper .el-button--success {
+  background: linear-gradient(135deg, #67c23a 0%, #5daf34 100%);
+  border: none;
+}
+
+/* ==========================================
+   对话框样式
+   ========================================== */
 .admin-wrapper .el-dialog {
   border-radius: 12px;
   overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }
 
 .admin-wrapper .el-dialog__header {
-  background: #f5f7fa;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%);
   padding: 20px 24px;
-  border-bottom: 1px solid #e8e8e8;
+  border-bottom: 1px solid #e4e7ed;
 }
 
 .admin-wrapper .el-dialog__title {
   font-size: 18px;
   font-weight: 600;
-  color: #333;
+  color: #303133;
 }
 
 .admin-wrapper .el-dialog__body {
   padding: 24px;
+  max-height: 60vh;
+  overflow-y: auto;
 }
 
 .admin-wrapper .el-dialog__footer {
   padding: 16px 24px;
-  border-top: 1px solid #e8e8e8;
+  border-top: 1px solid #e4e7ed;
+  background-color: #fafafa;
 }
 
-/* Оптимизация меню */
+/* ==========================================
+   侧边栏菜单样式
+   ========================================== */
+.admin-wrapper .el-menu {
+  border-right: none;
+}
+
 .admin-wrapper .el-menu-item,
 .admin-wrapper .el-submenu__title {
-  font-size: 14px !important;
-  padding: 0 20px !important;
-  height: 48px !important;
-  line-height: 48px !important;
+  font-size: 14px;
+  padding: 0 20px;
+  height: 48px;
+  line-height: 48px;
+  transition: all 0.2s;
+  border-radius: 0;
 }
 
-.admin-wrapper .el-menu-item i,
-.admin-wrapper .el-submenu__title i {
-  margin-right: 8px;
+.admin-wrapper .el-menu-item:hover,
+.admin-wrapper .el-submenu__title:hover {
+  background-color: rgba(64, 158, 255, 0.1);
 }
 
-/* Оптимизация пагинации */
+.admin-wrapper .el-menu-item.is-active {
+  background-color: rgba(64, 158, 255, 0.15);
+  border-right: 3px solid #409eff;
+  color: #409eff;
+}
+
+/* 子菜单样式 - 向右缩进 */
+.admin-wrapper .el-sub-menu .el-menu-item {
+  padding-left: 56px !important;
+  background-color: rgba(0, 0, 0, 0.3);
+  font-size: 13px;
+  height: 44px;
+  line-height: 44px;
+  position: relative;
+}
+
+.admin-wrapper .el-sub-menu .el-menu-item:hover {
+  background-color: rgba(64, 158, 255, 0.15);
+}
+
+.admin-wrapper .el-sub-menu .el-menu-item.is-active {
+  background-color: rgba(64, 158, 255, 0.25);
+  color: #409eff;
+  font-weight: 500;
+}
+
+.admin-wrapper .el-menu-item .el-icon,
+.admin-wrapper .el-submenu__title .el-icon {
+  margin-right: 10px;
+  font-size: 16px;
+}
+
+/* ==========================================
+   分页样式
+   ========================================== */
 .admin-wrapper .el-pagination {
   margin-top: 20px;
   display: flex;
   justify-content: flex-end;
+  padding: 16px 0;
+}
+
+.admin-wrapper .el-pagination button,
+.admin-wrapper .el-pagination .el-pager li {
+  border-radius: 6px;
+  margin: 0 3px;
+  transition: all 0.2s;
+}
+
+.admin-wrapper .el-pagination .el-pager li.is-active {
+  background: linear-gradient(135deg, #409eff 0%, #3a8ee6 100%);
+  color: #fff;
 }
 
 /* Оптимизация загрузки изображений */
@@ -212,64 +451,90 @@
   font-size: 14px;
 }
 
-/* Адаптивность для админки - улучшенная поддержка русского языка */
-@media (max-width: 1200px) {
-  .admin-wrapper .el-form-item__label {
-    min-width: 140px !important;
-  }
+/* ==========================================
+   标签样式
+   ========================================== */
+.admin-wrapper .el-tag {
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 500;
 }
 
+/* ==========================================
+   响应式设计
+   ========================================== */
 @media (max-width: 768px) {
   .admin-wrapper .el-aside {
-    width: 200px !important;
+    width: 180px;
   }
   
   .admin-wrapper .el-menu-item,
   .admin-wrapper .el-submenu__title {
-    font-size: 13px !important;
+    font-size: 12px;
     padding: 0 10px !important;
-    white-space: normal !important;
-    line-height: 1.3 !important;
-    height: auto !important;
-    min-height: 48px !important;
   }
   
-  .admin-wrapper .el-form-item__label {
-    min-width: 110px !important;
-    font-size: 13px !important;
+  .admin-wrapper .el-sub-menu .el-menu-item {
+    padding-left: 36px !important;
+    font-size: 11px;
   }
   
-  .admin-wrapper .toolbar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .admin-wrapper .toolbar-left,
-  .admin-wrapper .toolbar-right {
-    width: 100%;
-    justify-content: space-between;
+  .admin-wrapper .el-table .el-button {
+    padding: 4px 8px;
+    font-size: 11px;
+    min-width: 60px;
   }
   
   .admin-wrapper .el-table .el-button--small {
-    padding: 3px 10px !important;
-    font-size: 11px !important;
-    min-width: 60px !important;
+    padding: 3px 6px;
+    font-size: 10px;
+    min-width: 55px;
+  }
+  
+  .admin-wrapper .el-card__body {
+    padding: 12px;
+  }
+  
+  /* 移动端操作列按钮垂直排列 */
+  .admin-wrapper .el-table td:last-child .cell {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+  
+  .admin-wrapper .el-table td:last-child .el-button {
+    width: 100%;
+  }
+  
+  /* 移动端表格单元格更紧凑 */
+  .admin-wrapper .el-table td.el-table__cell {
+    padding: 10px 8px;
+  }
+  
+  .admin-wrapper .el-table .cell {
+    padding: 4px 6px;
+    font-size: 12px;
   }
 }
 
-/* Оптимизация для планшетов - адаптация для русского языка */
 @media (min-width: 769px) and (max-width: 1024px) {
   .admin-wrapper .el-aside {
-    width: 240px !important;
+    width: 220px;
   }
   
-  .admin-wrapper .el-form-item__label {
-    min-width: 130px !important;
+  .admin-wrapper .el-sub-menu .el-menu-item {
+    padding-left: 48px !important;
   }
   
-  .admin-wrapper .el-menu-item,
-  .admin-wrapper .el-submenu__title {
-    font-size: 13px !important;
+  .admin-wrapper .el-table .el-button {
+    padding: 5px 10px;
+    font-size: 11px;
+    min-width: 65px;
+  }
+  
+  .admin-wrapper .el-table td.el-table__cell {
+    padding: 12px 10px;
   }
 }
 

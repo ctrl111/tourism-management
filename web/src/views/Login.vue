@@ -268,7 +268,6 @@ async function handleLogin() {
       captchaRef.value?.refresh()
     }
   } catch (error) {
-    console.error('Ошибка входа:', error)
     ElMessage.error(t('login.loginFailed'))
     formData.captcha = ''
     captchaRef.value?.refresh()
@@ -556,10 +555,11 @@ onMounted(async () => {
 .type-option {
   flex: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 12px;
+  gap: 12px;
+  padding: 20px 12px;
   border: 2px solid #e8e8e8;
   border-radius: 12px;
   cursor: pointer;
@@ -567,6 +567,7 @@ onMounted(async () => {
   font-size: 14px;
   color: #595959;
   background: white;
+  list-style: none;
 }
 
 .type-option:hover {

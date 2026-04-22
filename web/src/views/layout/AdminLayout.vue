@@ -1,6 +1,6 @@
 <template>
   <el-container class="admin-wrapper" style="height: 100%;">
-    <el-aside width="200px" class="my-aside">
+    <el-aside width="260px" class="my-aside">
       <h3 class="title">{{ $t('menu.systemName') }}</h3>
       <el-menu
           style="width: 100%; overflow: hidden;"
@@ -222,6 +222,27 @@ const isCollapse = ref(true)
 
 .el-menu {
   border-right: 0px;
+}
+
+/* 移除菜单项前面的点 */
+:deep(.el-menu-item),
+:deep(.el-sub-menu__title) {
+  list-style: none;
+}
+
+:deep(.el-menu-item::before),
+:deep(.el-sub-menu__title::before) {
+  content: none !important;
+  display: none !important;
+}
+
+/* 调整图标和文字的间距 */
+:deep(.el-menu-item .el-icon) {
+  margin-right: 8px;
+}
+
+:deep(.el-sub-menu__title .el-icon) {
+  margin-right: 8px;
 }
 </style>
 

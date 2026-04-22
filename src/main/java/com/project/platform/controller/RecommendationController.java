@@ -5,7 +5,6 @@ import com.project.platform.service.CollaborativeFilteringService;
 import com.project.platform.utils.CurrentUserThreadLocal;
 import com.project.platform.dto.CurrentUserDTO;
 import jakarta.annotation.Resource;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -17,7 +16,6 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/recommendation")
-@Slf4j
 public class RecommendationController {
     
     @Resource
@@ -39,20 +37,14 @@ public class RecommendationController {
     public List<ScenicInfo> getRecommendationsForCurrentUser(@RequestParam(defaultValue = "10") Integer limit) {
         CurrentUserDTO user = CurrentUserThreadLocal.getCurrentUser();
         if (user == null) {
-            log.warn("Пользователь не авторизован, возвращаем пустые рекомендации");
             return List.of();
         }
         
         try {
             List<ScenicInfo> recommendations = collaborativeFilteringService.recommendForUser(user.getId(), limit);
-            log.info("为用户{}返回{}个推荐景点", user.getId(), recommendations.size());
-            
-            // 填充额外信息（分类名称、评论数、收藏数）
             enrichScenicInfo(recommendations);
-            
             return recommendations;
         } catch (Exception e) {
-            log.error("Ошибка получения рекомендаций", e);
             return List.of();
         }
     }
@@ -66,14 +58,9 @@ public class RecommendationController {
             @RequestParam(defaultValue = "10") Integer limit) {
         try {
             List<ScenicInfo> recommendations = collaborativeFilteringService.recommendForUser(userId, limit);
-            log.info("为用户{}返回{}个推荐景点", userId, recommendations.size());
-            
-            // 填充额外信息
             enrichScenicInfo(recommendations);
-            
             return recommendations;
         } catch (Exception e) {
-            log.error("Ошибка получения рекомендаций", e);
             return List.of();
         }
     }
@@ -103,11 +90,11 @@ public class RecommendationController {
             }
             
             // 查询评论数
-            int commentCount = commentInfoMapper.queryCommentsCount("景点", scenic.getId());
+            int commentCount = commentInfoMapper.queryCommentsCount("SCENIC", scenic.getId());
             scenic.setCountComment(commentCount);
             
             // 查询收藏数
-            int favoriteCount = favoriteMapper.queryFavoriteCount("景点", scenic.getId());
+            int favoriteCount = favoriteMapper.queryFavoriteCount("SCENIC", scenic.getId());
             scenic.setCountFavorite(favoriteCount);
         }
     }
@@ -132,7 +119,6 @@ public class RecommendationController {
             result.put("data", recommendations);
             result.put("total", recommendations.size());
         } catch (Exception e) {
-            log.error("Ошибка получения рекомендаций", e);
             result.put("success", false);
             result.put("message", "Ошибка получения рекомендаций: " + e.getMessage());
         }
@@ -154,7 +140,6 @@ public class RecommendationController {
             result.put("scenicId2", scenicId2);
             result.put("similarity", similarity);
         } catch (Exception e) {
-            log.error("Ошибка расчёта схожести", e);
             result.put("success", false);
             result.put("message", "Ошибка расчёта: " + e.getMessage());
         }

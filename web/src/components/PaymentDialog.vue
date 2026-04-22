@@ -157,7 +157,6 @@ const handlePayment = async () => {
       })
     }
   } catch (error) {
-    console.error('支付失败:', error)
     ElMessage.error(error.response?.data?.msg || $t('payment.payFailed'))
   } finally {
     paying.value = false

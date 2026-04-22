@@ -37,55 +37,48 @@
             border
             v-loading="loading"
         >
-          <el-table-column type="selection" width="55"></el-table-column>
-          <el-table-column :label="$t('commentManage.userInfo')" width="180">
+          <el-table-column type="selection" width="55" align="center"></el-table-column>
+          <el-table-column :label="$t('commentManage.userInfo')" width="200" align="center" header-align="center">
             <template #default="scope">
-              <div class="user-info">
-                <el-avatar :size="32" :src="scope.row.user?.avatarUrl" />
-                <div class="user-details">
-                  <div class="username">{{ scope.row.user?.username || $t('commentManage.unknownUser') }}</div>
-                </div>
+              <div style="display: flex; align-items: center; gap: 10px; justify-content: center;">
+                <el-avatar :size="35" :src="scope.row.user?.avatarUrl" />
+                <span style="font-size: 13px;">{{ scope.row.user?.username || $t('commentManage.unknownUser') }}</span>
               </div>
             </template>
           </el-table-column>
-          <el-table-column :label="$t('commentManage.commentObject')" width="280">
+          <el-table-column :label="$t('commentManage.commentObject')" width="180" align="center" header-align="center">
             <template #default="scope">
-              <div class="object-info">
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
                 <el-tag :type="scope.row.typeCode === 'SCENIC' ? 'success' : 'primary'" size="small">
                   {{ scope.row.typeCode === 'SCENIC' ? $t('commentManage.scenic') : $t('commentManage.travelNote') }}
                 </el-tag>
-                <div class="object-name">
-                  {{ scope.row.associationName || `ID: ${scope.row.associationId}` }}
-                </div>
                 <el-button 
                   type="primary" 
-                  link 
-                  size="small"
                   :icon="Link"
-                  @click="goToObject(scope.row)"
-                >
-                  {{ $t('commentManage.viewObject') }}
-                </el-button>
-              </div>
-            </template>
-          </el-table-column>
-          <el-table-column prop="content" :label="$t('commentManage.commentContent')" min-width="300">
-            <template #default="scope">
-              <div class="comment-content">
-                <el-text :line-clamp="2">{{ scope.row.content }}</el-text>
-                <el-button 
-                  v-if="scope.row.content && scope.row.content.length > 50"
-                  type="primary" 
-                  link 
                   size="small"
-                  @click="viewDetail(scope.row)"
-                >
-                  {{ $t('commentManage.viewDetails') }}
-                </el-button>
+                  circle
+                  @click="goToObject(scope.row)"
+                  title="查看对象"
+                />
               </div>
             </template>
           </el-table-column>
-          <el-table-column :label="$t('commentManage.replyStatus')" width="120" align="center">
+          <el-table-column :label="$t('commentManage.commentContent')" min-width="300" header-align="center">
+            <template #default="scope">
+              <div style="
+                overflow: hidden;
+                text-overflow: ellipsis;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                line-height: 1.5;
+                font-size: 13px;
+              ">
+                {{ scope.row.content }}
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column :label="$t('commentManage.replyStatus')" width="200" align="center" header-align="center">
             <template #default="scope">
               <el-tag v-if="scope.row.parentId" type="warning" size="small">
                 {{ $t('commentManage.replyComment') }}
@@ -95,14 +88,12 @@
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="createTime" :label="$t('commentManage.commentTime')" width="180"></el-table-column>
-          <el-table-column fixed="right" :label="$t('commentManage.operation')" width="120">
+          <el-table-column prop="createTime" :label="$t('commentManage.commentTime')" width="180" align="center" header-align="center"></el-table-column>
+          <el-table-column fixed="right" :label="$t('commentManage.operation')" width="180" align="center" header-align="center">
             <template #default="scope">
               <el-button 
                 :icon="View" 
-                type="primary" 
-                link 
-                size="small" 
+                size="small"
                 @click="viewDetail(scope.row)"
               >
                 {{ $t('commentManage.details') }}
@@ -110,8 +101,7 @@
               <el-button 
                 :icon="Delete" 
                 type="danger" 
-                link 
-                size="small" 
+                size="small"
                 @click="deleteOne(scope.row)"
               >
                 {{ $t('commentManage.delete') }}

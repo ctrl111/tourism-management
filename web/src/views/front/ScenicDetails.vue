@@ -396,7 +396,6 @@ onMounted(() => {
 function sizeChange(e) {
   pageInfo.value.pageSize = e
   loadComments()
-  console.log(e)
 }
 /**
  * 选择分页
@@ -408,7 +407,6 @@ function currentChange(e) {
 }
 function getInfo() {
   request.get("/scenicInfo/selectById/" + id.value,).then(res => {
-    console.log('后端返回的完整数据:', res.data)
     // 处理详情图数组
     const detailImages = res.data.detailImages
         ? res.data.detailImages.split(',').map((url, index) => ({
@@ -422,8 +420,6 @@ function getInfo() {
       detailImages: detailImages
     };
     isFavorited.value = res.data.favorited || false
-    console.log('景点收藏状态:', isFavorited.value, '原始值:', res.data.favorited)
-    console.log('详情图数组:', detailImages)
   })
   //增加浏览量
   request.get("/scenicInfo/putViewCount/" + id.value,).then(res => {
@@ -527,7 +523,6 @@ function handleWriteComment(info){
 //聊天窗口
 const handleChatToggle = () => {
   drawerVisible.value = !drawerVisible.value
-  console.log(`聊天窗口状态: ${drawerVisible.value ? '打开' : '关闭'}`)
 }
 
 // 收藏功能
@@ -537,7 +532,6 @@ function handleFavorite() {
     associationId: id.value,
   }
   let favorited = isFavorited.value
-  console.log('当前收藏状态:', favorited)
   //收藏
   if (!favorited) {
     request.post("/favorite/add", formData).then(res => {
@@ -550,9 +544,7 @@ function handleFavorite() {
       });
       // 更新状态
       isFavorited.value = true
-      console.log('收藏后状态:', isFavorited.value)
     }).catch(err => {
-      console.error('收藏失败:', err)
       // 如果是已经收藏过了，更新状态并重新获取数据
       if (err.response?.data?.msg?.includes('已经收藏')) {
         ElMessage({
@@ -574,9 +566,7 @@ function handleFavorite() {
       });
       // 更新状态
       isFavorited.value = false
-      console.log('取消收藏后状态:', isFavorited.value)
     }).catch(err => {
-      console.error('取消收藏失败:', err)
       // 如果取消失败，重新获取数据以同步状态
       getInfo()
     })

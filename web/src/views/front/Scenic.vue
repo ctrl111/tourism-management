@@ -270,7 +270,6 @@ function currentChange(e) {
 function sizeChange(e) {
   pageInfo.value.pageSize = e
   getPageList()
-  console.log(e)
 }
 
 /**
@@ -468,7 +467,6 @@ function handlePaymentSuccess() {
 //聊天窗口
 const handleChatToggle = () => {
   drawerVisible.value = !drawerVisible.value
-  console.log(`聊天窗口状态: ${drawerVisible.value ? '打开' : '关闭'}`)
 }
 </script>
 

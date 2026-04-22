@@ -172,7 +172,6 @@ const handleRecharge = async () => {
       rechargeAmount.value = 100
     }
   } catch (error) {
-    console.error('充值失败:', error)
     ElMessage.error(error.response?.data?.msg || $t('user.rechargeFailed'))
   } finally {
     recharging.value = false

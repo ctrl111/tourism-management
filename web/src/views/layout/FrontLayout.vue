@@ -151,12 +151,10 @@ async function initializeApp() {
       try {
         await menuStore.loadMenuByUserType(userStore.getUserType)
       } catch (error) {
-        console.error('加载动态菜单失败:', error)
         // 失败也不影响页面显示
       }
     }
   } catch (error) {
-    console.error('初始化应用失败:', error)
     // 即使初始化失败，也允许用户继续访问页面
   }
 }
@@ -184,7 +182,7 @@ function handleUserCommand(command) {
       router.push('/front/personalCenter')
       break
     case 'notice':
-      router.push('/front/notice')
+      router.push('/front/personalCenter?type=noticeManage')
       break
     case 'orders':
       // 跳转到个人中心的订单管理标签页

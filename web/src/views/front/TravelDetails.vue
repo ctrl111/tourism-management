@@ -300,7 +300,6 @@ onMounted(() => {
 function sizeChange(e) {
   pageInfo.value.pageSize = e
   loadComments()
-  console.log(e)
 }
 /**
  * 选择分页
@@ -315,7 +314,6 @@ function getInfo() {
     info.value = res.data
     isLiked.value = res.data.liked || false
     isFavorited.value = res.data.favorited || false
-    console.log('游记收藏状态:', isFavorited.value)
   })
   //增加浏览量
   request.get("/travelNote/putViewCount/" + id.value,).then(res => {
@@ -407,7 +405,6 @@ function handleFavorite() {
     associationId: id.value,
   }
   let favorited = isFavorited.value
-  console.log('当前收藏状态:', favorited)
   //收藏
   if (!favorited) {
     request.post("/favorite/add", formData).then(res => {
@@ -420,9 +417,7 @@ function handleFavorite() {
       });
       // 直接更新状态，不需要重新请求
       isFavorited.value = true
-      console.log('收藏后状态:', isFavorited.value)
     }).catch(err => {
-      console.error('收藏失败:', err)
       // 如果是已经收藏过了，更新状态
       if (err.response?.data?.msg?.includes('已经收藏')) {
         isFavorited.value = true
@@ -443,9 +438,7 @@ function handleFavorite() {
       });
       // 直接更新状态，不需要重新请求
       isFavorited.value = false
-      console.log('取消收藏后状态:', isFavorited.value)
     }).catch(err => {
-      console.error('取消收藏失败:', err)
     })
   }
 }
@@ -544,7 +537,6 @@ const toggleChildren = (comment) => {
 //聊天窗口
 const handleChatToggle = () => {
   drawerVisible.value = !drawerVisible.value
-  console.log(`聊天窗口状态: ${drawerVisible.value ? '打开' : '关闭'}`)
 }
 </script>
 <style scoped>

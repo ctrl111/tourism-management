@@ -42,6 +42,16 @@
             </template>
             <Favorite v-if="activeName==='favorite'"></Favorite>
           </el-tab-pane>
+          
+          <el-tab-pane name="noticeManage">
+            <template #label>
+              <div class="tab-label">
+                <el-icon><Bell /></el-icon>
+                <span>{{ $t('menu.myNotifications') }}</span>
+              </div>
+            </template>
+            <NoticeManage v-if="activeName==='noticeManage'"></NoticeManage>
+          </el-tab-pane>
         </el-tabs>
       </el-card>
     </div>
@@ -51,11 +61,12 @@
 <script setup>
 import { ref, watch } from "vue"
 import { useRoute } from "vue-router"
-import { User, ShoppingCart, Notebook, Star } from '@element-plus/icons-vue'
+import { User, ShoppingCart, Notebook, Star, Bell } from '@element-plus/icons-vue'
 import Profile from "@/views/front/personalCenter/Profile.vue"
 import OrderManage from "@/views/front/personalCenter/OrderManage.vue"
 import Favorite from "@/views/front/personalCenter/Favorite.vue"
 import TravelNoteManage from "@/views/front/personalCenter/TravelNoteManage.vue"
+import NoticeManage from "@/views/front/personalCenter/NoticeManage.vue"
 
 const drawerVisible = ref(false)
 const unreadCount = ref(0)
@@ -81,7 +92,6 @@ watch(
 // 聊天窗口
 const handleChatToggle = () => {
   drawerVisible.value = !drawerVisible.value
-  console.log(`聊天窗口状态: ${drawerVisible.value ? '打开' : '关闭'}`)
 }
 </script>
 

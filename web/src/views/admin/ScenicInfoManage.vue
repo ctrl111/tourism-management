@@ -26,40 +26,42 @@
         </el-space>
       </el-card>
       <el-card>
-        <el-table ref="tableComponents"
-                  :data="listData"
-                  tooltip-effect="dark"
-                  style="width: 100%"
-                  @selection-change="selectionChange"
-                  border>
-          <el-table-column type="selection" width="55"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="categoryType" :label="$t('scenicManage.scenicCategory')" min-width="140"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="name" :label="$t('scenicManage.scenicName')" min-width="180"></el-table-column>
-          <el-table-column prop="coverImage" :label="$t('scenicManage.coverImage')" width="120">
-            <template #default="scope" >
-              <el-image v-if="scope.row.coverImage" style="width: 80px; height: 80px; border-radius: 4px;" :src="scope.row.coverImage" :preview-src-list="[scope.row.coverImage]" :preview-teleported="true" fit="cover"></el-image>
-            </template>
-          </el-table-column>
-          <el-table-column show-overflow-tooltip prop="address" :label="$t('scenicManage.address')" min-width="150"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="description" :label="$t('scenicManage.description')" min-width="180"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="openingHours" :label="$t('scenicManage.openingHours')" width="120"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="price" :label="$t('scenicManage.price')" width="100"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="stock" :label="$t('scenicManage.ticketStock')" width="110"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="status" :label="$t('scenicManage.status')" width="100">
-            <template #default="scope">
-              <el-tag type="success" v-if="scope.row.status==='ACTIVE' || scope.row.status==='ON_SALE' || scope.row.status==='上架'">{{ $t('status.ACTIVE') }}</el-tag>
-              <el-tag type="danger" v-else-if="scope.row.status==='INACTIVE' || scope.row.status==='OFF_SALE' || scope.row.status==='下架'">{{ $t('status.INACTIVE') }}</el-tag>
-              <el-tag type="info" v-else>{{ $t('status.' + scope.row.status) }}</el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column show-overflow-tooltip prop="createTime" :label="$t('scenicManage.createTime')" width="180"></el-table-column>
-          <el-table-column fixed="right" :label="$t('scenicManage.operation')" width="200">
-            <template #default="scope">
-              <el-button :icon="Edit" @click="edit(scope.$index, scope.row)">{{ $t('scenicManage.edit') }}</el-button>
-              <el-button :icon="Delete" type="danger" @click="deleteOne(scope.$index, scope.row)">{{ $t('scenicManage.delete') }}</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
+        <div style="overflow-x: auto;">
+          <el-table ref="tableComponents"
+                    :data="listData"
+                    tooltip-effect="dark"
+                    style="min-width: 1400px;"
+                    @selection-change="selectionChange"
+                    border>
+            <el-table-column type="selection" width="55"></el-table-column>
+            <el-table-column show-overflow-tooltip prop="categoryType" :label="$t('scenicManage.scenicCategory')" width="160"></el-table-column>
+            <el-table-column show-overflow-tooltip prop="name" :label="$t('scenicManage.scenicName')" width="180"></el-table-column>
+            <el-table-column prop="coverImage" :label="$t('scenicManage.coverImage')" width="100" align="center">
+              <template #default="scope" >
+                <el-image v-if="scope.row.coverImage" style="width: 60px; height: 60px; border-radius: 4px;" :src="scope.row.coverImage" :preview-src-list="[scope.row.coverImage]" :preview-teleported="true" fit="cover"></el-image>
+              </template>
+            </el-table-column>
+            <el-table-column show-overflow-tooltip prop="address" :label="$t('scenicManage.address')" width="180"></el-table-column>
+            <el-table-column show-overflow-tooltip prop="description" :label="$t('scenicManage.description')" width="200"></el-table-column>
+            <el-table-column show-overflow-tooltip prop="openingHours" :label="$t('scenicManage.openingHours')" width="130"></el-table-column>
+            <el-table-column show-overflow-tooltip prop="price" :label="$t('scenicManage.price')" width="100" align="right"></el-table-column>
+            <el-table-column show-overflow-tooltip prop="stock" :label="$t('scenicManage.ticketStock')" width="100" align="right"></el-table-column>
+            <el-table-column show-overflow-tooltip prop="status" :label="$t('scenicManage.status')" width="100" align="center">
+              <template #default="scope">
+                <el-tag type="success" v-if="scope.row.status==='ACTIVE' || scope.row.status==='ON_SALE' || scope.row.status==='上架'">{{ $t('status.ACTIVE') }}</el-tag>
+                <el-tag type="danger" v-else-if="scope.row.status==='INACTIVE' || scope.row.status==='OFF_SALE' || scope.row.status==='下架'">{{ $t('status.INACTIVE') }}</el-tag>
+                <el-tag type="info" v-else>{{ $t('status.' + scope.row.status) }}</el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column show-overflow-tooltip prop="createTime" :label="$t('scenicManage.createTime')" width="170"></el-table-column>
+            <el-table-column fixed="right" :label="$t('scenicManage.operation')" width="200">
+              <template #default="scope">
+                <el-button size="small" :icon="Edit" @click="edit(scope.$index, scope.row)">{{ $t('scenicManage.edit') }}</el-button>
+                <el-button size="small" :icon="Delete" type="danger" @click="deleteOne(scope.$index, scope.row)">{{ $t('scenicManage.delete') }}</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
         <div style="margin-top: 20px">
           <el-pagination
               @current-change="currentChange"
@@ -199,7 +201,6 @@ function currentChange(e) {
 function sizeChange(e) {
   pageInfo.value.pageSize = e
   getPageList()
-  console.log(e)
 }
 
 /**

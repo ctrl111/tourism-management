@@ -12,7 +12,6 @@ import com.project.platform.service.UserService;
 import com.project.platform.utils.CurrentUserThreadLocal;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,7 +26,6 @@ import java.util.Map;
  * 用户信息
  */
 @Service
-@Slf4j
 @Tag(name = "用户管理", description = "用户相关操作API")
 public class UserServiceImpl implements UserService {
     @Resource
@@ -82,10 +80,7 @@ public class UserServiceImpl implements UserService {
         for (Integer id : ids) {
             User user = userMapper.selectById(id);
             if (user != null && StringUtils.isNotBlank(user.getAvatarUrl())) {
-                boolean deleted = fileService.deleteFileByUrl(user.getAvatarUrl());
-                if (deleted) {
-                    log.info("删除用户头像成功: userId={}, avatarUrl={}", id, user.getAvatarUrl());
-                }
+                fileService.deleteFileByUrl(user.getAvatarUrl());
             }
         }
         userMapper.removeByIds(ids);
@@ -226,10 +221,7 @@ public class UserServiceImpl implements UserService {
         if (StringUtils.isNotBlank(currentUserDTO.getAvatarUrl()) 
             && !currentUserDTO.getAvatarUrl().equals(user.getAvatarUrl())
             && StringUtils.isNotBlank(user.getAvatarUrl())) {
-            boolean deleted = fileService.deleteFileByUrl(user.getAvatarUrl());
-            if (deleted) {
-                log.info("删除旧头像成功: userId={}, oldAvatarUrl={}", user.getId(), user.getAvatarUrl());
-            }
+            fileService.deleteFileByUrl(user.getAvatarUrl());
         }
         
         user.setId(currentUserDTO.getId());

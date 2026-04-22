@@ -25,12 +25,12 @@
                   @selection-change="selectionChange"
                   border>
           <el-table-column type="selection" width="55"></el-table-column>
-          <el-table-column prop="name" :label="$t('categoryManage.categoryName')"></el-table-column>
-          <el-table-column prop="createTime" :label="$t('categoryManage.createTime')"></el-table-column>
+          <el-table-column prop="name" :label="$t('categoryManage.categoryName')" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="createTime" :label="$t('categoryManage.createTime')" width="200"></el-table-column>
           <el-table-column fixed="right" :label="$t('categoryManage.operation')" width="200">
             <template #default="scope">
-              <el-button :icon="Edit" @click="edit(scope.$index, scope.row)">{{ $t('categoryManage.edit') }}</el-button>
-              <el-button :icon="Delete" type="danger" @click="deleteOne(scope.$index, scope.row)">{{ $t('categoryManage.delete') }}</el-button>
+              <el-button size="small" :icon="Edit" @click="edit(scope.$index, scope.row)">{{ $t('categoryManage.edit') }}</el-button>
+              <el-button size="small" :icon="Delete" type="danger" @click="deleteOne(scope.$index, scope.row)">{{ $t('categoryManage.delete') }}</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -126,7 +126,6 @@ function currentChange(e) {
 function sizeChange(e) {
   pageInfo.value.pageSize = e
   getPageList()
-  console.log(e)
 }
 
 /**

@@ -176,9 +176,7 @@ function handleAdd() {
  * 处理封面图片变化
  */
 function handleCoverChange(files) {
-  console.log('封面图片变化:', files)
   formData.value.cover = files
-  console.log('formData.cover 更新为:', formData.value.cover)
   // 手动触发表单验证
   if (formRef.value) {
     formRef.value.validateField('cover')
@@ -217,8 +215,6 @@ function submit() {
     submitting.value = true
     const url = formData.value.id ? '/travelNote/update' : '/travelNote/add'
     const method = formData.value.id ? 'put' : 'post'
-
-    console.log('提交的数据:', formData.value)
 
     request[method](url, formData.value).then(res => {
       if (res) {

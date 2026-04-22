@@ -60,9 +60,8 @@
                 </div>
               </template>
             </el-image>
-            <!-- 标题和用户信息叠加在封面图 -->
+            <!-- 用户信息叠加在封面图 -->
             <div class="cover-overlay">
-              <h4 class="note-title">{{ item.title }}</h4>
               <div class="user-info">
                 <el-avatar
                     :size="32"
@@ -85,6 +84,7 @@
           <div class="card-footer">
             <div class="travel-info">
               <span class="date">{{ $t('travelNote.itineraryTime', { time: item.travelTime }) }}</span>
+              <h4 class="note-title">{{ item.title }}</h4>
             </div>
             <div class="comment-stat">
               <el-icon><ChatDotRound /></el-icon>
@@ -248,7 +248,6 @@ function currentChange(e) {
 function sizeChange(e) {
   pageInfo.value.pageSize = e
   getPageList()
-  console.log(e)
 }
 
 /**
@@ -391,7 +390,6 @@ function batchDelete(rows) {
 //聊天窗口
 const handleChatToggle = () => {
   drawerVisible.value = !drawerVisible.value
-  console.log(`聊天窗口状态: ${drawerVisible.value ? '打开' : '关闭'}`)
 }
 // 添加在setup最后
 // const formatDate = (timestamp) => {
@@ -508,14 +506,15 @@ const handleChatToggle = () => {
 
 /* 标题样式 */
 .note-title {
-  font-size: 18px;
+  font-size: 16px;
   line-height: 1.4;
-  margin: 0 0 10px;
+  margin: 8px 0 0 0;
+  color: #2c3e50;
+  font-weight: 600;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 
 .stat-item {
@@ -588,12 +587,14 @@ const handleChatToggle = () => {
   padding: 12px 15px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   background: #f8f9fa;
 
   .travel-info {
     display: flex;
     flex-direction: column;
+    flex: 1;
+    min-width: 0;
 
     .days {
       color: var(--el-color-primary);
@@ -604,6 +605,7 @@ const handleChatToggle = () => {
     .date {
       color: #666;
       font-size: 12px;
+      margin-bottom: 4px;
     }
   }
 
@@ -613,6 +615,8 @@ const handleChatToggle = () => {
     gap: 4px;
     color: #666;
     font-size: 14px;
+    flex-shrink: 0;
+    margin-left: 10px;
 
     .el-icon {
       color: var(--el-color-warning);

@@ -2,7 +2,7 @@
   <div class="favorite-container">
     <el-tabs v-model="activeTab" @tab-change="handleTabChange">
       <!-- 景点收藏 -->
-      <el-tab-pane :label="$t('personalCenter.scenicFavorites')" name="景点">
+      <el-tab-pane :label="$t('personalCenter.scenicFavorites')" name="SCENIC">
         <div v-loading="loading">
           <div class="scenic-grid">
             <div
@@ -58,7 +58,7 @@
       </el-tab-pane>
 
       <!-- 游记收藏 -->
-      <el-tab-pane :label="$t('personalCenter.noteFavorites')" name="游记">
+      <el-tab-pane :label="$t('personalCenter.noteFavorites')" name="TRAVEL_NOTE">
         <div v-loading="loading">
           <el-row :gutter="20" class="note-list">
             <el-col
@@ -152,7 +152,7 @@ import request from '@/utils/http.js'
 const router = useRouter()
 
 // 当前激活的标签页
-const activeTab = ref('景点')
+const activeTab = ref('SCENIC')
 
 // 列表数据
 const listData = ref([])
@@ -182,7 +182,6 @@ async function getFavoriteList() {
       pageInfo.value.total = res.data.total || 0
     }
   } catch (error) {
-    console.error('获取收藏列表失败:', error)
     ElMessage.error('Ошибка загрузки списка избранного')
   } finally {
     loading.value = false
@@ -239,7 +238,7 @@ function viewTravelNote(row) {
  * 取消收藏
  */
 async function handleUnfavorite(row) {
-  const itemType = activeTab.value === '景点' ? 'достопримечательность' : 'заметку'
+  const itemType = activeTab.value === 'SCENIC' ? 'достопримечательность' : 'заметку'
   try {
     await ElMessageBox.confirm(`Вы уверены, что хотите удалить из избранного эту ${itemType}?`, 'Подсказка', {
       confirmButtonText: 'Подтвердить',
@@ -254,7 +253,6 @@ async function handleUnfavorite(row) {
     }
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('取消收藏失败:', error)
       ElMessage.error('Ошибка удаления из избранного')
     }
   }

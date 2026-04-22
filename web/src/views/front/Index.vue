@@ -235,29 +235,12 @@ const fetchData = () => {
         limit: 6
       }
     }).then(res => {
-      console.log('========== 推荐接口返回 ==========')
-      console.log('返回数据类型:', typeof res, '是否为数组:', Array.isArray(res))
-      console.log('返回数据长度:', res ? res.length : 'null')
-      console.log('返回数据内容:', res)
-      
       if (res && Array.isArray(res) && res.length > 0) {
         scenicList.value = res
-        console.log('✓ 使用推荐结果:', res.length, '个景点')
-        console.log('推荐景点列表:', res.map(s => `ID:${s.id} ${s.name}`).join(', '))
-        console.log('提示：查看后端日志确认是协同过滤还是热门推荐')
       } else {
-        console.log('✗ 推荐结果为空')
-        console.log('可能原因：')
-        console.log('  1. 用户未登录')
-        console.log('  2. 用户没有交互历史（未收藏、未购买）')
-        console.log('  3. 找不到相似用户')
-        console.log('  4. 所有推荐景点都已被用户交互过')
-        console.log('解决方案：运行 add_test_interactions.bat 添加测试数据')
         scenicList.value = []
       }
     }).catch(error => {
-      console.error('✗ 推荐加载失败:', error)
-      console.error('错误详情:', error.response || error.message)
       scenicList.value = []
     })
     
@@ -266,30 +249,19 @@ const fetchData = () => {
       pageNum: 1,
       pageSize: 6
     }
-    console.log('========== 开始获取游记数据 ==========')
-    console.log('请求参数:', paramsForm)
     request.get('/travelNote/homelist', {
       params: paramsForm
     }).then(res => {
-      console.log('游记接口返回:', res)
-      console.log('游记数据类型:', typeof res, '是否有data:', res && res.data)
-      
-      // 后端返回格式：{ code: 200, msg: "...", data: { list: [...], total: 6 } }
       if (res && res.data && res.data.list) {
-        console.log('游记列表长度:', res.data.list.length)
-        console.log('游记列表:', res.data.list)
         travelNotes.value = res.data.list
       } else {
-        console.warn('游记数据格式异常:', res)
         travelNotes.value = []
       }
     }).catch(error => {
-      console.error('✗ 游记加载失败:', error)
-      console.error('错误详情:', error.response || error.message)
       travelNotes.value = []
     })
   } catch (error) {
-    console.error('数据加载失败:', error)
+    // 数据加载失败
   }
 }
 function disabledDate(time) {
@@ -351,7 +323,6 @@ function handlePaymentSuccess() {
 //聊天窗口
 const handleChatToggle = () => {
   drawerVisible.value = !drawerVisible.value
-  console.log(`聊天窗口状态: ${drawerVisible.value ? '打开' : '关闭'}`)
 }
 fetchData()
 </script>

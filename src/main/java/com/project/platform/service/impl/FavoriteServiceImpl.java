@@ -7,7 +7,6 @@ import com.project.platform.service.FavoriteService;
 import com.project.platform.utils.CurrentUserThreadLocal;
 import com.project.platform.exception.CustomException;
 import jakarta.annotation.Resource;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import com.project.platform.vo.PageVO;
 
@@ -19,7 +18,6 @@ import java.util.Map;
  * 收藏信息
  */
 @Service
-@Slf4j
 public class FavoriteServiceImpl implements FavoriteService {
     @Resource
     private FavoriteMapper favoriteMapper;
@@ -57,11 +55,6 @@ public class FavoriteServiceImpl implements FavoriteService {
             entity.setUserId(currentUser.getId());
         }
         
-        System.out.println("=== 添加收藏 ===");
-        System.out.println("用户ID: " + entity.getUserId());
-        System.out.println("类型: " + entity.getTypeCode());
-        System.out.println("关联ID: " + entity.getAssociationId());
-        
         // 设置创建时间
         if (entity.getCreateTime() == null) {
             entity.setCreateTime(LocalDateTime.now());
@@ -70,7 +63,6 @@ public class FavoriteServiceImpl implements FavoriteService {
         // 检查是否已经收藏
         if (entity.getUserId() != null && entity.getTypeCode() != null && entity.getAssociationId() != null) {
             int count = favoriteMapper.queryIsFavorite(entity.getTypeCode(), entity.getAssociationId(), entity.getUserId());
-            System.out.println("已收藏数量: " + count);
             if (count > 0) {
                 throw new CustomException("Уже добавлено в избранное");
             }
@@ -78,7 +70,6 @@ public class FavoriteServiceImpl implements FavoriteService {
         
         check(entity);
         favoriteMapper.insert(entity);
-        System.out.println("Избранное добавлено успешно");
     }
     
     @Override

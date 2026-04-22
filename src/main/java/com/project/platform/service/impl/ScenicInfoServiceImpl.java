@@ -4,6 +4,7 @@ import com.project.platform.dto.CurrentUserDTO;
 import com.project.platform.entity.*;
 import com.project.platform.mapper.CommentInfoMapper;
 import com.project.platform.mapper.FavoriteMapper;
+import com.project.platform.mapper.OrderInfoMapper;
 import com.project.platform.mapper.ScenicInfoMapper;
 import com.project.platform.mapper.UserMapper;
 import com.project.platform.service.CollaborativeFilteringService;
@@ -11,7 +12,6 @@ import com.project.platform.service.FileService;
 import com.project.platform.service.ScenicInfoService;
 import com.project.platform.utils.CurrentUserThreadLocal;
 import jakarta.annotation.Resource;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
  * 景点信息
  */
 @Service
-@Slf4j
 public class ScenicInfoServiceImpl  implements ScenicInfoService {
     @Resource
     private ScenicInfoMapper scenicInfoMapper;
@@ -37,6 +36,8 @@ public class ScenicInfoServiceImpl  implements ScenicInfoService {
     private CommentInfoMapper commentInfoMapper;
     @Resource
     private FavoriteMapper favoriteMapper;
+    @Resource
+    private OrderInfoMapper orderInfoMapper;
     @Resource
     private FileService fileService;
     @Resource
@@ -81,15 +82,10 @@ public class ScenicInfoServiceImpl  implements ScenicInfoService {
         
         // 如果用户已登录，使用协同过滤推荐
         if (dto != null && dto.getId() != null && "USER".equals(dto.getType())) {
-            log.info("为用户{}生成协同过滤推荐", dto.getId());
-            
             try {
-                // 使用协同过滤算法推荐
                 List<ScenicInfo> cfRecommendations = collaborativeFilteringService.recommendForUser(dto.getId(), pageSize * 2);
                 
                 if (!cfRecommendations.isEmpty()) {
-                    log.info("协同过滤推荐成功，推荐了{}个景点", cfRecommendations.size());
-                    // 分页处理推荐结果
                     int start = (pageNum - 1) * pageSize;
                     int end = Math.min(start + pageSize, cfRecommendations.size());
                     
@@ -98,13 +94,12 @@ public class ScenicInfoServiceImpl  implements ScenicInfoService {
                     }
                 }
             } catch (Exception e) {
-                log.error("协同过滤推荐失败，降级到普通推荐", e);
+                // 推荐失败，降级到普通推荐
             }
         }
         
         // 如果推荐结果不足（未登录、推荐失败、或推荐数量不够），补充热门景点
         if (list.size() < pageSize) {
-            log.info("推荐结果不足，补充热门景点");
             
             // 提取已有的景点ID，避免重复
             Set<Integer> existingIds = list.stream()
@@ -178,16 +173,9 @@ public class ScenicInfoServiceImpl  implements ScenicInfoService {
             
             // 只有登录用户才检查是否收藏
             if (dto != null && dto.getId() != null) {
-                System.out.println("=== 检查收藏状态 ===");
-                System.out.println("用户ID: " + dto.getId());
-                System.out.println("景点ID: " + scenicInfo.getId());
-                System.out.println("类型: SCENIC");
                 int isFavorited = favoriteMapper.queryIsFavorite("SCENIC", scenicInfo.getId(), dto.getId());
-                System.out.println("查询结果: " + isFavorited);
                 scenicInfo.setFavorited(isFavorited > 0);
-                System.out.println("设置收藏状态: " + scenicInfo.getFavorited());
             } else {
-                System.out.println("=== 用户未登录，设置收藏状态为false ===");
                 scenicInfo.setFavorited(false);
             }
         }
@@ -197,8 +185,6 @@ public class ScenicInfoServiceImpl  implements ScenicInfoService {
     @Override
     public void  putViewCount(Integer id){
         // 不再记录浏览历史
-        // 协同过滤算法现在只基于收藏和购票数据
-        log.debug("景点{}被访问，但不再记录浏览历史", id);
     }
 
     @Override
@@ -222,7 +208,6 @@ public class ScenicInfoServiceImpl  implements ScenicInfoService {
                 && !entity.getCoverImage().equals(oldEntity.getCoverImage())
                 && StringUtils.isNotBlank(oldEntity.getCoverImage())) {
                 fileService.deleteFileByUrl(oldEntity.getCoverImage());
-                log.info("删除旧封面图: scenicId={}, oldCoverImage={}", entity.getId(), oldEntity.getCoverImage());
             }
             
             // 删除旧详情图（可能是多张，逗号分隔）
@@ -236,7 +221,6 @@ public class ScenicInfoServiceImpl  implements ScenicInfoService {
                 for (String oldImage : oldImages) {
                     if (!newImageList.contains(oldImage.trim())) {
                         fileService.deleteFileByUrl(oldImage.trim());
-                        log.info("删除旧详情图: scenicId={}, oldDetailImage={}", entity.getId(), oldImage.trim());
                     }
                 }
             }
@@ -255,61 +239,50 @@ public class ScenicInfoServiceImpl  implements ScenicInfoService {
                 continue;
             }
             
-            // 检查关联数据
-            int orderCount = orderInfoMapper.countByScenicId(id);
-            int favoriteCount = favoriteMapper.queryFavoriteCount("SCENIC", id);
-            int commentCount = commentInfoMapper.queryCommentsCount("SCENIC", id);
-            
-            log.info("准备删除景点ID={}, 名称={}, 关联数据：订单{}条, 收藏{}条, 评论{}条", 
-                id, scenicInfo.getName(), orderCount, favoriteCount, commentCount);
-            
             // 删除关联的订单
+            int orderCount = orderInfoMapper.countByScenicId(id);
             if (orderCount > 0) {
                 List<OrderInfo> orders = orderInfoMapper.queryByScenicId(id);
                 List<Integer> orderIds = orders.stream()
                         .map(OrderInfo::getId)
                         .collect(Collectors.toList());
                 orderInfoMapper.removeByIds(orderIds);
-                log.info("删除景点ID={}的{}条订单", id, orderCount);
             }
             
             // 删除关联的收藏
+            int favoriteCount = favoriteMapper.queryFavoriteCount("SCENIC", id);
             if (favoriteCount > 0) {
                 List<Favorite> favorites = favoriteMapper.queryFavoriteList("SCENIC", id);
                 List<Integer> favoriteIds = favorites.stream()
                         .map(Favorite::getId)
                         .collect(Collectors.toList());
                 favoriteMapper.removeByIds(favoriteIds);
-                log.info("删除景点ID={}的{}条收藏", id, favoriteCount);
             }
             
             // 删除关联的评论
+            int commentCount = commentInfoMapper.queryCommentsCount("SCENIC", id);
             if (commentCount > 0) {
                 List<CommentInfo> commentInfos = commentInfoMapper.queryCommentsList("SCENIC", id);
                 List<Integer> commentIds = commentInfos.stream()
                         .map(CommentInfo::getId)
                         .collect(Collectors.toList());
                 commentInfoMapper.removeByIds(commentIds);
-                log.info("删除景点ID={}的{}条评论", id, commentCount);
             }
             
             // 删除景点图片文件
             if (StringUtils.isNotBlank(scenicInfo.getCoverImage())) {
                 fileService.deleteFileByUrl(scenicInfo.getCoverImage());
-                log.info("删除景点封面图: scenicId={}, coverImage={}", id, scenicInfo.getCoverImage());
             }
             
             if (StringUtils.isNotBlank(scenicInfo.getDetailImages())) {
                 String[] images = scenicInfo.getDetailImages().split(",");
                 for (String image : images) {
                     fileService.deleteFileByUrl(image.trim());
-                    log.info("删除景点详情图: scenicId={}, detailImage={}", id, image.trim());
                 }
             }
         }
         
         scenicInfoMapper.removeByIds(ids);
-        log.info("景点删除完成，共删除{}个景点", ids.size());
     }
 
     // 计算简单算术平均分

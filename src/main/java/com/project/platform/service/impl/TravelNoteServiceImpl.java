@@ -7,7 +7,6 @@ import com.project.platform.service.FileService;
 import com.project.platform.service.TravelNoteService;
 import com.project.platform.utils.CurrentUserThreadLocal;
 import jakarta.annotation.Resource;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import com.project.platform.vo.PageVO;
@@ -22,7 +21,6 @@ import java.util.stream.Collectors;
  * 游记分享信息
  */
 @Service
-@Slf4j
 public class TravelNoteServiceImpl  implements TravelNoteService {
     @Resource
     private TravelNoteMapper travelNoteMapper;
@@ -60,14 +58,10 @@ public class TravelNoteServiceImpl  implements TravelNoteService {
 
     @Override
     public PageVO<TravelNote> homePage(Map<String, Object> query, Integer pageNum, Integer pageSize) {
-        log.info("========== 开始获取首页游记列表 ==========");
-        log.info("参数：pageNum={}, pageSize={}, query={}", pageNum, pageSize, query);
-        
         PageVO<TravelNote> page = new PageVO();
         
         // 获取所有游记
         List<TravelNote> allNotes = travelNoteMapper.list();
-        log.info("从数据库获取到{}条游记", allNotes.size());
         
         // 填充每个游记的统计信息
         allNotes.forEach(travelNote -> {
@@ -83,9 +77,6 @@ public class TravelNoteServiceImpl  implements TravelNoteService {
             Integer favoriteCount = favoriteMapper.queryFavoriteCount("TRAVEL_NOTE", travelNote.getId());
             travelNote.setFavoriteCount(favoriteCount);
             travelNote.setLikesCount(favoriteCount);
-            
-            log.debug("游记ID:{}, 标题:{}, 收藏数:{}, 评论数:{}", 
-                travelNote.getId(), travelNote.getTitle(), favoriteCount, commentCount);
         });
         
         // 按热度排序：收藏数 + 评论数（降序）
@@ -98,10 +89,8 @@ public class TravelNoteServiceImpl  implements TravelNoteService {
             int hot1 = (fav1 != null ? fav1 : 0) + (comm1 != null ? comm1 : 0);
             int hot2 = (fav2 != null ? fav2 : 0) + (comm2 != null ? comm2 : 0);
             
-            return Integer.compare(hot2, hot1); // 降序
+            return Integer.compare(hot2, hot1);
         });
-        
-        log.info("按热度排序完成");
         
         // 分页
         int start = (pageNum - 1) * pageSize;
@@ -110,8 +99,6 @@ public class TravelNoteServiceImpl  implements TravelNoteService {
         
         page.setList(pagedList);
         page.setTotal(allNotes.size());
-        
-        log.info("========== 首页游记列表：按热度排序，返回{}条记录（总共{}条） ==========", pagedList.size(), allNotes.size());
         
         return page;
     }
@@ -148,7 +135,6 @@ public class TravelNoteServiceImpl  implements TravelNoteService {
     @Override
     public void  putViewCount(Integer id){
         // 不再记录浏览历史
-        log.debug("游记{}被访问，但不再记录浏览历史", id);
     }
     @Override
     public List<TravelNote> list() {
@@ -172,7 +158,6 @@ public class TravelNoteServiceImpl  implements TravelNoteService {
             && !entity.getCover().equals(oldEntity.getCover())
             && StringUtils.isNotBlank(oldEntity.getCover())) {
             fileService.deleteFileByUrl(oldEntity.getCover());
-            log.info("删除旧游记封面: travelNoteId={}, oldCover={}", entity.getId(), oldEntity.getCover());
         }
         
         travelNoteMapper.updateById(entity);
@@ -188,41 +173,32 @@ public class TravelNoteServiceImpl  implements TravelNoteService {
                 continue;
             }
             
-            // 检查关联数据
-            int favoriteCount = favoriteMapper.queryFavoriteCount("TRAVEL_NOTE", id);
-            int commentCount = commentInfoMapper.queryCommentsCount("TRAVEL_NOTE", id);
-            
-            log.info("准备删除游记ID={}, 标题={}, 关联数据：收藏{}条, 评论{}条", 
-                id, travelNote.getTitle(), favoriteCount, commentCount);
-            
             // 删除游记封面文件
             if (StringUtils.isNotBlank(travelNote.getCover())) {
                 fileService.deleteFileByUrl(travelNote.getCover());
-                log.info("删除游记封面: travelNoteId={}, cover={}", id, travelNote.getCover());
             }
             
             // 删除关联的评论
+            int commentCount = commentInfoMapper.queryCommentsCount("TRAVEL_NOTE", id);
             if (commentCount > 0) {
                 List<CommentInfo> commentInfos = commentInfoMapper.queryCommentsList("TRAVEL_NOTE", id);
                 List<Integer> commentIds = commentInfos.stream()
                         .map(CommentInfo::getId)
                         .collect(Collectors.toList());
                 commentInfoMapper.removeByIds(commentIds);
-                log.info("删除游记ID={}的{}条评论", id, commentCount);
             }
             
             // 删除关联的收藏
+            int favoriteCount = favoriteMapper.queryFavoriteCount("TRAVEL_NOTE", id);
             if (favoriteCount > 0) {
                 List<Favorite> favoriteList = favoriteMapper.queryFavoriteList("TRAVEL_NOTE", id);
                 List<Integer> favoriteIds = favoriteList.stream()
                         .map(Favorite::getId)
                         .collect(Collectors.toList());
                 favoriteMapper.removeByIds(favoriteIds);
-                log.info("删除游记ID={}的{}条收藏", id, favoriteCount);
             }
         }
         
         travelNoteMapper.removeByIds(ids);
-        log.info("游记删除完成，共删除{}条游记", ids.size());
     }
 }
