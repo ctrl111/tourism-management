@@ -33,8 +33,23 @@ public class CommonController {
      */
     @PostMapping("login")
     public ResponseVO<String> login(@RequestBody LoginDTO loginDTO) {
+        // 验证登录类型
+        if (loginDTO.getType() == null || loginDTO.getType().trim().isEmpty()) {
+            throw new CustomException("Не указан тип пользователя");
+        }
+        
         CommonService commonService = getCommonService(loginDTO.getType());
         CurrentUserDTO currentUserDTO = commonService.login(loginDTO.getUsername(), loginDTO.getPassword());
+        
+        // 验证用户角色是否匹配登录类型
+        if (!loginDTO.getType().equals(currentUserDTO.getType())) {
+            if ("ADMIN".equals(loginDTO.getType())) {
+                throw new CustomException("Этот аккаунт не является администратором, пожалуйста, войдите через вход для обычных пользователей");
+            } else {
+                throw new CustomException("Этот аккаунт является администратором, пожалуйста, войдите через вход для администраторов");
+            }
+        }
+        
         currentUserDTO.setType(loginDTO.getType());
         String token = JwtUtils.generateToken(currentUserDTO);
         return ResponseVO.ok(token);

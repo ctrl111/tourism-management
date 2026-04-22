@@ -96,7 +96,6 @@
             <div class="scenic-footer">
               <div class="price">
                 <span class="current-price">￥{{ item.price }}</span>
-                <span class="original-price" v-if="item.originalPrice">¥{{ item.originalPrice }}</span>
               </div>
               <el-button type="primary" size="small" @click.stop="openBookingDialog(item)">{{ $t('scenic.bookNow') }}</el-button>
             </div>
@@ -634,12 +633,6 @@ const handleChatToggle = () => {
   color: #ff6b6b;
   font-weight: 500;
   font-size: 16px;
-}
-
-.original-price {
-  color: #999;
-  font-size: 12px;
-  text-decoration: line-through;
 }
 
 @media (max-width: 1200px) {

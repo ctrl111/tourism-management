@@ -62,7 +62,6 @@
                 <div class="scenic-footer">
                   <div class="price">
                     <span class="current-price">￥{{ item.price }}</span>
-                    <span class="original-price">¥{{ item.originalPrice }}</span>
                   </div>
                   <el-button type="primary" size="small" @click.stop="openBookingDialog(item)">{{ $t('scenic.bookNow') }}</el-button>
                 </div>
@@ -587,12 +586,6 @@ fetchData()
   font-variant-numeric: tabular-nums;
 }
 
-.original-price {
-  color: #999;
-  font-size: 13px;
-  text-decoration: line-through;
-  font-variant-numeric: tabular-nums;
-}
 /* 新增样式 */
 .user-info {
   display: flex;
