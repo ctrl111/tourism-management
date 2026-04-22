@@ -54,8 +54,8 @@
             u.username as travel_note_username,
             u.avatar_url as travel_note_avatar_url
         FROM favorite
-        LEFT JOIN scenic_info si ON favorite.type_code = '景点' AND favorite.association_id = si.id
-        LEFT JOIN travel_note tn ON favorite.type_code = '游记' AND favorite.association_id = tn.id
+        LEFT JOIN scenic_info si ON favorite.type_code = 'SCENIC' AND favorite.association_id = si.id
+        LEFT JOIN travel_note tn ON favorite.type_code = 'TRAVEL_NOTE' AND favorite.association_id = tn.id
         LEFT JOIN user u ON tn.user_id = u.id
         <include refid="queryConditions"/>
         ORDER BY favorite.id DESC
