@@ -61,7 +61,7 @@
                 </div>
                 <div class="scenic-footer">
                   <div class="price">
-                    <span class="current-price">￥{{ item.price }}</span>
+                    <span class="current-price">₽{{ item.price }}</span>
                   </div>
                   <el-button type="primary" size="small" @click.stop="openBookingDialog(item)">{{ $t('scenic.bookNow') }}</el-button>
                 </div>
@@ -161,7 +161,7 @@
 
         <el-form-item :label="$t('order.totalPrice')">
         <span class="total-price">
-          ￥{{ totalPrice}}
+          ₽{{ totalPrice}}
         </span>
         </el-form-item>
       </el-form>
@@ -231,7 +231,7 @@ const fetchData = () => {
     // 获取推荐景点数据（使用协同过滤）
     request.get('/recommendation/forCurrentUser', {
       params: {
-        limit: 6
+        limit: 9
       }
     }).then(res => {
       if (res && Array.isArray(res) && res.length > 0) {
